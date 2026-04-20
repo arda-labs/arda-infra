@@ -4,5 +4,5 @@ namespace: arda-dev
 resources:
 - ../../base
 images:
-- name: ghcr.io/hoan02/mfe-common
+- name: ghcr.io/arda-labs/mfe-common
   newTag: latest

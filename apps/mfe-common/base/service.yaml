@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: mfe-common
-        image: ghcr.io/hoan02/mfe-common:latest
+        image: ghcr.io/arda-labs/mfe-common:latest
         ports:
         - containerPort: 80
         readinessProbe:
