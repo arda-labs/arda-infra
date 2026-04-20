@@ -1,0 +1,16 @@
+gateway:
+  type: ClusterIP
+
+etcd:
+  enabled: true
+  persistence:
+    enabled: false
+
+ingress-controller:
+  enabled: true
+  config:
+    apisix:
+      adminAPIVersion: v3
+
+dashboard:
+  enabled: false
