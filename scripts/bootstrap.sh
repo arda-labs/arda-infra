@@ -12,7 +12,7 @@ kubectl apply -f infrastructure/storageclass.yaml
 
 # 2. Install ArgoCD
 echo -e "${GREEN}==> Installing ArgoCD...${NC}"
-kubectl apply --server-side -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl apply --server-side --force-conflicts -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
 # 3. Wait for ArgoCD
 echo -e "${GREEN}==> Waiting for ArgoCD Server...${NC}"
