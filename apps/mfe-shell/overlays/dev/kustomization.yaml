@@ -2,9 +2,12 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: arda-dev
 resources:
-- ../../base
+  - ../../base
+images:
+  - name: ghcr.io/arda-labs/mfe-shell
+    newTag: latest
 configMapGenerator:
-- name: mfe-shell-env-template
-  behavior: merge
-  literals:
-  - API_URL=https://api.dev.arda.io.vn
+  - name: mfe-shell-env-template
+    behavior: merge
+    literals:
+      - API_URL=https://api.dev.arda.io.vn

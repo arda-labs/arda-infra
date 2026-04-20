@@ -4,14 +4,14 @@ metadata:
   name: arda-route
 spec:
   http:
-  - name: mfe-shell
+  - name: mfe-common
     match:
       hosts:
       - arda.io.vn
       paths:
-      - /*
+      - /common/*
     backends:
-    - serviceName: mfe-shell
+    - serviceName: mfe-common
       servicePort: 80
   - name: crm-api
     match:
@@ -21,4 +21,13 @@ spec:
       - /api/*
     backends:
     - serviceName: go-crm
+      servicePort: 80
+  - name: mfe-shell
+    match:
+      hosts:
+      - arda.io.vn
+      paths:
+      - /*
+    backends:
+    - serviceName: mfe-shell
       servicePort: 80

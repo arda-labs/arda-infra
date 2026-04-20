@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/hoanl/arda-infra.git
+    repoURL: https://github.com/arda-labs/arda-infra.git
     targetRevision: main
     path: argocd/apps
     directory:

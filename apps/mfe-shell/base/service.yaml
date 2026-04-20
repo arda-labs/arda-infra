@@ -13,28 +13,39 @@ spec:
         app: mfe-shell
     spec:
       containers:
-      - name: mfe-shell
-        image: ghcr.io/arda/mfe-shell:latest
-        ports:
-        - containerPort: 80
-        volumeMounts:
-        - name: nginx-config
-          mountPath: /etc/nginx/conf.d/default.conf
-          subPath: default.conf
-        - name: env-template
-          mountPath: /usr/share/nginx/html/assets/env.template.js
-          subPath: env.template.js
-        lifecycle:
-          postStart:
-            exec:
-              command: ["/bin/sh", "-c", "envsubst < /usr/share/nginx/html/assets/env.template.js > /usr/share/nginx/html/assets/env.js"]
+        - name: mfe-shell
+          image: ghcr.io/arda-labs/mfe-shell:latest
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          volumeMounts:
+            - name: env-template
+              mountPath: /usr/share/nginx/html/assets/env.template.js
+              subPath: env.template.js
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  [
+                    "/bin/sh",
+                    "-c",
+                    "envsubst < /usr/share/nginx/html/assets/env.template.js > /usr/share/nginx/html/assets/env.js",
+                  ]
       volumes:
-      - name: nginx-config
-        configMap:
-          name: mfe-shell-nginx-config
-      - name: env-template
-        configMap:
-          name: mfe-shell-env-template
+        - name: env-template
+          configMap:
+            name: mfe-shell-env-template
 ---
 apiVersion: v1
 kind: Service
@@ -42,7 +53,7 @@ metadata:
   name: mfe-shell
 spec:
   ports:
-  - port: 80
-    targetPort: 80
+    - port: 80
+      targetPort: 80
   selector:
     app: mfe-shell
