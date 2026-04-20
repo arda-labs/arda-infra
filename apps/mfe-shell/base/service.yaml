@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mfe-shell
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mfe-shell
+  template:
+    metadata:
+      labels:
+        app: mfe-shell
+    spec:
+      containers:
+      - name: mfe-shell
+        image: ghcr.io/arda/mfe-shell:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+        - name: env-template
+          mountPath: /usr/share/nginx/html/assets/env.template.js
+          subPath: env.template.js
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c", "envsubst < /usr/share/nginx/html/assets/env.template.js > /usr/share/nginx/html/assets/env.js"]
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: mfe-shell-nginx-config
+      - name: env-template
+        configMap:
+          name: mfe-shell-env-template
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mfe-shell
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: mfe-shell

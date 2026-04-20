@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: arda-dev
+  namespace: argocd
+spec:
+  description: Development project for Arda
+  destinations:
+  - namespace: arda-dev
+    server: https://kubernetes.default.svc
+  - namespace: gateway
+    server: https://kubernetes.default.svc
+  - namespace: infra
+    server: https://kubernetes.default.svc
+  sourceRepos:
+  - '*'
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: arda-prod
+  namespace: argocd
+spec:
+  description: Production project for Arda
+  destinations:
+  - namespace: arda-prod
+    server: https://kubernetes.default.svc
+  - namespace: gateway
+    server: https://kubernetes.default.svc
+  - namespace: infra
+    server: https://kubernetes.default.svc
+  sourceRepos:
+  - '*'
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'

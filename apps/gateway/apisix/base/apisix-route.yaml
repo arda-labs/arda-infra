@@ -1,0 +1,24 @@
+apiVersion: apisix.apache.org/v2
+kind: ApisixRoute
+metadata:
+  name: arda-route
+spec:
+  http:
+  - name: mfe-shell
+    match:
+      hosts:
+      - arda.io.vn
+      paths:
+      - /*
+    backends:
+    - serviceName: mfe-shell
+      servicePort: 80
+  - name: crm-api
+    match:
+      hosts:
+      - arda.io.vn
+      paths:
+      - /api/*
+    backends:
+    - serviceName: go-crm
+      servicePort: 80
