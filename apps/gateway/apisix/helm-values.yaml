@@ -11,6 +11,7 @@ ingress-controller:
   config:
     apisix:
       adminAPIVersion: v3
+  initSyncDelay: 0s
 
 dashboard:
   enabled: false
