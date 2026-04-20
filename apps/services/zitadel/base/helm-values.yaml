@@ -29,7 +29,7 @@ zitadel:
     Database:
       Postgres:
         DSN: "postgresql://zitadel:zitadel@zitadel-postgresql:5432/zitadel?sslmode=disable"
-  masterkeySecret: "zitadel-masterkey"
+  masterkeySecretName: "zitadel-masterkey"
 
 postgresql:
   enabled: true
