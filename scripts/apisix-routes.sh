@@ -32,6 +32,22 @@ curl -s "$APISIX_ADMIN/apisix/admin/routes/1" \
   }'
 echo ""
 
+# Route: Zitadel (auth.arda.io.vn/*)
+curl -s "$APISIX_ADMIN/apisix/admin/routes/4" \
+  -H "X-API-KEY: $API_KEY" \
+  -X PUT \
+  -d '{
+    "uri": "/*",
+    "host": "auth.arda.io.vn",
+    "upstream": {
+      "type": "roundrobin",
+      "nodes": {
+        "zitadel.arda-dev.svc.cluster.local:8080": 1
+      }
+    }
+  }'
+echo ""
+
 # Route: go-crm (/api/*)
 curl -s "$APISIX_ADMIN/apisix/admin/routes/2" \
   -H "X-API-KEY: $API_KEY" \

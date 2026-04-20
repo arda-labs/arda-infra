@@ -29,6 +29,15 @@ echo -e "${GREEN}==> Waiting for APISIX...${NC}"
 kubectl wait --for=condition=available --timeout=300s deployment/apisix-gateway -n gateway
 kubectl wait --for=condition=available --timeout=300s deployment/apisix-ingress-controller -n gateway
 
+# 4b. Install Zitadel
+echo -e "${GREEN}==> Installing Zitadel...${NC}"
+helm repo add zitadel https://charts.zitadel.com || true
+helm repo update
+kubectl create secret generic zitadel-masterkey --from-literal=masterkey="$(openssl rand -base64 32 | head -c 32)" -n arda-dev --dry-run=client -o yaml | kubectl apply -f -
+helm upgrade --install zitadel zitadel/zitadel \
+  -n arda-dev \
+  -f apps/services/zitadel/base/helm-values.yaml
+
 # 5. Install ArgoCD
 echo -e "${GREEN}==> Installing ArgoCD...${NC}"
 kubectl apply --server-side --force-conflicts -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml

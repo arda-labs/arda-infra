@@ -77,6 +77,25 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: zitadel
+  namespace: argocd
+spec:
+  project: arda-dev
+  source:
+    repoURL: https://github.com/arda-labs/arda-infra.git
+    targetRevision: main
+    path: apps/services/zitadel/overlays/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arda-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: go-crm-dev
   namespace: argocd
 spec:

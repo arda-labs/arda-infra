@@ -1,0 +1,45 @@
+zitadel:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  configmapConfig:
+    ExternalDomain: "auth.arda.io.vn"
+    ExternalPort: 443
+    ExternalSecure: true
+    TLS:
+      Enabled: false
+    FirstInstance:
+      Org:
+        Name: "Arda"
+        Human:
+          UserName: "admin"
+          Password: "ChangeMe123!"
+          FirstName: "Admin"
+          LastName: "Arda"
+          Email:
+            Address: "admin@arda.io.vn"
+            Verified: true
+          PasswordChangeRequired: true
+  secretConfig:
+    Database:
+      Postgres:
+        DSN: "postgresql://zitadel:zitadel@zitadel-postgresql:5432/zitadel?sslmode=disable"
+  masterkeySecret: "zitadel-masterkey"
+
+postgresql:
+  enabled: true
+  auth:
+    username: zitadel
+    password: zitadel
+    database: zitadel
+  primary:
+    persistence:
+      enabled: false
+
+ingress:
+  enabled: false
