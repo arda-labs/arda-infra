@@ -18,6 +18,12 @@ spec:
           ports:
             - containerPort: 8000
             - containerPort: 9000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: iam-service-secrets
+                  key: DATABASE_URL
           readinessProbe:
             httpGet:
               path: /health

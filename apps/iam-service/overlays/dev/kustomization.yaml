@@ -10,6 +10,5 @@ images:
 configMapGenerator:
 - behavior: merge
   literals:
-  - DATABASE_URL=postgres://iam:iam@123@thinkcenter:5432/iam?sslmode=disable
   - REDIS_ADDR=thinkcenter:6379
   name: iam-service-config

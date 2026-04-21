@@ -5,7 +5,7 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 
 APISIX_ADMIN="http://127.0.0.1:9180"
-API_KEY="edd1c9f034335f136f87ad84b625c8f1"
+API_KEY="${APISIX_API_KEY:?APISIX_API_KEY is not set}"
 
 echo -e "${GREEN}==> Port-forwarding APISIX admin API...${NC}"
 kubectl port-forward -n gateway deployment/apisix 9180:9180 &

@@ -18,7 +18,7 @@ zitadel:
         Name: "Arda"
         Human:
           UserName: "admin"
-          Password: "ChangeMe123!"
+          Password: "${ZITADEL_ADMIN_PASSWORD}"
           FirstName: "Admin"
           LastName: "Arda"
           Email:
@@ -28,14 +28,14 @@ zitadel:
   secretConfig:
     Database:
       Postgres:
-        DSN: "postgresql://zitadel:zitadel@zitadel-postgresql:5432/zitadel?sslmode=disable"
+        DSN: "${ZITADEL_PG_DSN}"
   masterkeySecretName: "zitadel-masterkey"
 
 postgresql:
   enabled: true
   auth:
-    username: zitadel
-    password: zitadel
+    username: "${ZITADEL_PG_USER}"
+    password: "${ZITADEL_PG_PASSWORD}"
     database: zitadel
   primary:
     persistence:

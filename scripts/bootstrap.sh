@@ -6,6 +6,21 @@ NC='\033[0m'
 
 echo -e "${GREEN}==> Bootstrapping Arda Production-Ready Infra <==${NC}"
 
+# 0. Load secrets (not committed to git)
+if [ -f .env ]; then
+  set -a && source .env && set +a
+else
+  echo "ERROR: .env file not found. Copy .env.example and fill in values."
+  exit 1
+fi
+
+# Validate required secrets
+: "${ZITADEL_ADMIN_PASSWORD:?ZITADEL_ADMIN_PASSWORD not set in .env}"
+: "${ZITADEL_PG_DSN:?ZITADEL_PG_DSN not set in .env}"
+: "${ZITADEL_PG_USER:?ZITADEL_PG_USER not set in .env}"
+: "${ZITADEL_PG_PASSWORD:?ZITADEL_PG_PASSWORD not set in .env}"
+: "${APISIX_API_KEY:?APISIX_API_KEY not set in .env}"
+
 # 1. Basic Setup
 kubectl apply -f infrastructure/namespaces.yaml
 kubectl apply -f infrastructure/storageclass.yaml
