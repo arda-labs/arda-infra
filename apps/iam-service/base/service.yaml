@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iam-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iam-service
+  template:
+    metadata:
+      labels:
+        app: iam-service
+    spec:
+      containers:
+        - name: iam-service
+          image: ghcr.io/arda-labs/iam-service:latest
+          ports:
+            - containerPort: 8000
+            - containerPort: 9000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          volumeMounts:
+            - name: config
+              mountPath: /data/conf
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  [
+                    "/bin/sh",
+                    "-c",
+                    "envsubst < /data/conf/config.yaml > /data/conf/config-rendered.yaml && mv /data/conf/config-rendered.yaml /data/conf/config.yaml",
+                  ]
+      volumes:
+        - name: config
+          configMap:
+            name: iam-service-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iam-service
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+    - name: grpc
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: iam-service

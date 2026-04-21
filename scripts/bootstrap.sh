@@ -36,7 +36,7 @@ helm repo update
 kubectl create secret generic zitadel-masterkey --from-literal=masterkey="$(openssl rand -base64 32 | head -c 32)" -n arda-dev --dry-run=client -o yaml | kubectl apply -f -
 helm upgrade --install zitadel zitadel/zitadel \
   -n arda-dev \
-  -f apps/services/zitadel/base/helm-values.yaml
+  -f apps/zitadel/base/helm-values.yaml
 
 # 5. Install ArgoCD
 echo -e "${GREEN}==> Installing ArgoCD...${NC}"

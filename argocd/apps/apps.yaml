@@ -77,14 +77,14 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: go-crm-dev
+  name: iam-service-dev
   namespace: argocd
 spec:
   project: arda-dev
   source:
     repoURL: https://github.com/arda-labs/arda-infra.git
     targetRevision: main
-    path: apps/services/crm/overlays/dev
+    path: apps/iam-service/overlays/dev
   destination:
     server: https://kubernetes.default.svc
     namespace: arda-dev

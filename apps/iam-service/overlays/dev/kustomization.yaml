@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: arda-dev
+resources:
+- ../../base
+images:
+- name: ghcr.io/arda-labs/iam-service
+  newName: ghcr.io/arda-labs/iam-service
+  newTag: latest
+configMapGenerator:
+- behavior: merge
+  literals:
+  - DATABASE_URL=postgres://iam:iam@123@thinkcenter:5432/iam?sslmode=disable
+  - REDIS_ADDR=thinkcenter:6379
+  name: iam-service-config
