@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+# Load secrets
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$SCRIPT_DIR/../.env" ]; then
+  set -a && source "$SCRIPT_DIR/../.env" && set +a
+fi
+
 GREEN='\033[0;32m'
 NC='\033[0m'
 
