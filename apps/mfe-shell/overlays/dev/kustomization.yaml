@@ -11,4 +11,5 @@ configMapGenerator:
 - behavior: merge
   literals:
   - API_URL=https://api.dev.arda.io.vn
+  - AUTH_CLIENT_ID=REPLACE_AFTER_ZITADEL_SETUP
   name: mfe-shell-env-template
