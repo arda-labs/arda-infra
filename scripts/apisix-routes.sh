@@ -38,38 +38,6 @@ curl -s "$APISIX_ADMIN/apisix/admin/routes/1" \
   }'
 echo ""
 
-# Route: Zitadel (auth.arda.io.vn/*)
-curl -s "$APISIX_ADMIN/apisix/admin/routes/4" \
-  -H "X-API-KEY: $API_KEY" \
-  -X PUT \
-  -d '{
-    "uri": "/*",
-    "host": "auth.arda.io.vn",
-    "upstream": {
-      "type": "roundrobin",
-      "nodes": {
-        "zitadel.arda-dev.svc.cluster.local:8080": 1
-      }
-    }
-  }'
-echo ""
-
-# Route: go-crm (/api/*)
-curl -s "$APISIX_ADMIN/apisix/admin/routes/2" \
-  -H "X-API-KEY: $API_KEY" \
-  -X PUT \
-  -d '{
-    "uri": "/api/*",
-    "host": "arda.io.vn",
-    "upstream": {
-      "type": "roundrobin",
-      "nodes": {
-        "go-crm.arda-dev.svc.cluster.local:80": 1
-      }
-    }
-  }'
-echo ""
-
 # Route: mfe-shell (/* - catch all)
 curl -s "$APISIX_ADMIN/apisix/admin/routes/3" \
   -H "X-API-KEY: $API_KEY" \
@@ -81,6 +49,30 @@ curl -s "$APISIX_ADMIN/apisix/admin/routes/3" \
       "type": "roundrobin",
       "nodes": {
         "mfe-shell.arda-dev.svc.cluster.local:80": 1
+      }
+    }
+  }'
+echo ""
+
+# Route: Zitadel (auth.arda.io.vn/*)
+curl -s "$APISIX_ADMIN/apisix/admin/routes/4" \
+  -H "X-API-KEY: $API_KEY" \
+  -X PUT \
+  -d '{
+    "uri": "/*",
+    "host": "auth.arda.io.vn",
+    "priority": 100,
+    "plugins": {
+      "proxy-rewrite": {
+        "headers": {
+          "X-Forwarded-Proto": "https",
+          "X-Forwarded-Host": "auth.arda.io.vn"
+        }
+      }
+    },
+    "upstream": {
+      "nodes": {
+        "zitadel.arda-dev.svc.cluster.local:8080": 1
       }
     }
   }'
