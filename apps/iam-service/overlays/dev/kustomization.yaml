@@ -6,7 +6,7 @@ resources:
 images:
 - name: ghcr.io/arda-labs/iam-service
   newName: ghcr.io/arda-labs/iam-service
-  newTag: latest
+  newTag: da47cf4
 configMapGenerator:
 - behavior: merge
   literals:
