@@ -18,24 +18,17 @@ zitadel:
         Name: "Arda"
         Human:
           UserName: "admin"
-          Password: "${ZITADEL_ADMIN_PASSWORD}"
           FirstName: "Admin"
           LastName: "Arda"
           Email:
             Address: "admin@arda.io.vn"
             Verified: true
           PasswordChangeRequired: true
-  secretConfig:
-    Database:
-      Postgres:
-        DSN: "${ZITADEL_PG_DSN}"
   masterkeySecretName: "zitadel-masterkey"
 
 postgresql:
   enabled: true
   auth:
-    username: "${ZITADEL_PG_USER}"
-    password: "${ZITADEL_PG_PASSWORD}"
     database: zitadel
   primary:
     persistence:
