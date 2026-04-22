@@ -1,0 +1,39 @@
+apiVersion: apisix.apache.org/v2
+kind: ApisixRoute
+metadata:
+  name: iam-service-route
+spec:
+  http:
+  # Route Login Public (Không qua plugin auth)
+  - name: iam-login-public
+    priority: 9
+    match:
+      hosts:
+      - arda.io.vn
+      paths:
+      - /v1/auth/login
+    backends:
+    - serviceName: iam-service
+      servicePort: 80
+
+  # Route API - qua Forward Auth
+  - name: iam-api
+    priority: 8
+    match:
+      hosts:
+      - arda.io.vn
+      paths:
+      - /v1/*
+    plugins:
+    - name: forward-auth
+      enable: true
+      config:
+        uri: "http://iam-service.arda-dev.svc.cluster.local:8000/v1/auth/forward"
+        request_headers:
+          - Authorization
+        upstream_headers:
+          - X-User-Id
+          - X-Tenant-Id
+    backends:
+    - serviceName: iam-service
+      servicePort: 80

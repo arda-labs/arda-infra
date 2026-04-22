@@ -1,0 +1,16 @@
+apiVersion: apisix.apache.org/v2
+kind: ApisixRoute
+metadata:
+  name: mfe-shell-route
+spec:
+  http:
+  - name: mfe-shell
+    priority: 1
+    match:
+      hosts:
+      - arda.io.vn
+      paths:
+      - /*
+    backends:
+    - serviceName: mfe-shell
+      servicePort: 80

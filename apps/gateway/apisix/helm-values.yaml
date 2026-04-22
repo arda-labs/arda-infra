@@ -11,6 +11,8 @@ ingress-controller:
   config:
     apisix:
       adminAPIVersion: v3
+    kubernetes:
+      watchEndpointslices: false
   initSyncDelay: 0s
   # Đảm bảo Controller có quyền đọc CRD từ Kubernetes
   rbac:

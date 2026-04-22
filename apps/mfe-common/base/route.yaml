@@ -1,0 +1,16 @@
+apiVersion: apisix.apache.org/v2
+kind: ApisixRoute
+metadata:
+  name: mfe-common-route
+spec:
+  http:
+  - name: mfe-common
+    priority: 10
+    match:
+      hosts:
+      - arda.io.vn
+      paths:
+      - /common/*
+    backends:
+    - serviceName: mfe-common
+      servicePort: 80
