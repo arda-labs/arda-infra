@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
 - service.yaml
 - configs.yaml
-  - route.yaml
+- route.yaml
