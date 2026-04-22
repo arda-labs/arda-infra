@@ -12,6 +12,9 @@ ingress-controller:
     apisix:
       adminAPIVersion: v3
   initSyncDelay: 0s
+  # Đảm bảo Controller có quyền đọc CRD từ Kubernetes
+  rbac:
+    create: true
 
 dashboard:
   enabled: false

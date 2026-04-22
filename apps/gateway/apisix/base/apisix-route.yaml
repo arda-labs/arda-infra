@@ -4,6 +4,25 @@ metadata:
   name: arda-route
 spec:
   http:
+  # Route dành cho Zitadel Auth
+  - name: zitadel-auth
+    priority: 100
+    match:
+      hosts:
+      - auth.arda.io.vn
+      paths:
+      - /*
+    plugins:
+    - name: proxy-rewrite
+      enable: true
+      config:
+        headers:
+          X-Forwarded-Proto: "https"
+          X-Forwarded-Host: "auth.arda.io.vn"
+    backends:
+    - serviceName: zitadel
+      servicePort: 8080
+
   - name: mfe-common
     priority: 10
     match:
