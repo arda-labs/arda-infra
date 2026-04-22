@@ -12,6 +12,9 @@ ingress-controller:
     apisix:
       adminAPIVersion: v3
     kubernetes:
+      # Watch all namespaces
+      namespaceSelector:
+        - ""
       watchEndpointslices: false
   initSyncDelay: 0s
   # Đảm bảo Controller có quyền đọc CRD từ Kubernetes
