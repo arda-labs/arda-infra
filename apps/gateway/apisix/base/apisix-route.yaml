@@ -5,6 +5,7 @@ metadata:
 spec:
   http:
   - name: mfe-common
+    priority: 10
     match:
       hosts:
       - arda.io.vn
@@ -14,8 +15,9 @@ spec:
     - serviceName: mfe-common
       servicePort: 80
 
-  # Route Login Public (Không qua plugin auth) - PHẢI đặt TRƯỚC iam-api
+  # Route Login Public (Không qua plugin auth)
   - name: iam-login-public
+    priority: 9
     match:
       hosts:
       - arda.io.vn
@@ -27,6 +29,7 @@ spec:
 
   # Route dành cho IAM Service - mọi request đều qua Forward Auth
   - name: iam-api
+    priority: 8
     match:
       hosts:
       - arda.io.vn
@@ -53,6 +56,7 @@ spec:
       servicePort: 80
 
   - name: mfe-shell
+    priority: 1
     match:
       hosts:
       - arda.io.vn
