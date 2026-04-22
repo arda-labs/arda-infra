@@ -22,13 +22,14 @@ trap "kill $PF_PID 2>/dev/null" EXIT
 
 echo -e "${GREEN}==> Creating APISIX routes...${NC}"
 
-# Route: mfe-common (/common/*)
+# Route: mfe-common (/common/*) - ID 1, Priority 10
 curl -s "$APISIX_ADMIN/apisix/admin/routes/1" \
   -H "X-API-KEY: $API_KEY" \
   -X PUT \
   -d '{
     "uri": "/common/*",
     "host": "arda.io.vn",
+    "priority": 10,
     "upstream": {
       "type": "roundrobin",
       "nodes": {
@@ -38,13 +39,55 @@ curl -s "$APISIX_ADMIN/apisix/admin/routes/1" \
   }'
 echo ""
 
-# Route: mfe-shell (/* - catch all)
+# Route: iam-login-public (/v1/auth/login) - ID 5, Priority 9 (KHÔNG CÓ AUTH)
+curl -s "$APISIX_ADMIN/apisix/admin/routes/5" \
+  -H "X-API-KEY: $API_KEY" \
+  -X PUT \
+  -d '{
+    "uri": "/v1/auth/login",
+    "host": "arda.io.vn",
+    "priority": 9,
+    "upstream": {
+      "type": "roundrobin",
+      "nodes": {
+        "iam-service.arda-dev.svc.cluster.local:8000": 1
+      }
+    }
+  }'
+echo ""
+
+# Route: iam-api (/v1/*) - ID 6, Priority 8 (CÓ FORWARD AUTH)
+curl -s "$APISIX_ADMIN/apisix/admin/routes/6" \
+  -H "X-API-KEY: $API_KEY" \
+  -X PUT \
+  -d '{
+    "uri": "/v1/*",
+    "host": "arda.io.vn",
+    "priority": 8,
+    "plugins": {
+      "forward-auth": {
+        "uri": "http://iam-service.arda-dev.svc.cluster.local:8000/v1/auth/forward",
+        "request_headers": ["Authorization"],
+        "upstream_headers": ["X-User-Id", "X-Tenant-Id"]
+      }
+    },
+    "upstream": {
+      "type": "roundrobin",
+      "nodes": {
+        "iam-service.arda-dev.svc.cluster.local:8000": 1
+      }
+    }
+  }'
+echo ""
+
+# Route: mfe-shell (/* - catch all) - ID 3, Priority 1
 curl -s "$APISIX_ADMIN/apisix/admin/routes/3" \
   -H "X-API-KEY: $API_KEY" \
   -X PUT \
   -d '{
     "uri": "/*",
     "host": "arda.io.vn",
+    "priority": 1,
     "upstream": {
       "type": "roundrobin",
       "nodes": {
@@ -54,7 +97,7 @@ curl -s "$APISIX_ADMIN/apisix/admin/routes/3" \
   }'
 echo ""
 
-# Route: Zitadel (auth.arda.io.vn/*)
+# Route: Zitadel (auth.arda.io.vn/*) - ID 4
 curl -s "$APISIX_ADMIN/apisix/admin/routes/4" \
   -H "X-API-KEY: $API_KEY" \
   -X PUT \
@@ -80,7 +123,7 @@ echo ""
 
 echo -e "${GREEN}==> Routes created. Verifying...${NC}"
 curl -s "$APISIX_ADMIN/apisix/admin/routes" \
-  -H "X-API-KEY: $API_KEY" | python3 -m json.tool 2>/dev/null || \
+  -H "X-API-KEY: $API_KEY" | python -m json.tool 2>/dev/null || \
   curl -s "$APISIX_ADMIN/apisix/admin/routes" \
   -H "X-API-KEY: $API_KEY"
 
