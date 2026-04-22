@@ -7,8 +7,9 @@ images:
 - name: ghcr.io/arda-labs/iam-service
   newName: ghcr.io/arda-labs/iam-service
   newTag: da47cf4
-configMapGenerator:
-- behavior: merge
-  literals:
-  - REDIS_ADDR=thinkcenter:6379
-  name: iam-service-config
+# Secrets được tạo thủ công trên cluster (KHÔNG lưu vào git):
+#   kubectl create secret generic iam-service-secrets \
+#     --from-literal=DATABASE_URL='postgres://iam:iam%40123@thinkcenter:5432/iam?sslmode=disable' \
+#     --from-literal=REDIS_ADDR='thinkcenter:6379' \
+#     --from-literal=ZITADEL_LOGIN_CLIENT_PAT='KLKAkAKWHGi5...' \
+#     -n arda-dev

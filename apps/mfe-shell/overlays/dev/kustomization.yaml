@@ -11,5 +11,9 @@ configMapGenerator:
 - behavior: merge
   literals:
   - API_URL=https://api.dev.arda.io.vn
-  - AUTH_CLIENT_ID=REPLACE_AFTER_ZITADEL_SETUP
-  name: mfe-shell-env-template
+  name: mfe-shell-env-config
+# AUTH_CLIENT_ID lưu trong Secret (không hardcode trong git)
+# Tạo secret thủ công trên cluster:
+#   kubectl create secret generic mfe-shell-secrets \
+#     --from-literal=AUTH_CLIENT_ID=369717196990972004 \
+#     -n arda-dev

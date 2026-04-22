@@ -13,15 +13,45 @@ spec:
     backends:
     - serviceName: mfe-common
       servicePort: 80
-  - name: crm-api
+
+  # Route Login Public (Không qua plugin auth) - PHẢI đặt TRƯỚC iam-api
+  - name: iam-login-public
     match:
       hosts:
       - arda.io.vn
       paths:
-      - /api/*
+      - /v1/auth/login
     backends:
-    - serviceName: go-crm
+    - serviceName: iam-service
       servicePort: 80
+
+  # Route dành cho IAM Service - mọi request đều qua Forward Auth
+  - name: iam-api
+    match:
+      hosts:
+      - arda.io.vn
+      paths:
+      - /v1/*
+    plugins:
+    # Forward Auth: APISIX gọi iam-service để hỏi "User này có được phép không?"
+    # iam-service verify JWT + check RBAC/ABAC → trả về 200 (allow) hoặc 403 (deny)
+    - name: forward-auth
+      enable: true
+      config:
+        # URL nội bộ trong cluster K3s
+        uri: "http://iam-service.arda-dev.svc.cluster.local:8000/v1/auth/forward"
+        # Chuyển tiếp Authorization header để iam-service có thể verify JWT
+        request_headers:
+          - Authorization
+        # Sau khi iam-service cho phép, các header này sẽ được inject vào request gốc
+        # upstream nhận được X-User-Id và X-Tenant-Id để dùng trong business logic
+        upstream_headers:
+          - X-User-Id
+          - X-Tenant-Id
+    backends:
+    - serviceName: iam-service
+      servicePort: 80
+
   - name: mfe-shell
     match:
       hosts:

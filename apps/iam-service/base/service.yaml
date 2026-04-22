@@ -12,18 +12,43 @@ spec:
       labels:
         app: iam-service
     spec:
-      containers:
-        - name: iam-service
-          image: ghcr.io/arda-labs/iam-service:latest
-          ports:
-            - containerPort: 8000
-            - containerPort: 9000
+      initContainers:
+        - name: config-init
+          image: alpine:3.20
+          command:
+            - sh
+            - -c
+            - apk add --no-cache gettext -q && envsubst < /config-template/config.yaml > /config-rendered/config.yaml
           env:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: iam-service-secrets
                   key: DATABASE_URL
+            - name: REDIS_ADDR
+              valueFrom:
+                secretKeyRef:
+                  name: iam-service-secrets
+                  key: REDIS_ADDR
+            - name: ZITADEL_LOGIN_CLIENT_PAT
+              valueFrom:
+                secretKeyRef:
+                  name: iam-service-secrets
+                  key: ZITADEL_LOGIN_CLIENT_PAT
+          volumeMounts:
+            - name: config-template
+              mountPath: /config-template
+            - name: config-rendered
+              mountPath: /config-rendered
+      containers:
+        - name: iam-service
+          image: ghcr.io/arda-labs/iam-service:latest
+          ports:
+            - containerPort: 8000
+            - containerPort: 9000
+          args:
+            - -conf
+            - /data/conf
           readinessProbe:
             httpGet:
               path: /health
@@ -37,21 +62,14 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 30
           volumeMounts:
-            - name: config
+            - name: config-rendered
               mountPath: /data/conf
-          lifecycle:
-            postStart:
-              exec:
-                command:
-                  [
-                    "/bin/sh",
-                    "-c",
-                    "envsubst < /data/conf/config.yaml > /data/conf/config-rendered.yaml && mv /data/conf/config-rendered.yaml /data/conf/config.yaml",
-                  ]
       volumes:
-        - name: config
+        - name: config-template
           configMap:
             name: iam-service-config
+        - name: config-rendered
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service

@@ -12,6 +12,31 @@ spec:
       labels:
         app: mfe-shell
     spec:
+      initContainers:
+        # initContainer chạy envsubst trước khi container chính start
+        # Kết quả là /env-output/env.js được đặt vào emptyDir shared với nginx
+        - name: env-init
+          image: alpine:3.20
+          command:
+            - sh
+            - -c
+            - apk add --no-cache gettext -q && envsubst < /env-template/env.template.js > /env-output/env.js
+          env:
+            - name: API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: mfe-shell-env-config
+                  key: API_URL
+            - name: AUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mfe-shell-secrets
+                  key: AUTH_CLIENT_ID
+          volumeMounts:
+            - name: env-template
+              mountPath: /env-template
+            - name: env-output
+              mountPath: /env-output
       containers:
         - name: mfe-shell
           image: ghcr.io/arda-labs/mfe-shell:latest
@@ -30,22 +55,17 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 30
           volumeMounts:
-            - name: env-template
-              mountPath: /usr/share/nginx/html/assets/env.template.js
-              subPath: env.template.js
-          lifecycle:
-            postStart:
-              exec:
-                command:
-                  [
-                    "/bin/sh",
-                    "-c",
-                    "envsubst < /usr/share/nginx/html/assets/env.template.js > /usr/share/nginx/html/assets/env.js",
-                  ]
+            # Mount env.js đã được render vào đúng path nginx serve
+            - name: env-output
+              mountPath: /usr/share/nginx/html/env.js
+              subPath: env.js
       volumes:
         - name: env-template
           configMap:
-            name: mfe-shell-env-template
+            name: mfe-shell-env-config
+        # emptyDir dùng để share file env.js giữa initContainer và nginx container
+        - name: env-output
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
