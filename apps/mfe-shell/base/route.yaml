@@ -3,6 +3,7 @@ kind: ApisixRoute
 metadata:
   name: mfe-shell-route
 spec:
+  ingressClassName: apisix
   http:
   - name: mfe-shell
     priority: 1
