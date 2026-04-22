@@ -13,6 +13,10 @@ spec:
       - arda.io.vn
       paths:
       - /v1/auth/login
+      methods:
+      - POST
+      - GET
+      - OPTIONS
     backends:
     - serviceName: iam-service
       servicePort: 80
