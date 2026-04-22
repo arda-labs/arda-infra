@@ -10,5 +10,5 @@ images:
 configMapGenerator:
 - behavior: merge
   literals:
-  - API_URL=https://api.dev.arda.io.vn
+  - API_URL=https://arda.io.vn
   name: mfe-shell-env-config
