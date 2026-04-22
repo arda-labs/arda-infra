@@ -3,7 +3,6 @@ kind: ApisixRoute
 metadata:
   name: mfe-shell-route
 spec:
-  ingressClassName: apisix
   http:
   - name: mfe-shell
     priority: 1
@@ -12,10 +11,6 @@ spec:
       - arda.io.vn
       paths:
       - /*
-      methods:
-      - GET
-      - HEAD
-      - OPTIONS
     backends:
     - serviceName: mfe-shell
       servicePort: 80

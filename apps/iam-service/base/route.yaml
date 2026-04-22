@@ -3,33 +3,43 @@ kind: ApisixRoute
 metadata:
   name: iam-service-route
 spec:
-  ingressClassName: apisix
   http:
   # Route Login Public (Không qua plugin auth)
   - name: iam-login-public
-    priority: 9
+    priority: 10
     match:
       hosts:
-      - arda.io.vn
+      - api.arda.io.vn
       paths:
       - /v1/auth/login
-      methods:
-      - POST
-      - GET
-      - OPTIONS
+    plugins:
+    - name: cors
+      enable: true
+      config:
+        allow_origins: "https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
+        allow_headers: "Authorization,Content-Type"
+        max_age: 3600
     backends:
     - serviceName: iam-service
       servicePort: 80
 
   # Route API - qua Forward Auth
   - name: iam-api
-    priority: 8
+    priority: 9
     match:
       hosts:
-      - arda.io.vn
+      - api.arda.io.vn
       paths:
       - /v1/*
     plugins:
+    - name: cors
+      enable: true
+      config:
+        allow_origins: "https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
+        allow_headers: "Authorization,Content-Type"
+        max_age: 3600
     - name: forward-auth
       enable: true
       config:

@@ -3,7 +3,6 @@ kind: ApisixRoute
 metadata:
   name: mfe-common-route
 spec:
-  ingressClassName: apisix
   http:
   - name: mfe-common
     priority: 10
