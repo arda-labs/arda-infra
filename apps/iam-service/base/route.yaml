@@ -15,9 +15,9 @@ spec:
     - name: cors
       enable: true
       config:
-        allow_origins: "https://arda.io.vn"
+        allow_origins: "**"
         allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
-        allow_headers: "content-type,authorization,x-tenant-id"
+        allow_headers: "content-type,authorization,x-tenant-id,sec-ch-ua,sec-ch-ua-mobile,sec-ch-ua-platform"
         expose_headers: "content-length,x-tenant-id"
         allow_credential: true
         max_age: 3600
