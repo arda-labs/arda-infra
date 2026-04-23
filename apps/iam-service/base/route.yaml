@@ -13,19 +13,11 @@ spec:
       paths:
       - /v1/auth/login
     plugins:
-    - name: cors
-      enable: true
-      config:
-        allow_origins: "https://arda.io.vn"
-        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
-        allow_headers: "content-type,authorization,x-tenant-id"
-        expose_headers: "content-length,x-tenant-id"
-        allow_credential: true
-        max_age: 3600
     - name: response-rewrite
       enable: true
       config:
         headers:
+          X-Debug-CORS: "true"
           Access-Control-Allow-Origin: "https://arda.io.vn"
           Access-Control-Allow-Headers: "Content-Type,Authorization,X-Tenant-ID"
           Access-Control-Allow-Methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
