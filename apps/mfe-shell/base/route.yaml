@@ -11,6 +11,12 @@ spec:
       - arda.io.vn
       paths:
       - /*
+    exprs:
+    - subject:
+        scope: Header
+        name: URI
+      op: NotRegexMatch
+      value: "^/api/.*"
     plugins:
     - name: cors
       enable: true
