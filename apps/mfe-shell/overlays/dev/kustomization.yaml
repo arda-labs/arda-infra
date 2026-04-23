@@ -6,7 +6,7 @@ resources:
 images:
 - name: ghcr.io/arda-labs/mfe-shell
   newName: ghcr.io/arda-labs/mfe-shell
-  newTag: d423254
+  newTag: d78ce3d
 configMapGenerator:
 - behavior: merge
   literals:

@@ -6,4 +6,4 @@ resources:
 images:
 - name: ghcr.io/arda-labs/mfe-common
   newName: ghcr.io/arda-labs/mfe-common
-  newTag: d423254
+  newTag: d78ce3d
