@@ -24,7 +24,7 @@ spec:
         max_age: 3600
     backends:
     - serviceName: iam-service
-      servicePort: http
+      servicePort: 80
 
   # Route API - qua Forward Auth
   - name: iam-api
@@ -47,7 +47,7 @@ spec:
     - name: forward-auth
       enable: true
       config:
-        uri: "http://iam-service.arda-dev.svc.cluster.local:80/v1/auth/forward"
+        uri: "http://iam-service.arda-dev.svc.cluster.local/v1/auth/forward"
         request_headers:
           - Authorization
         upstream_headers:
