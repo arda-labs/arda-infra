@@ -13,15 +13,15 @@ spec:
       paths:
       - /v1/auth/login
     plugins:
-    - name: response-rewrite
+    - name: cors
       enable: true
       config:
-        headers:
-          X-Debug-CORS: "true"
-          Access-Control-Allow-Origin: "https://arda.io.vn"
-          Access-Control-Allow-Headers: "Content-Type,Authorization,X-Tenant-ID"
-          Access-Control-Allow-Methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
-          Access-Control-Allow-Credentials: "true"
+        allow_origins: "https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+        allow_headers: "*"
+        expose_headers: "*"
+        allow_credential: true
+        max_age: 3600
     backends:
     - serviceName: iam-service
       servicePort: 80
