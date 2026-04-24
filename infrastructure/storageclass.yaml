@@ -1,0 +1,8 @@
+# K3s comes with local-path by default, but we can define a standard SC for Arda
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: arda-storage
+provisioner: rancher.io/local-path
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer

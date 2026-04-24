@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: accounting-service
+spec:
+  selector:
+    app: accounting-service
+  ports:
+  - port: 80
+    targetPort: 8080

@@ -1,0 +1,21 @@
+apiVersion: apisix.apache.org/v2
+kind: ApisixRoute
+metadata:
+  name: iam-service-v2-route
+spec:
+  http:
+  - name: iam-service-all
+    priority: 10
+    match:
+      hosts:
+      - arda.io.vn
+      paths:
+      - /api/v1/*
+    plugins:
+    - name: proxy-rewrite
+      enable: true
+      config:
+        regex_uri: ["^/api/(.*)", "/$1"]
+    backends:
+    - serviceName: iam-service
+      servicePort: 80

@@ -1,0 +1,21 @@
+apiVersion: apisix.apache.org/v2
+kind: ApisixRoute
+metadata:
+  name: accounting-service-route
+spec:
+  http:
+  - name: accounting-all
+    priority: 10
+    match:
+      hosts:
+      - arda.io.vn
+      paths:
+      - /api/accounting/*
+    plugins:
+    - name: proxy-rewrite
+      enable: true
+      config:
+        regex_uri: ["^/api/accounting/(.*)", "/$1"]
+    backends:
+    - serviceName: accounting-service
+      servicePort: 80

@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounting-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: accounting-service
+  template:
+    metadata:
+      labels:
+        app: accounting-service
+    spec:
+      containers:
+      - name: accounting-service
+        image: ghcr.io/arda-labs/accounting-service:latest
+        ports:
+        - containerPort: 8080

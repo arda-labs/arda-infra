@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iam-service-config
+data:
+  config.yaml: |
+    server:
+      http:
+        addr: 0.0.0.0:8000
+        timeout: 10s
+      grpc:
+        addr: 0.0.0.0:9000
+        timeout: 10s
+
+    data:
+      database:
+        driver: postgres
+        source: "${DATABASE_URL}"
+      redis:
+        addr: "${REDIS_ADDR}"
+        read_timeout: 0.2s
+        write_timeout: 0.2s
+        db: 0
+
+    jwt:
+      jwks_endpoint: "https://auth.arda.io.vn/oauth/v2/keys"
+      issuer: "https://auth.arda.io.vn"
+      audience: "iam-service"
+
+    zitadel:
+      authority: "https://auth.arda.io.vn"
+      pat: "${ZITADEL_LOGIN_CLIENT_PAT}"
