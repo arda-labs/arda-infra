@@ -46,6 +46,7 @@ spec:
           ports:
             - containerPort: 8000
             - containerPort: 9000
+          command: ["/app/iam-service"]
           args:
             - -conf
             - /data/conf
