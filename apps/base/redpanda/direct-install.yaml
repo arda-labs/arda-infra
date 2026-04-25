@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redpanda
+  namespace: arda-dev
+spec:
+  serviceName: redpanda
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redpanda
+  template:
+    metadata:
+      labels:
+        app: redpanda
+    spec:
+      containers:
+      - name: redpanda
+        image: docker.redpanda.com/redpandadata/redpanda:v23.2.1
+        command:
+        - rpk
+        - redpanda
+        - start
+        - --smp
+        - "1"
+        - --memory
+        - "1G"
+        - --overprovisioned
+        - --node-id
+        - "0"
+        - --check=false
+        - --reserve-memory
+        - "0M"
+        - --kafka-addr
+        - PLAINTEXT://0.0.0.0:9092
+        - --advertise-kafka-addr
+        - PLAINTEXT://redpanda.arda-dev.svc.cluster.local:9092
+        ports:
+        - containerPort: 9092
+          name: kafka
+        - containerPort: 9644
+          name: admin
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redpanda
+  namespace: arda-dev
+spec:
+  ports:
+  - port: 9092
+    name: kafka
+  - port: 9644
+    name: admin
+  selector:
+    app: redpanda
