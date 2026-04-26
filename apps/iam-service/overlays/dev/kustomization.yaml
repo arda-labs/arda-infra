@@ -6,4 +6,4 @@ resources:
 images:
 - name: ghcr.io/arda-labs/iam-service
   newName: ghcr.io/arda-labs/iam-service
-  newTag: d82917288d98bb5c273e832a8b123b2c8f35d46e
+  newTag: 9126ece
