@@ -2,13 +2,15 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: arda-dev
 resources:
-- ../../base
+  - ../../base
 images:
-- name: ghcr.io/arda-labs/mfe-shell
-  newName: ghcr.io/arda-labs/mfe-shell
-  newTag: f3e4b01
+  - name: ghcr.io/arda-labs/mfe-shell
+    newName: ghcr.io/arda-labs/mfe-shell
+    newTag: f3e4b01
 configMapGenerator:
-- behavior: merge
-  literals:
-  - API_URL=https://arda.io.vn/api
-  name: mfe-shell-env-config
+  - behavior: merge
+    literals:
+      - API_URL=https://arda.io.vn/api
+      - MFE_IAM_URL=https://arda.io.vn/iam
+      - MFE_COMMON_URL=https://arda.io.vn/common
+    name: mfe-shell-env-config
