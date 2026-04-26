@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mfe-iam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mfe-iam
+  template:
+    metadata:
+      labels:
+        app: mfe-iam
+    spec:
+      initContainers:
+        # initContainer chạy envsubst trước khi container chính start
+        # Kết quả là /env-output/env.js được đặt vào emptyDir shared với nginx
+        - name: env-init
+          image: alpine:3.20
+          command:
+            - sh
+            - -c
+            - apk add --no-cache gettext -q && envsubst < /env-template/env.template.js > /env-output/env.js
+          env:
+            - name: API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: mfe-iam-env-config
+                  key: API_URL
+            - name: AUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mfe-iam-secrets
+                  key: AUTH_CLIENT_ID
+          volumeMounts:
+            - name: env-template
+              mountPath: /env-template
+            - name: env-output
+              mountPath: /env-output
+      containers:
+        - name: mfe-iam
+          image: ghcr.io/arda-labs/mfe-iam:latest
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          volumeMounts:
+            # Mount env.js đã được render vào đúng path nginx serve
+            - name: env-output
+              mountPath: /usr/share/nginx/html/env.js
+              subPath: env.js
+      volumes:
+        - name: env-template
+          configMap:
+            name: mfe-iam-env-config
+        # emptyDir dùng để share file env.js giữa initContainer và nginx container
+        - name: env-output
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mfe-iam
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: mfe-iam
