@@ -13,10 +13,10 @@ spec:
           - /*
         exprs:
           - subject:
-              scope: Header
-              name: URI
+              scope: Variable
+              name: uri
             op: NotRegexMatch
-            value: "^/api/.*"
+            value: "^/(api|mfe-iam|mfe-common)/.*"
       plugins:
         - name: cors
           enable: true

@@ -5,7 +5,7 @@ metadata:
 spec:
   http:
     - name: mfe-common
-      priority: 10
+      priority: 100
       match:
         hosts:
           - arda.io.vn
