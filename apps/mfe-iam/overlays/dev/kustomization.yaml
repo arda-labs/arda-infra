@@ -2,13 +2,13 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: arda-dev
 resources:
-  - ../../base
+- ../../base
 images:
-  - name: ghcr.io/arda-labs/mfe-iam
-    newName: ghcr.io/arda-labs/mfe-iam
-    newTag: 881c8d3
+- name: ghcr.io/arda-labs/mfe-iam
+  newName: ghcr.io/arda-labs/mfe-iam
+  newTag: f168d3c
 configMapGenerator:
-  - behavior: merge
-    literals:
-      - API_URL=https://arda.io.vn/api
-    name: mfe-iam-env-config
+- behavior: merge
+  literals:
+  - API_URL=https://arda.io.vn/api
+  name: mfe-iam-env-config
