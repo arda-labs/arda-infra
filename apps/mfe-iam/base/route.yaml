@@ -5,18 +5,19 @@ metadata:
 spec:
   http:
     - name: mfe-iam
-      priority: 100
+      priority: 1000
       match:
         hosts:
           - arda.io.vn
         paths:
+          - /mfe-iam
           - /mfe-iam/*
       plugins:
         - name: proxy-rewrite
           enable: true
           config:
             regex_uri:
-              - ^/mfe-iam/(.*)
+              - ^/mfe-iam/?(.*)
               - /$1
         - name: cors
           enable: true

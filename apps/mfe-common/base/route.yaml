@@ -5,18 +5,19 @@ metadata:
 spec:
   http:
     - name: mfe-common
-      priority: 100
+      priority: 1000
       match:
         hosts:
           - arda.io.vn
         paths:
+          - /mfe-common
           - /mfe-common/*
       plugins:
         - name: proxy-rewrite
           enable: true
           config:
             regex_uri:
-              - ^/mfe-common/(.*)
+              - ^/mfe-common/?(.*)
               - /$1
         - name: cors
           enable: true
