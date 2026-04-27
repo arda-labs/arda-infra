@@ -13,7 +13,7 @@ spec:
           - /*
         exprs:
           - subject:
-              scope: Path
+              scope: Variable
               name: uri
             op: RegexNotMatch
             value: "^/(mfe-iam|mfe-common|api)"
