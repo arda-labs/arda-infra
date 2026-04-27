@@ -13,10 +13,9 @@ spec:
           - /*
         exprs:
           - subject:
-              scope: Variable
-              name: uri
+              scope: Path
             op: NotRegexMatch
-            value: "^/(mfe-iam|mfe-common|api)/"
+            value: "^/(mfe-iam|mfe-common|api)"
       plugins:
         - name: cors
           enable: true
