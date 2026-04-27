@@ -11,6 +11,6 @@ configMapGenerator:
   - behavior: merge
     literals:
       - API_URL=https://arda.io.vn/api
-      - MFE_IAM_URL=https://arda.io.vn/iam
-      - MFE_COMMON_URL=https://arda.io.vn/common
+      - MFE_IAM_URL=https://arda.io.vn/mfe-iam
+      - MFE_COMMON_URL=https://arda.io.vn/mfe-common
     name: mfe-shell-env-config

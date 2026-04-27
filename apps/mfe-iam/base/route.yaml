@@ -10,13 +10,13 @@ spec:
         hosts:
           - arda.io.vn
         paths:
-          - /iam/*
+          - /mfe-iam/*
       plugins:
         - name: proxy-rewrite
           enable: true
           config:
             regex_uri:
-              - ^/iam/(.*)
+              - ^/mfe-iam/(.*)
               - /$1
         - name: cors
           enable: true

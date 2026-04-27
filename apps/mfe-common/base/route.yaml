@@ -10,13 +10,13 @@ spec:
         hosts:
           - arda.io.vn
         paths:
-          - /common/*
+          - /mfe-common/*
       plugins:
         - name: proxy-rewrite
           enable: true
           config:
             regex_uri:
-              - ^/common/(.*)
+              - ^/mfe-common/(.*)
               - /$1
         - name: cors
           enable: true
