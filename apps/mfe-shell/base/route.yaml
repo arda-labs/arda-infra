@@ -14,7 +14,7 @@ spec:
         exprs:
           - subject:
               scope: Path
-            op: NotRegexMatch
+            op: RegexNotMatch
             value: "^/(mfe-iam|mfe-common|api)"
       plugins:
         - name: cors
