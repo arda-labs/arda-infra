@@ -10,7 +10,13 @@ spec:
         hosts:
           - arda.io.vn
         paths:
-          - "$regex:^/(?!mfe-|api).*$"
+          - /*
+        exprs:
+          - subject:
+              scope: Variable
+              name: uri
+            op: NotRegexMatch
+            value: "^/(mfe-iam|mfe-common|api)/"
       plugins:
         - name: cors
           enable: true
