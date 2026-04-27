@@ -5,18 +5,12 @@ metadata:
 spec:
   http:
     - name: mfe-shell
-      priority: 1
+      priority: 0
       match:
         hosts:
           - arda.io.vn
         paths:
-          - /*
-        exprs:
-          - subject:
-              scope: Variable
-              name: uri
-            op: NotRegexMatch
-            value: "^/(api|mfe-iam|mfe-common)/.*"
+          - "$regex:^/(?!mfe-|api).*$"
       plugins:
         - name: cors
           enable: true
