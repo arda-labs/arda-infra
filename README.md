@@ -43,6 +43,13 @@ The active platform model is:
 - `gateway`, `infra`, `argocd`, and `arda-prod` are the namespaces to expect
 - `identity` is reserved for Zitadel and future auth platform components
 
+Zitadel is deployed from the official `https://charts.zitadel.com` Helm chart with:
+
+- release name `zitadel-core`
+- namespace `identity`
+- Gateway API routing in `apps/identity/zitadel-routes`
+- the bootstrap secret `zitadel-masterkey` created by `scripts/create-zitadel-secret.sh`
+
 ## Local Dev via APISIX
 
 Use the shared APISIX running on `thinkcenter` when developing locally so request routing matches the deployed gateway shape more closely.

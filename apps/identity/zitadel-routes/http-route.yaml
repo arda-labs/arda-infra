@@ -1,0 +1,26 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: zitadel-core
+  namespace: identity
+spec:
+  parentRefs:
+    - name: apisix-lb
+      namespace: gateway
+  hostnames:
+    - auth.arda.io.vn
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /ui/v2/login
+      backendRefs:
+        - name: zitadel-core-login
+          port: 3000
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: zitadel-core
+          port: 8080

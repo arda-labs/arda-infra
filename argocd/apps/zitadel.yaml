@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: zitadel
+  namespace: argocd
+spec:
+  project: arda-platform
+  source:
+    repoURL: https://charts.zitadel.com
+    chart: zitadel
+    targetRevision: 9.34.0
+    helm:
+      releaseName: zitadel-core
+      values: |
+        ingress:
+          enabled: false
+        login:
+          ingress:
+            enabled: false
+        gateway:
+          httpRoute:
+            enabled: false
+          grpcRoute:
+            enabled: false
+        postgresql:
+          enabled: true
+          primary:
+            persistence:
+              storageClass: arda-storage
+        zitadel:
+          masterkeySecretName: zitadel-masterkey
+          configmapConfig:
+            ExternalDomain: auth.arda.io.vn
+            ExternalPort: 443
+            ExternalSecure: true
+            FirstInstance:
+              Skip: false
+              Org:
+                Human:
+                  Email: zitadel-admin@auth.arda.io.vn
+                  UserName: zitadel-admin
+                  Password: Password1!
+                  PasswordChangeRequired: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: identity
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
