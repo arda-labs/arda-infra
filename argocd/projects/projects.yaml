@@ -10,12 +10,15 @@ spec:
     server: https://kubernetes.default.svc
   - namespace: gateway
     server: https://kubernetes.default.svc
+  - namespace: identity
+    server: https://kubernetes.default.svc
   - namespace: infra
     server: https://kubernetes.default.svc
   - namespace: arda-prod
     server: https://kubernetes.default.svc
   sourceRepos:
   - https://github.com/arda-labs/arda-infra.git
+  - https://charts.zitadel.com
   clusterResourceWhitelist:
   - group: '*'
     kind: '*'

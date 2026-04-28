@@ -16,4 +16,9 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
+  name: identity
+---
+apiVersion: v1
+kind: Namespace
+metadata:
   name: arda-prod

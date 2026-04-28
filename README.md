@@ -41,6 +41,7 @@ The active platform model is:
 - no separate dev environment
 - ArgoCD manages cluster state from Git
 - `gateway`, `infra`, `argocd`, and `arda-prod` are the namespaces to expect
+- `identity` is reserved for Zitadel and future auth platform components
 
 ## Local Dev via APISIX
 
