@@ -6,11 +6,11 @@ resources:
 images:
 - name: ghcr.io/arda-labs/iam-service
   newName: ghcr.io/arda-labs/iam-service
-  newTag: 7307ee9
+  newTag: ba3bc99
 patches:
 - path: route-dev-hosts.patch.yaml
   target:
     group: apisix.apache.org
-    version: v2
     kind: ApisixRoute
     name: iam-service-v2-route
+    version: v2
