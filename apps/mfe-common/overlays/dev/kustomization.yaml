@@ -6,7 +6,7 @@ resources:
 images:
 - name: ghcr.io/arda-labs/mfe-common
   newName: ghcr.io/arda-labs/mfe-common
-  newTag: ba3bc99
+  newTag: 311ac17
 patches:
 - path: route-dev-local.patch.yaml
   target:
