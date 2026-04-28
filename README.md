@@ -47,7 +47,6 @@ Zitadel is deployed from the official `https://charts.zitadel.com` Helm chart wi
 
 - release name `zitadel-core`
 - namespace `identity`
-- Gateway API routing in `apps/identity/zitadel-routes`
 - the bootstrap secret `zitadel-masterkey` created by `scripts/create-zitadel-secret.sh`
 
 ## Local Dev via APISIX
