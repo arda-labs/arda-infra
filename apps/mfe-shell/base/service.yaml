@@ -9,6 +9,8 @@ spec:
       app: mfe-shell
   template:
     metadata:
+      annotations:
+        arda.io/auth-config-revision: "2026-04-28-oidc-proxy"
       labels:
         app: mfe-shell
     spec:
@@ -27,6 +29,11 @@ spec:
                 configMapKeyRef:
                   name: mfe-shell-env-config
                   key: API_URL
+            - name: AUTH_AUTHORITY
+              valueFrom:
+                configMapKeyRef:
+                  name: mfe-shell-env-config
+                  key: AUTH_AUTHORITY
             - name: MFE_IAM_URL
               valueFrom:
                 configMapKeyRef:

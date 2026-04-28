@@ -9,6 +9,8 @@ spec:
       app: mfe-iam
   template:
     metadata:
+      annotations:
+        arda.io/auth-config-revision: "2026-04-28-oidc-proxy"
       labels:
         app: mfe-iam
     spec:
@@ -27,6 +29,11 @@ spec:
                 configMapKeyRef:
                   name: mfe-iam-env-config
                   key: API_URL
+            - name: AUTH_AUTHORITY
+              valueFrom:
+                configMapKeyRef:
+                  name: mfe-iam-env-config
+                  key: AUTH_AUTHORITY
             - name: AUTH_CLIENT_ID
               valueFrom:
                 secretKeyRef:

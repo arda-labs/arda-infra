@@ -23,8 +23,8 @@ data:
         db: 0
 
     jwt:
-      jwks_endpoint: "https://auth.arda.io.vn/oauth/v2/keys"
-      issuer: "https://auth.arda.io.vn"
+      jwks_endpoint: "https://arda.io.vn/oauth/v2/keys"
+      issuer: "https://arda.io.vn"
       audience: "370596460112183382"
 
     zitadel:

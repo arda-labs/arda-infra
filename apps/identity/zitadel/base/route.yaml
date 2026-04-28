@@ -1,6 +1,37 @@
 apiVersion: apisix.apache.org/v2
 kind: ApisixRoute
 metadata:
+  name: zitadel-oidc-proxy
+spec:
+  ingressClassName: apisix
+  http:
+  - name: zitadel-oidc-proxy
+    priority: 100
+    match:
+      hosts:
+      - arda.io.vn
+      paths:
+      - /.well-known/*
+      - /oauth/*
+      - /oidc/*
+      - /idps/callback/*
+    plugins:
+    - name: proxy-rewrite
+      enable: true
+      config:
+        host: auth.arda.io.vn
+        headers:
+          set:
+            X-Zitadel-Public-Host: arda.io.vn
+            X-Zitadel-Instance-Host: auth.arda.io.vn
+            X-Forwarded-Proto: https
+    backends:
+    - serviceName: zitadel-core
+      servicePort: 8080
+---
+apiVersion: apisix.apache.org/v2
+kind: ApisixRoute
+metadata:
   name: zitadel-core-login
 spec:
   ingressClassName: apisix

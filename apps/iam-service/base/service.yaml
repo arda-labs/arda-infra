@@ -9,6 +9,8 @@ spec:
       app: iam-service
   template:
     metadata:
+      annotations:
+        arda.io/auth-config-revision: "2026-04-28-oidc-proxy"
       labels:
         app: iam-service
     spec:
