@@ -25,10 +25,16 @@ helm repo update
 helm upgrade --install apisix apisix/apisix \
   -n gateway \
   --create-namespace \
-  --set gateway.type=NodePort \
-  --set dashboard.enabled=false \
+  --set service.type=NodePort \
+  --set apisix.deployment.admin.enable_admin_ui=true \
+  --set apisix.deployment.admin.type=ClusterIP \
   --set etcd.persistence.enabled=false \
   --set ingress-controller.enabled=true \
+  --set ingress-controller.apisix.adminService.namespace=gateway \
+  --set ingress-controller.apisix.adminService.name=apisix-admin \
+  --set ingress-controller.apisix.adminService.port=9180 \
+  --set ingress-controller.gatewayProxy.createDefault=true \
+  --set ingress-controller.config.provider.initSyncDelay=0s \
   --set ingress-controller.config.apisix.adminAPIVersion=v3 \
   --set ingress-controller.config.kubernetes.namespaceSelector[0]=''
 

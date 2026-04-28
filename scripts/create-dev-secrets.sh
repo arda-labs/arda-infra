@@ -1,9 +1,12 @@
 #!/bin/bash
-# Script tạo Kubernetes Secrets cho môi trường dev
+# Script tạo Kubernetes Secrets cho app namespace
 # Chạy một lần khi setup cluster mới
 # KHÔNG commit file này lên git nếu bạn hardcode giá trị thật vào đây
 
-NAMESPACE="arda-dev"
+NAMESPACE="arda-apps"
+AUTH_CLIENT_ID="370596460112183382"
+
+kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
 
 echo "=== Tạo secrets cho iam-service ==="
 kubectl create secret generic iam-service-secrets \
@@ -15,7 +18,13 @@ kubectl create secret generic iam-service-secrets \
 
 echo "=== Tạo secrets cho mfe-shell ==="
 kubectl create secret generic mfe-shell-secrets \
-  --from-literal=AUTH_CLIENT_ID='369717196990972004' \
+  --from-literal=AUTH_CLIENT_ID="$AUTH_CLIENT_ID" \
+  -n "$NAMESPACE" \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+echo "=== Tạo secrets cho mfe-iam ==="
+kubectl create secret generic mfe-iam-secrets \
+  --from-literal=AUTH_CLIENT_ID="$AUTH_CLIENT_ID" \
   -n "$NAMESPACE" \
   --dry-run=client -o yaml | kubectl apply -f -
 

@@ -1,5 +1,11 @@
-gateway:
-  type: ClusterIP
+service:
+  type: NodePort
+
+apisix:
+  deployment:
+    admin:
+      enable_admin_ui: true
+      type: ClusterIP
 
 etcd:
   enabled: true
@@ -8,7 +14,16 @@ etcd:
 
 ingress-controller:
   enabled: true
+  apisix:
+    adminService:
+      namespace: gateway
+      name: apisix-admin
+      port: 9180
+  gatewayProxy:
+    createDefault: true
   config:
+    provider:
+      initSyncDelay: 0s
     apisix:
       adminAPIVersion: v3
     kubernetes:
@@ -16,10 +31,6 @@ ingress-controller:
       namespaceSelector:
         - ""
       watchEndpointslices: false
-  initSyncDelay: 0s
   # Đảm bảo Controller có quyền đọc CRD từ Kubernetes
   rbac:
     create: true
-
-dashboard:
-  enabled: false

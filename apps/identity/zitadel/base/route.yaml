@@ -1,0 +1,36 @@
+apiVersion: apisix.apache.org/v2
+kind: ApisixRoute
+metadata:
+  name: zitadel-core-login
+spec:
+  ingressClassName: apisix
+  http:
+  - name: zitadel-core-login
+    priority: 20
+    match:
+      hosts:
+      - auth.arda.io.vn
+      paths:
+      - /ui/v2/login
+      - /ui/v2/login/*
+    backends:
+    - serviceName: zitadel-core-login
+      servicePort: 3000
+---
+apiVersion: apisix.apache.org/v2
+kind: ApisixRoute
+metadata:
+  name: zitadel-core
+spec:
+  ingressClassName: apisix
+  http:
+  - name: zitadel-core
+    priority: 10
+    match:
+      hosts:
+      - auth.arda.io.vn
+      paths:
+      - /*
+    backends:
+    - serviceName: zitadel-core
+      servicePort: 8080

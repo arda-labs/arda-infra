@@ -25,7 +25,7 @@ data:
     jwt:
       jwks_endpoint: "https://auth.arda.io.vn/oauth/v2/keys"
       issuer: "https://auth.arda.io.vn"
-      audience: "iam-service"
+      audience: "370596460112183382"
 
     zitadel:
       authority: "https://auth.arda.io.vn"

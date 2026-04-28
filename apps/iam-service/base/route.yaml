@@ -3,6 +3,7 @@ kind: ApisixRoute
 metadata:
   name: iam-service-v2-route
 spec:
+  ingressClassName: apisix
   http:
   - name: iam-service-all
     priority: 10

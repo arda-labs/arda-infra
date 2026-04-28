@@ -21,4 +21,4 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: arda-prod
+  name: arda-apps

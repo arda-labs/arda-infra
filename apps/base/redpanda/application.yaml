@@ -26,7 +26,7 @@ spec:
           enabled: true
   destination:
     server: https://kubernetes.default.svc
-    namespace: arda-dev
+    namespace: arda-apps
   syncPolicy:
     automated:
       prune: true

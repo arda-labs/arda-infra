@@ -3,6 +3,7 @@ kind: ApisixRoute
 metadata:
   name: mfe-iam-route
 spec:
+  ingressClassName: apisix
   http:
     - name: mfe-iam
       priority: 1000

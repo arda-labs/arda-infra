@@ -40,7 +40,7 @@ The active platform model is:
 - prod runs on k3s on `thinkcenter`
 - no separate dev environment
 - ArgoCD manages cluster state from Git
-- `gateway`, `infra`, `argocd`, and `arda-prod` are the namespaces to expect
+- `gateway`, `infra`, `identity`, `argocd`, and `arda-apps` are the namespaces to expect
 - `identity` is reserved for Zitadel and future auth platform components
 
 Zitadel is bootstrapped from the official `https://charts.zitadel.com` Helm chart.
@@ -48,6 +48,36 @@ Zitadel is bootstrapped from the official `https://charts.zitadel.com` Helm char
 - release name `zitadel-core`
 - namespace `identity`
 - bootstrap secret `zitadel-masterkey` from `scripts/create-zitadel-secret.sh`
+
+## APISIX Dashboard
+
+APISIX 3.16 ships the Dashboard as an embedded Admin UI. The old standalone `apisix-dashboard` Helm chart is deprecated, so this repo keeps the Admin UI enabled on the existing `apisix-admin` service instead of installing a second dashboard workload.
+
+The dashboard is intentionally kept on the internal ClusterIP Admin service. Do not expose `apisix-admin` through Cloudflare Tunnel or the public APISIX gateway unless Cloudflare Access or equivalent protection is in front of it.
+
+From Windows:
+
+```powershell
+.\scripts\apisix-dashboard.ps1
+```
+
+From Linux on `thinkcenter`:
+
+```bash
+./scripts/apisix-dashboard.sh
+```
+
+Then open:
+
+```text
+http://127.0.0.1:9180/ui/
+```
+
+The script prints the Admin API key because the embedded UI authenticates to APISIX through the Admin API.
+
+References:
+- https://apisix.apache.org/docs/apisix/dashboard/
+- https://apisix.apache.org/docs/helm-chart/apisix-dashboard/
 
 ## Local Dev via APISIX
 
