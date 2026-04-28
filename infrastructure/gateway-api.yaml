@@ -3,7 +3,7 @@ kind: GatewayClass
 metadata:
   name: apisix-lb
 spec:
-  controllerName: apisix.apache.org/gateway-controller
+  controllerName: apisix.apache.org/apisix-ingress-controller
   parametersRef:
     group: apisix.apache.org
     kind: GatewayProxy
