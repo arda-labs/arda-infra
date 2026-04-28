@@ -43,11 +43,11 @@ The active platform model is:
 - `gateway`, `infra`, `argocd`, and `arda-prod` are the namespaces to expect
 - `identity` is reserved for Zitadel and future auth platform components
 
-Zitadel is deployed from the official `https://charts.zitadel.com` Helm chart with:
+Zitadel is bootstrapped from the official `https://charts.zitadel.com` Helm chart.
 
 - release name `zitadel-core`
 - namespace `identity`
-- the bootstrap secret `zitadel-masterkey` created by `scripts/create-zitadel-secret.sh`
+- bootstrap secret `zitadel-masterkey` from `scripts/create-zitadel-secret.sh`
 
 ## Local Dev via APISIX
 
