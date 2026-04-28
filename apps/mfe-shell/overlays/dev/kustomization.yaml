@@ -6,7 +6,7 @@ resources:
 images:
 - name: ghcr.io/arda-labs/mfe-shell
   newName: ghcr.io/arda-labs/mfe-shell
-  newTag: f168d3c
+  newTag: ba3bc99
 configMapGenerator:
 - behavior: merge
   literals:
@@ -18,6 +18,6 @@ patches:
 - path: route-dev-local.patch.yaml
   target:
     group: apisix.apache.org
-    version: v2
     kind: ApisixRoute
     name: mfe-shell-route
+    version: v2
