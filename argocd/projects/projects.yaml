@@ -1,39 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: arda-dev
+  name: arda-platform
   namespace: argocd
 spec:
-  description: Development project for Arda
+  description: Platform project for the clean Arda rebuild
   destinations:
-  - namespace: arda-dev
+  - namespace: argocd
     server: https://kubernetes.default.svc
   - namespace: gateway
     server: https://kubernetes.default.svc
   - namespace: infra
     server: https://kubernetes.default.svc
-  sourceRepos:
-  - '*'
-  clusterResourceWhitelist:
-  - group: '*'
-    kind: '*'
----
-apiVersion: argoproj.io/v1alpha1
-kind: AppProject
-metadata:
-  name: arda-prod
-  namespace: argocd
-spec:
-  description: Production project for Arda
-  destinations:
   - namespace: arda-prod
     server: https://kubernetes.default.svc
-  - namespace: gateway
-    server: https://kubernetes.default.svc
-  - namespace: infra
-    server: https://kubernetes.default.svc
   sourceRepos:
-  - '*'
+  - https://github.com/arda-labs/arda-infra.git
   clusterResourceWhitelist:
   - group: '*'
     kind: '*'

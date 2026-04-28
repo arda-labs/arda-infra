@@ -4,17 +4,9 @@ set -e
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-echo -e "${GREEN}==> Bootstrapping Arda Production-Ready Infra <==${NC}"
+export KUBECONFIG="${KUBECONFIG:-/etc/rancher/k3s/k3s.yaml}"
 
-# 0. Load secrets (not committed to git)
-if [ -f .env ]; then
-  set -a && source .env && set +a
-else
-  echo "ERROR: .env file not found. Copy .env.example and fill in values."
-  exit 1
-fi
-
-: "${APISIX_API_KEY:?APISIX_API_KEY not set in .env}"
+echo -e "${GREEN}==> Bootstrapping Arda platform base <==${NC}"
 
 # 1. Basic Setup
 kubectl apply -f infrastructure/namespaces.yaml
@@ -28,11 +20,17 @@ fi
 
 # 3. Install APISIX Gateway
 echo -e "${GREEN}==> Installing APISIX...${NC}"
-helm repo add apisix https://charts.apiseven.com || true
+helm repo add apisix https://apache.github.io/apisix-helm-chart || true
 helm repo update
 helm upgrade --install apisix apisix/apisix \
   -n gateway \
-  -f apps/gateway/apisix/helm-values.yaml
+  --create-namespace \
+  --set gateway.type=NodePort \
+  --set dashboard.enabled=false \
+  --set etcd.persistence.enabled=false \
+  --set ingress-controller.enabled=true \
+  --set ingress-controller.config.apisix.adminAPIVersion=v3 \
+  --set ingress-controller.config.kubernetes.namespaceSelector[0]=''
 
 # 4. Wait for APISIX
 echo -e "${GREEN}==> Waiting for APISIX...${NC}"
@@ -41,7 +39,7 @@ kubectl wait --for=condition=available --timeout=300s deployment/apisix-ingress-
 
 # 5. Install ArgoCD
 echo -e "${GREEN}==> Installing ArgoCD...${NC}"
-kubectl apply --server-side --force-conflicts -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl create -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml || true
 
 # 6. Wait for ArgoCD
 echo -e "${GREEN}==> Waiting for ArgoCD Server...${NC}"

@@ -1,112 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: apisix
+  name: foundation
   namespace: argocd
 spec:
-  project: arda-dev
+  project: arda-platform
   source:
     repoURL: https://github.com/arda-labs/arda-infra.git
     targetRevision: main
-    path: apps/gateway/apisix/overlays/dev
+    path: infrastructure
   destination:
     server: https://kubernetes.default.svc
-    namespace: gateway
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: cloudflared
-  namespace: argocd
-spec:
-  project: arda-dev
-  source:
-    repoURL: https://github.com/arda-labs/arda-infra.git
-    targetRevision: main
-    path: apps/ingress/cloudflared/overlays
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: infra
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: mfe-shell-dev
-  namespace: argocd
-spec:
-  project: arda-dev
-  source:
-    repoURL: https://github.com/arda-labs/arda-infra.git
-    targetRevision: main
-    path: apps/mfe-shell/overlays/dev
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: arda-dev
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: mfe-common-dev
-  namespace: argocd
-spec:
-  project: arda-dev
-  source:
-    repoURL: https://github.com/arda-labs/arda-infra.git
-    targetRevision: main
-    path: apps/mfe-common/overlays/dev
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: arda-dev
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: iam-service-dev
-  namespace: argocd
-spec:
-  project: arda-dev
-  source:
-    repoURL: https://github.com/arda-labs/arda-infra.git
-    targetRevision: main
-    path: apps/iam-service/overlays/dev
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: arda-dev
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: mfe-iam-dev
-  namespace: argocd
-spec:
-  project: arda-dev
-  source:
-    repoURL: https://github.com/arda-labs/arda-infra.git
-    targetRevision: main
-    path: apps/mfe-iam/overlays/dev
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: arda-dev
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true

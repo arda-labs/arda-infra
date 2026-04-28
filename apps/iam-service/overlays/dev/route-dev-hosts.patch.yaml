@@ -1,0 +1,6 @@
+- op: replace
+  path: /spec/http/0/match/hosts
+  value:
+  - arda.io.vn
+  - localhost
+  - 127.0.0.1

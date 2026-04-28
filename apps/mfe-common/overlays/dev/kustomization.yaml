@@ -7,3 +7,10 @@ images:
 - name: ghcr.io/arda-labs/mfe-common
   newName: ghcr.io/arda-labs/mfe-common
   newTag: f168d3c
+patches:
+- path: route-dev-local.patch.yaml
+  target:
+    group: apisix.apache.org
+    version: v2
+    kind: ApisixRoute
+    name: mfe-common-route

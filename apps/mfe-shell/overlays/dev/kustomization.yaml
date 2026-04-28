@@ -14,3 +14,10 @@ configMapGenerator:
   - MFE_IAM_URL=https://arda.io.vn/mfe-iam
   - MFE_COMMON_URL=https://arda.io.vn/mfe-common
   name: mfe-shell-env-config
+patches:
+- path: route-dev-local.patch.yaml
+  target:
+    group: apisix.apache.org
+    version: v2
+    kind: ApisixRoute
+    name: mfe-shell-route
