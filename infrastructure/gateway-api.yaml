@@ -12,6 +12,11 @@ metadata:
   namespace: gateway
 spec:
   gatewayClassName: apisix-lb
+  infrastructure:
+    parametersRef:
+      group: apisix.apache.org
+      kind: GatewayProxy
+      name: apisix-config
   listeners:
     - name: http
       protocol: HTTP
@@ -19,3 +24,19 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+---
+apiVersion: apisix.apache.org/v1alpha1
+kind: GatewayProxy
+metadata:
+  name: apisix-config
+  namespace: gateway
+spec:
+  provider:
+    type: ControlPlane
+    controlPlane:
+      endpoints:
+        - http://apisix-admin.gateway.svc.cluster.local:9180
+      auth:
+        type: AdminKey
+        adminKey:
+          value: edd1c9f034335f136f87ad84b625c8f1
