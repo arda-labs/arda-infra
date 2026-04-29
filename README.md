@@ -81,32 +81,42 @@ References:
 
 ## Local Dev via APISIX
 
-Use the shared APISIX running on `thinkcenter` when developing locally so request routing matches the deployed gateway shape more closely.
+For local development, use the standalone APISIX gateway under `local/apisix`. It routes local frontend and backend processes through the same public path shape used by the cluster.
 
-1. Open an SSH tunnel from your Windows machine:
+1. Start APISIX:
    ```powershell
-   ssh -N -L 9080:127.0.0.1:30907 hoan@thinkcenter
+   cd D:\Github\arda-labs\arda-infra\local\apisix
+   docker compose up -d
    ```
-   This forwards `http://localhost:9080` to the APISIX `NodePort` service on `thinkcenter`.
 
-2. Point local frontend runtime config to APISIX instead of calling services directly:
+2. Run local services:
+   - IAM backend: `http://localhost:8000`
+   - MDM backend: `http://localhost:8001`
+   - Shell MFE: `http://localhost:3000`
+   - IAM MFE: `http://localhost:3002`
+   - MDM MFE: `http://localhost:3001`
+
+3. Point local frontend runtime config to APISIX instead of calling services directly:
    ```js
    window.__env.apiUrl = 'http://localhost:9080/api';
+   window.__env.apiPath = '/v1';
    window.__env.mfeIamUrl = 'http://localhost:9080/mfe-iam';
-   window.__env.mfeCommonUrl = 'http://localhost:9080/mfe-common';
+   window.__env.mfeMdmUrl = 'http://localhost:9080/mfe-mdm';
    ```
 
-3. Keep the request host as `localhost`. The APISIX route manifests in this repo accept:
-   - `arda.io.vn`
-   - `localhost`
-   - `127.0.0.1`
+4. Open the shell through APISIX:
+   ```text
+   http://localhost:9080
+   ```
 
-4. Quick checks:
+5. Quick checks:
    ```powershell
-   curl.exe -i -H "Host: localhost" http://localhost:9080/api/v1/me
+   curl.exe -i http://localhost:9080/api/v1/me
+   curl.exe -i http://localhost:9080/api/v1/mdm/code-sets
    curl.exe -i -H "Host: localhost" http://localhost:9080/mfe-iam/remoteEntry.json
+   curl.exe -i -H "Host: localhost" http://localhost:9080/mfe-mdm/remoteEntry.json
    ```
 
 Notes:
-- This setup gives local development the same gateway entrypoint shape as deployed traffic.
-- It does not replace proper APISIX auth plugins; it only aligns the transport path and routing path.
+- APISIX runs in standalone YAML mode and does not need etcd or Admin API.
+- API paths are rewritten from `/api/v1/*` to service-native `/v1/*`.

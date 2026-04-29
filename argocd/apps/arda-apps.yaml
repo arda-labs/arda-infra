@@ -1,6 +1,27 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: mdm-service
+  namespace: argocd
+spec:
+  project: arda-platform
+  source:
+    repoURL: https://github.com/arda-labs/arda-infra.git
+    targetRevision: main
+    path: apps/mdm-service/overlays/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arda-apps
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: iam-service
   namespace: argocd
 spec:
@@ -64,14 +85,14 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: mfe-common
+  name: mfe-mdm
   namespace: argocd
 spec:
   project: arda-platform
   source:
     repoURL: https://github.com/arda-labs/arda-infra.git
     targetRevision: main
-    path: apps/mfe-common/overlays/dev
+    path: apps/mfe-mdm/overlays/dev
   destination:
     server: https://kubernetes.default.svc
     namespace: arda-apps

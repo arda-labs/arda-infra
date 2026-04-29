@@ -22,6 +22,13 @@ kubectl create secret generic mfe-shell-secrets \
   -n "$NAMESPACE" \
   --dry-run=client -o yaml | kubectl apply -f -
 
+echo "=== Tạo secrets cho mdm-service ==="
+kubectl create secret generic mdm-service-secrets \
+  --from-literal=DATABASE_URL='postgres://mdm:mdm%40123@thinkcenter:5432/mdm?sslmode=disable' \
+  --from-literal=REDIS_ADDR='thinkcenter:6379' \
+  -n "$NAMESPACE" \
+  --dry-run=client -o yaml | kubectl apply -f -
+
 echo "=== Tạo secrets cho mfe-iam ==="
 kubectl create secret generic mfe-iam-secrets \
   --from-literal=AUTH_CLIENT_ID="$AUTH_CLIENT_ID" \

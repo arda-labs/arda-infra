@@ -1,0 +1,22 @@
+apiVersion: apisix.apache.org/v2
+kind: ApisixRoute
+metadata:
+  name: mdm-service-v1-route
+spec:
+  ingressClassName: apisix
+  http:
+    - name: mdm-service-api
+      priority: 20
+      match:
+        hosts:
+          - arda.io.vn
+        paths:
+          - /api/v1/mdm/*
+      plugins:
+        - name: proxy-rewrite
+          enable: true
+          config:
+            regex_uri: ["^/api/(.*)", "/$1"]
+      backends:
+        - serviceName: mdm-service
+          servicePort: 80

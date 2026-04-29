@@ -10,5 +10,5 @@ data:
       window.__env.authAuthority = "${AUTH_AUTHORITY}";
       window.__env.authClientId = "${AUTH_CLIENT_ID}";
       window.__env.mfeIamUrl = "${MFE_IAM_URL}";
-      window.__env.mfeCommonUrl = "${MFE_COMMON_URL}";
+      window.__env.mfeMdmUrl = "${MFE_MDM_URL}";
     })(this);

@@ -4,13 +4,13 @@ namespace: arda-apps
 resources:
 - ../../base
 images:
-- name: ghcr.io/arda-labs/mfe-common
-  newName: ghcr.io/arda-labs/mfe-common
+- name: ghcr.io/arda-labs/mfe-mdm
+  newName: ghcr.io/arda-labs/mfe-mdm
   newTag: 15b3526
 patches:
 - path: route-dev-local.patch.yaml
   target:
     group: apisix.apache.org
     kind: ApisixRoute
-    name: mfe-common-route
+    name: mfe-mdm-route
     version: v2

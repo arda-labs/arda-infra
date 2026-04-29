@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mfe-common
+  name: mfe-mdm
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mfe-common
+      app: mfe-mdm
   template:
     metadata:
       labels:
-        app: mfe-common
+        app: mfe-mdm
     spec:
       containers:
-      - name: mfe-common
-        image: ghcr.io/arda-labs/mfe-common:latest
+      - name: mfe-mdm
+        image: ghcr.io/arda-labs/mfe-mdm:latest
         ports:
         - containerPort: 80
         readinessProbe:
@@ -33,10 +33,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mfe-common
+  name: mfe-mdm
 spec:
   ports:
   - port: 80
     targetPort: 80
   selector:
-    app: mfe-common
+    app: mfe-mdm

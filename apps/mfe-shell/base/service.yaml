@@ -39,11 +39,11 @@ spec:
                 configMapKeyRef:
                   name: mfe-shell-env-config
                   key: MFE_IAM_URL
-            - name: MFE_COMMON_URL
+            - name: MFE_MDM_URL
               valueFrom:
                 configMapKeyRef:
                   name: mfe-shell-env-config
-                  key: MFE_COMMON_URL
+                  key: MFE_MDM_URL
             - name: AUTH_CLIENT_ID
               valueFrom:
                 secretKeyRef:

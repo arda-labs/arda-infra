@@ -1,0 +1,18 @@
+\set ON_ERROR_STOP on
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'mdm') THEN
+    CREATE ROLE mdm LOGIN PASSWORD 'mdm@123';
+  ELSE
+    ALTER ROLE mdm LOGIN PASSWORD 'mdm@123';
+  END IF;
+END
+$$;
+
+SELECT 'CREATE DATABASE mdm OWNER mdm'
+WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'mdm')\gexec
+
+ALTER DATABASE mdm OWNER TO mdm;
+
+GRANT ALL PRIVILEGES ON DATABASE mdm TO mdm;

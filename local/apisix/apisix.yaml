@@ -1,0 +1,90 @@
+routes:
+  - id: arda-mdm-api
+    name: arda-mdm-api
+    uri: /api/v1/mdm/*
+    priority: 100
+    plugins:
+      proxy-rewrite:
+        regex_uri: ["^/api/(.*)", "/$1"]
+      cors:
+        allow_origins: "http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+        allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
+        expose_headers: "content-length,x-tenant-id,x-request-id"
+        allow_credential: true
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8001": 1
+
+  - id: arda-iam-api
+    name: arda-iam-api
+    uri: /api/v1/*
+    priority: 90
+    plugins:
+      proxy-rewrite:
+        regex_uri: ["^/api/(.*)", "/$1"]
+      cors:
+        allow_origins: "http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+        allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
+        expose_headers: "content-length,x-tenant-id,x-request-id"
+        allow_credential: true
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8000": 1
+
+  - id: arda-mfe-mdm
+    name: arda-mfe-mdm
+    uris:
+      - /mfe-mdm
+      - /mfe-mdm/*
+    priority: 80
+    plugins:
+      proxy-rewrite:
+        regex_uri: ["^/mfe-mdm/?(.*)", "/$1"]
+      cors:
+        allow_origins: "http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+        allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
+        expose_headers: "content-length,x-tenant-id,x-request-id"
+        allow_credential: true
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:3001": 1
+
+  - id: arda-mfe-iam
+    name: arda-mfe-iam
+    uris:
+      - /mfe-iam
+      - /mfe-iam/*
+    priority: 80
+    plugins:
+      proxy-rewrite:
+        regex_uri: ["^/mfe-iam/?(.*)", "/$1"]
+      cors:
+        allow_origins: "http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+        allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
+        expose_headers: "content-length,x-tenant-id,x-request-id"
+        allow_credential: true
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:3002": 1
+
+  - id: arda-shell
+    name: arda-shell
+    uri: /*
+    priority: 10
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:3000": 1
+#END

@@ -1,0 +1,12 @@
+services:
+  apisix:
+    image: apache/apisix:3.16.0-ubuntu
+    container_name: arda-local-apisix
+    restart: unless-stopped
+    ports:
+      - "9080:9080"
+    volumes:
+      - ./config.yaml:/usr/local/apisix/conf/config.yaml:ro
+      - ./apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

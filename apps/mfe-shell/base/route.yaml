@@ -17,7 +17,7 @@ spec:
               scope: Variable
               name: uri
             op: RegexNotMatch
-            value: "^/(mfe-iam|mfe-common|api)"
+            value: "^/(mfe-iam|mfe-mdm|api)"
       plugins:
         - name: cors
           enable: true

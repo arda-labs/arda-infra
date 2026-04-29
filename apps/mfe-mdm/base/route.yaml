@@ -1,24 +1,24 @@
 apiVersion: apisix.apache.org/v2
 kind: ApisixRoute
 metadata:
-  name: mfe-common-route
+  name: mfe-mdm-route
 spec:
   ingressClassName: apisix
   http:
-    - name: mfe-common
+    - name: mfe-mdm
       priority: 1000
       match:
         hosts:
           - arda.io.vn
         paths:
-          - /mfe-common
-          - /mfe-common/*
+          - /mfe-mdm
+          - /mfe-mdm/*
       plugins:
         - name: proxy-rewrite
           enable: true
           config:
             regex_uri:
-              - ^/mfe-common/?(.*)
+              - ^/mfe-mdm/?(.*)
               - /$1
         - name: cors
           enable: true
@@ -30,5 +30,5 @@ spec:
             allow_credential: true
             max_age: 3600
       backends:
-        - serviceName: mfe-common
+        - serviceName: mfe-mdm
           servicePort: 80

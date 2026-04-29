@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mdm-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mdm-service
+  template:
+    metadata:
+      labels:
+        app: mdm-service
+    spec:
+      initContainers:
+        - name: config-init
+          image: alpine:3.20
+          command:
+            - sh
+            - -c
+            - apk add --no-cache gettext -q && envsubst < /config-template/config.yaml > /config-rendered/config.yaml
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mdm-service-secrets
+                  key: DATABASE_URL
+            - name: REDIS_ADDR
+              valueFrom:
+                secretKeyRef:
+                  name: mdm-service-secrets
+                  key: REDIS_ADDR
+          volumeMounts:
+            - name: config-template
+              mountPath: /config-template
+            - name: config-rendered
+              mountPath: /config-rendered
+      containers:
+        - name: mdm-service
+          image: ghcr.io/arda-labs/mdm-service:latest
+          ports:
+            - containerPort: 8000
+            - containerPort: 9000
+          args:
+            - -conf
+            - /data/conf
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          volumeMounts:
+            - name: config-rendered
+              mountPath: /data/conf
+      volumes:
+        - name: config-template
+          configMap:
+            name: mdm-service-config
+        - name: config-rendered
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mdm-service
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+    - name: grpc
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: mdm-service
