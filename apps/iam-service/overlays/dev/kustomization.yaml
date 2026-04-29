@@ -6,7 +6,7 @@ resources:
 images:
 - name: ghcr.io/arda-labs/iam-service
   newName: ghcr.io/arda-labs/iam-service
-  newTag: 9ed6804
+  newTag: b25b85d
 patches:
 - path: route-dev-hosts.patch.yaml
   target:
