@@ -29,4 +29,6 @@ data:
 
     zitadel:
       authority: "https://auth.arda.io.vn"
+      # Login Client PAT. User provisioning uses ZITADEL_MANAGEMENT_PAT
+      # from iam-service-secrets.
       pat: "${ZITADEL_LOGIN_CLIENT_PAT}"

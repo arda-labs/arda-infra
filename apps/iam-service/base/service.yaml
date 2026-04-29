@@ -45,6 +45,12 @@ spec:
       containers:
         - name: iam-service
           image: ghcr.io/arda-labs/iam-service:latest
+          env:
+            - name: ZITADEL_MANAGEMENT_PAT
+              valueFrom:
+                secretKeyRef:
+                  name: iam-service-secrets
+                  key: ZITADEL_MANAGEMENT_PAT
           ports:
             - containerPort: 8000
             - containerPort: 9000
