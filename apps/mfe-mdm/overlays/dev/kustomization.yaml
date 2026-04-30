@@ -6,7 +6,7 @@ resources:
 images:
 - name: ghcr.io/arda-labs/mfe-mdm
   newName: ghcr.io/arda-labs/mfe-mdm
-  newTag: 34cd58d
+  newTag: 64c6ba6
 patches:
 - path: route-dev-local.patch.yaml
   target:
