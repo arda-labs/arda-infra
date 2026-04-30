@@ -77,6 +77,27 @@ routes:
       nodes:
         "host.docker.internal:3001": 1
 
+  - id: arda-mfe-ntf
+    name: arda-mfe-ntf
+    uris:
+      - /mfe-ntf
+      - /mfe-ntf/*
+    priority: 80
+    plugins:
+      proxy-rewrite:
+        regex_uri: ["^/mfe-ntf/?(.*)", "/$1"]
+      cors:
+        allow_origins: "http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+        allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
+        expose_headers: "content-length,x-tenant-id,x-request-id"
+        allow_credential: true
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:3003": 1
+
   - id: arda-mfe-iam
     name: arda-mfe-iam
     uris:

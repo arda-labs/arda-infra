@@ -1,24 +1,25 @@
 apiVersion: apisix.apache.org/v2
 kind: ApisixRoute
 metadata:
-  name: mfe-shell-route
+  name: mfe-ntf-route
 spec:
   ingressClassName: apisix
   http:
-    - name: mfe-shell
-      priority: 0
+    - name: mfe-ntf
+      priority: 1000
       match:
         hosts:
           - arda.io.vn
         paths:
-          - /*
-        exprs:
-          - subject:
-              scope: Variable
-              name: uri
-            op: RegexNotMatch
-            value: "^/(mfe-iam|mfe-mdm|mfe-ntf|api)"
+          - /mfe-ntf
+          - /mfe-ntf/*
       plugins:
+        - name: proxy-rewrite
+          enable: true
+          config:
+            regex_uri:
+              - ^/mfe-ntf/?(.*)
+              - /$1
         - name: cors
           enable: true
           config:
@@ -29,5 +30,5 @@ spec:
             allow_credential: true
             max_age: 3600
       backends:
-        - serviceName: mfe-shell
+        - serviceName: mfe-ntf
           servicePort: 80

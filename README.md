@@ -39,7 +39,8 @@ arda-infra/
 │   ├── notification-service/
 │   ├── mfe-shell/
 │   ├── mfe-iam/
-│   └── mfe-mdm/
+│   ├── mfe-mdm/
+│   └── mfe-ntf/
 ├── bootstrap/
 ├── infrastructure/
 ├── local/apisix/
@@ -66,6 +67,7 @@ arda-infra/
 | `mfe-shell` | `apps/mfe-shell/overlays/dev` | `arda-apps` |
 | `mfe-iam` | `apps/mfe-iam/overlays/dev` | `arda-apps` |
 | `mfe-mdm` | `apps/mfe-mdm/overlays/dev` | `arda-apps` |
+| `mfe-ntf` | `apps/mfe-ntf/overlays/dev` | `arda-apps` |
 | `cloudflared` | `apps/ingress/cloudflared/overlays` | `infra` |
 | `zitadel-routes` | `apps/identity/zitadel/base` | `identity` |
 
@@ -76,6 +78,7 @@ arda-infra/
 | `/*` | `mfe-shell` |
 | `/mfe-iam/*` | `mfe-iam` |
 | `/mfe-mdm/*` | `mfe-mdm` |
+| `/mfe-ntf/*` | `mfe-ntf` |
 | `/api/v1/*` | `iam-service` |
 | `/api/v1/mdm/*` | `mdm-service` |
 | `/api/v1/notifications/*` | `notification-service` |
@@ -103,6 +106,7 @@ Run local services:
 | Shell MFE | `http://localhost:3000` |
 | IAM MFE | `http://localhost:3002` |
 | MDM MFE | `http://localhost:3001` |
+| NTF MFE | `http://localhost:3003` |
 
 Shell runtime config:
 
@@ -111,6 +115,7 @@ window.__env.apiUrl = 'http://localhost:9080/api';
 window.__env.apiPath = '/v1';
 window.__env.mfeIamUrl = 'http://localhost:9080/mfe-iam';
 window.__env.mfeMdmUrl = 'http://localhost:9080/mfe-mdm';
+window.__env.mfeNtfUrl = 'http://localhost:9080/mfe-ntf';
 ```
 
 Quick checks:
@@ -121,6 +126,7 @@ curl.exe -i http://localhost:9080/api/v1/mdm/code-sets
 curl.exe -i http://localhost:9080/api/v1/notifications/templates
 curl.exe -i http://localhost:9080/mfe-iam/remoteEntry.json
 curl.exe -i http://localhost:9080/mfe-mdm/remoteEntry.json
+curl.exe -i http://localhost:9080/mfe-ntf/remoteEntry.json
 ```
 
 ## Verify Manifests
@@ -132,6 +138,7 @@ kubectl kustomize apps\notification-service\overlays\dev
 kubectl kustomize apps\mfe-shell\overlays\dev
 kubectl kustomize apps\mfe-iam\overlays\dev
 kubectl kustomize apps\mfe-mdm\overlays\dev
+kubectl kustomize apps\mfe-ntf\overlays\dev
 ```
 
 ## APISIX Dashboard

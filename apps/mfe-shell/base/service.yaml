@@ -44,6 +44,11 @@ spec:
                 configMapKeyRef:
                   name: mfe-shell-env-config
                   key: MFE_MDM_URL
+            - name: MFE_NTF_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: mfe-shell-env-config
+                  key: MFE_NTF_URL
             - name: AUTH_CLIENT_ID
               valueFrom:
                 secretKeyRef:

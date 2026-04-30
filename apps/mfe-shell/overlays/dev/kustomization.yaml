@@ -14,6 +14,7 @@ configMapGenerator:
   - AUTH_AUTHORITY=https://arda.io.vn
   - MFE_IAM_URL=https://arda.io.vn/mfe-iam
   - MFE_MDM_URL=https://arda.io.vn/mfe-mdm
+  - MFE_NTF_URL=https://arda.io.vn/mfe-ntf
   name: mfe-shell-env-config
 patches:
 - path: route-dev-local.patch.yaml

@@ -11,6 +11,7 @@ Standalone APISIX for local development. It does not need etcd or the Admin API.
 - Shell MFE: `http://localhost:3000`
 - IAM MFE: `http://localhost:3002`
 - MDM MFE: `http://localhost:3001`
+- NTF MFE: `http://localhost:3003`
 
 ## Run
 
@@ -25,5 +26,6 @@ docker compose up -d
 - `/api/v1/notifications/*` -> `host.docker.internal:8002`, rewritten to `/v1/notifications/*`
 - `/api/v1/*` -> `host.docker.internal:8000`, rewritten to `/v1/*`
 - `/mfe-mdm/*` -> `host.docker.internal:3001`
+- `/mfe-ntf/*` -> `host.docker.internal:3003`
 - `/mfe-iam/*` -> `host.docker.internal:3002`
 - `/*` -> `host.docker.internal:3000`

@@ -11,4 +11,5 @@ data:
       window.__env.authClientId = "${AUTH_CLIENT_ID}";
       window.__env.mfeIamUrl = "${MFE_IAM_URL}";
       window.__env.mfeMdmUrl = "${MFE_MDM_URL}";
+      window.__env.mfeNtfUrl = "${MFE_NTF_URL}";
     })(this);
