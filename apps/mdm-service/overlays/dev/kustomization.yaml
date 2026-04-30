@@ -6,7 +6,7 @@ resources:
 images:
 - name: ghcr.io/arda-labs/mdm-service
   newName: ghcr.io/arda-labs/mdm-service
-  newTag: 34865ff
+  newTag: b18d79a
 patches:
 - path: route-dev-hosts.patch.yaml
   target:
