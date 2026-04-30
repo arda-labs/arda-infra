@@ -1,6 +1,27 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: notification-service
+  namespace: argocd
+spec:
+  project: arda-platform
+  source:
+    repoURL: https://github.com/arda-labs/arda-infra.git
+    targetRevision: main
+    path: apps/notification-service/overlays/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arda-apps
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: mdm-service
   namespace: argocd
 spec:

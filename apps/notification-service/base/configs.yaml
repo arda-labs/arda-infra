@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: notification-service-config
+data:
+  config.yaml: |
+    server:
+      http:
+        addr: 0.0.0.0:8002
+        timeout: 60s
+      grpc:
+        addr: 0.0.0.0:9002
+        timeout: 60s
+
+    data:
+      database:
+        driver: postgres
+        source: "${DATABASE_URL}"
+
+    jwt:
+      jwks_endpoint: "https://arda.io.vn/oauth/v2/keys"
+      issuer: "https://arda.io.vn"
+      audience: "370596460112183382"

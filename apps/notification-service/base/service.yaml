@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      initContainers:
+        - name: config-init
+          image: alpine:3.20
+          command:
+            - sh
+            - -c
+            - apk add --no-cache gettext -q && envsubst < /config-template/config.yaml > /config-rendered/config.yaml
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: notification-service-secrets
+                  key: DATABASE_URL
+          volumeMounts:
+            - name: config-template
+              mountPath: /config-template
+            - name: config-rendered
+              mountPath: /config-rendered
+      containers:
+        - name: notification-service
+          image: ghcr.io/arda-labs/notification-service:latest
+          ports:
+            - containerPort: 8002
+            - containerPort: 9002
+          args:
+            - -conf
+            - /data/conf
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8002
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8002
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          volumeMounts:
+            - name: config-rendered
+              mountPath: /data/conf
+      volumes:
+        - name: config-template
+          configMap:
+            name: notification-service-config
+        - name: config-rendered
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8002
+    - name: grpc
+      port: 9002
+      targetPort: 9002
+  selector:
+    app: notification-service

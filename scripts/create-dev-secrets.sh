@@ -29,6 +29,12 @@ kubectl create secret generic mdm-service-secrets \
   -n "$NAMESPACE" \
   --dry-run=client -o yaml | kubectl apply -f -
 
+echo "=== Tạo secrets cho notification-service ==="
+kubectl create secret generic notification-service-secrets \
+  --from-literal=DATABASE_URL='postgres://notification:notification%40123@thinkcenter:5432/notification?sslmode=disable' \
+  -n "$NAMESPACE" \
+  --dry-run=client -o yaml | kubectl apply -f -
+
 echo "=== Tạo secrets cho mfe-iam ==="
 kubectl create secret generic mfe-iam-secrets \
   --from-literal=AUTH_CLIENT_ID="$AUTH_CLIENT_ID" \

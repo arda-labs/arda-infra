@@ -1,4 +1,23 @@
 routes:
+  - id: arda-notification-api
+    name: arda-notification-api
+    uri: /api/v1/notifications/*
+    priority: 110
+    plugins:
+      proxy-rewrite:
+        regex_uri: ["^/api/(.*)", "/$1"]
+      cors:
+        allow_origins: "http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+        allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
+        expose_headers: "content-length,x-tenant-id,x-request-id"
+        allow_credential: true
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8002": 1
+
   - id: arda-mdm-api
     name: arda-mdm-api
     uri: /api/v1/mdm/*

@@ -1,0 +1,22 @@
+apiVersion: apisix.apache.org/v2
+kind: ApisixRoute
+metadata:
+  name: notification-service-v1-route
+spec:
+  ingressClassName: apisix
+  http:
+    - name: notification-service-api
+      priority: 30
+      match:
+        hosts:
+          - arda.io.vn
+        paths:
+          - /api/v1/notifications/*
+      plugins:
+        - name: proxy-rewrite
+          enable: true
+          config:
+            regex_uri: ["^/api/(.*)", "/$1"]
+      backends:
+        - serviceName: notification-service
+          servicePort: 80

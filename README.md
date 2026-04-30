@@ -36,6 +36,7 @@ arda-infra/
 │   ├── ingress/cloudflared/
 │   ├── iam-service/
 │   ├── mdm-service/
+│   ├── notification-service/
 │   ├── mfe-shell/
 │   ├── mfe-iam/
 │   └── mfe-mdm/
@@ -61,6 +62,7 @@ arda-infra/
 | --- | --- | --- |
 | `iam-service` | `apps/iam-service/overlays/dev` | `arda-apps` |
 | `mdm-service` | `apps/mdm-service/overlays/dev` | `arda-apps` |
+| `notification-service` | `apps/notification-service/overlays/dev` | `arda-apps` |
 | `mfe-shell` | `apps/mfe-shell/overlays/dev` | `arda-apps` |
 | `mfe-iam` | `apps/mfe-iam/overlays/dev` | `arda-apps` |
 | `mfe-mdm` | `apps/mfe-mdm/overlays/dev` | `arda-apps` |
@@ -76,6 +78,7 @@ arda-infra/
 | `/mfe-mdm/*` | `mfe-mdm` |
 | `/api/v1/*` | `iam-service` |
 | `/api/v1/mdm/*` | `mdm-service` |
+| `/api/v1/notifications/*` | `notification-service` |
 
 API paths are rewritten from `/api/<path>` to `/<path>`.
 
@@ -96,6 +99,7 @@ Run local services:
 | --- | --- |
 | IAM backend | `http://localhost:8000` |
 | MDM backend | `http://localhost:8001` |
+| Notification backend | `http://localhost:8002` |
 | Shell MFE | `http://localhost:3000` |
 | IAM MFE | `http://localhost:3002` |
 | MDM MFE | `http://localhost:3001` |
@@ -114,6 +118,7 @@ Quick checks:
 ```powershell
 curl.exe -i http://localhost:9080/api/v1/me
 curl.exe -i http://localhost:9080/api/v1/mdm/code-sets
+curl.exe -i http://localhost:9080/api/v1/notifications/templates
 curl.exe -i http://localhost:9080/mfe-iam/remoteEntry.json
 curl.exe -i http://localhost:9080/mfe-mdm/remoteEntry.json
 ```
@@ -123,6 +128,7 @@ curl.exe -i http://localhost:9080/mfe-mdm/remoteEntry.json
 ```powershell
 kubectl kustomize apps\iam-service\overlays\dev
 kubectl kustomize apps\mdm-service\overlays\dev
+kubectl kustomize apps\notification-service\overlays\dev
 kubectl kustomize apps\mfe-shell\overlays\dev
 kubectl kustomize apps\mfe-iam\overlays\dev
 kubectl kustomize apps\mfe-mdm\overlays\dev
