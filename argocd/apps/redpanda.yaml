@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: redpanda
+  namespace: argocd
+spec:
+  project: arda-platform
+  source:
+    repoURL: https://github.com/arda-labs/arda-infra.git
+    targetRevision: main
+    path: apps/base/redpanda
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arda-apps
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

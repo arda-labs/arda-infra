@@ -55,6 +55,7 @@ arda-infra/
 - Identity workloads run in namespace `identity`.
 - Cloudflared runs in namespace `infra`.
 - ArgoCD runs in namespace `argocd`.
+- Redpanda/Kafka runs in namespace `arda-apps`.
 - Environment overlays are currently named `dev`.
 
 ## Current Applications
@@ -68,6 +69,7 @@ arda-infra/
 | `mfe-iam` | `apps/mfe-iam/overlays/dev` | `arda-apps` |
 | `mfe-mdm` | `apps/mfe-mdm/overlays/dev` | `arda-apps` |
 | `mfe-ntf` | `apps/mfe-ntf/overlays/dev` | `arda-apps` |
+| `redpanda` | `apps/base/redpanda` | `arda-apps` |
 | `cloudflared` | `apps/ingress/cloudflared/overlays` | `infra` |
 | `zitadel-routes` | `apps/identity/zitadel/base` | `identity` |
 
@@ -132,6 +134,7 @@ curl.exe -i http://localhost:9080/mfe-ntf/remoteEntry.json
 ## Verify Manifests
 
 ```powershell
+kubectl kustomize apps\base\redpanda
 kubectl kustomize apps\iam-service\overlays\dev
 kubectl kustomize apps\mdm-service\overlays\dev
 kubectl kustomize apps\notification-service\overlays\dev
@@ -139,6 +142,28 @@ kubectl kustomize apps\mfe-shell\overlays\dev
 kubectl kustomize apps\mfe-iam\overlays\dev
 kubectl kustomize apps\mfe-mdm\overlays\dev
 kubectl kustomize apps\mfe-ntf\overlays\dev
+```
+
+## Redpanda / Kafka
+
+The dev cluster runs a single-node Redpanda broker for platform events.
+
+Internal bootstrap address:
+
+```text
+redpanda.arda-apps.svc.cluster.local:9092
+```
+
+Install or sync the ArgoCD application:
+
+```powershell
+kubectl apply -f argocd\apps\redpanda.yaml
+```
+
+Quick cluster-side check:
+
+```powershell
+kubectl -n arda-apps exec statefulset/redpanda -- rpk cluster info --brokers redpanda.arda-apps.svc.cluster.local:9092
 ```
 
 ## APISIX Dashboard
