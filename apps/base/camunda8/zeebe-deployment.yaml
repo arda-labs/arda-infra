@@ -18,9 +18,9 @@ spec:
           image: camunda/zeebe:8.4.0
           env:
             - name: ZEEBE_BROKER_DATA_DISK_FREESPACE_PROCESSING
-              value: "0.1"
+              value: "512MB"
             - name: ZEEBE_BROKER_DATA_DISK_FREESPACE_REPLICATION
-              value: "0.05"
+              value: "256MB"
           ports:
             - containerPort: 26500
               name: gateway
