@@ -16,7 +16,7 @@ spec:
       containers:
         - name: master
           image: chrislusf/seaweedfs:latest
-          args: ["master", "-ip=seaweedfs-master.infra.svc.cluster.local", "-port=9333"]
+          args: ["master", "-ip=0.0.0.0", "-port=9333"]
           ports:
             - containerPort: 9333
             - containerPort: 19333
