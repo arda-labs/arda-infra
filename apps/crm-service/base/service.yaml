@@ -15,19 +15,21 @@ spec:
       containers:
         - name: crm-service
           image: ghcr.io/arda-labs/crm-service:latest
+          volumeMounts:
+            - name: config
+              mountPath: /app/resources/application.yaml
+              subPath: application.yaml
           env:
-            - name: ZEEBE_CLIENT_BROKER_GATEWAY-ADDRESS
-              value: 'zeebe-gateway.infra.svc.cluster.local:26500'
-            - name: ZEEBE_CLIENT_SECURITY_PLAINTEXT
-              value: 'true'
             - name: SPRING_R2DBC_URL
               value: 'r2dbc:postgresql://postgres-external.infra.svc.cluster.local:5432/crm'
-            - name: SPRING_R2DBC_USERNAME
-              value: 'postgres'
-            - name: SPRING_R2DBC_PASSWORD
-              value: 'postgres'
+            - name: ZEEBE_CLIENT_BROKER_GATEWAY_ADDRESS
+              value: 'zeebe-gateway.infra.svc.cluster.local:26500'
           ports:
             - containerPort: 8080
+      volumes:
+        - name: config
+          configMap:
+            name: crm-service-config
 ---
 apiVersion: v1
 kind: Service

@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: crm-service
+  r2dbc:
+    url: ${SPRING_R2DBC_URL:r2dbc:postgresql://localhost:5432/crm}
+    username: ${SPRING_R2DBC_USERNAME:postgres}
+    password: ${SPRING_R2DBC_PASSWORD:postgres}
+
+zeebe:
+  client:
+    broker:
+      gateway-address: ${ZEEBE_CLIENT_BROKER_GATEWAY_ADDRESS:127.0.0.1:26500}
+    security:
+      plaintext: ${ZEEBE_CLIENT_SECURITY_PLAINTEXT:true}
+
+server:
+  port: 8080
