@@ -6,4 +6,4 @@ resources:
 images:
 - name: ghcr.io/arda-labs/crm-service
   newName: ghcr.io/arda-labs/crm-service
-  newTag: 7b1a40c
+  newTag: d9b3255
