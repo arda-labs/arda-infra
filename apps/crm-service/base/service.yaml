@@ -17,7 +17,7 @@ spec:
           image: ghcr.io/arda-labs/crm-service:latest
           env:
             - name: ZEEBE_CLIENT_BROKER_GATEWAY-ADDRESS
-              value: 'camunda8-zeebe.infra.svc.cluster.local:26500'
+              value: 'zeebe-gateway.infra.svc.cluster.local:26500'
             - name: SPRING_R2DBC_URL
               value: 'r2dbc:postgresql://postgres-external.infra.svc.cluster.local:5432/crm'
             - name: SPRING_R2DBC_USERNAME

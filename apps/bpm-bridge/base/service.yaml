@@ -17,9 +17,9 @@ spec:
           image: ghcr.io/arda-labs/bpm-bridge:latest
           env:
             - name: ZEEBE_ADDRESS
-              value: 'camunda8-zeebe.infra.svc.cluster.local:26500'
+              value: 'zeebe-gateway.infra.svc.cluster.local:26500'
             - name: DATABASE_URL
-              value: 'postgres://user:pass@postgres-external.infra.svc.cluster.local:5432/bpm_bridge?sslmode=disable'
+              value: 'postgres://postgres:postgres@postgres-external.infra.svc.cluster.local:5432/bpm_bridge?sslmode=disable'
           ports:
             - containerPort: 8080
 ---
