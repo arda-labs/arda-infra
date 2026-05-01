@@ -16,7 +16,11 @@ spec:
       containers:
         - name: volume
           image: chrislusf/seaweedfs:latest
-          args: ["volume", "-master=seaweedfs-master.infra.svc.cluster.local:9333", "-port=8080", "-s3"]
+          args:
+            - "volume"
+            - "-master=seaweedfs-master.infra.svc.cluster.local:9333"
+            - "-port=8080"
+            - "-s3"
           ports:
             - containerPort: 8080
             - containerPort: 18080
