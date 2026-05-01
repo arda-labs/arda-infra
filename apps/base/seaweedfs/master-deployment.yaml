@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seaweedfs-master
+  namespace: arda-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: seaweedfs-master
+  template:
+    metadata:
+      labels:
+        app: seaweedfs-master
+    spec:
+      containers:
+        - name: master
+          image: chrislusf/seaweedfs:latest
+          args: ["master", "-ip=seaweedfs-master", "-port=9333"]
+          ports:
+            - containerPort: 9333
+            - containerPort: 19333
