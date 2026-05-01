@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: media-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: media-service
+  template:
+    metadata:
+      labels:
+        app: media-service
+    spec:
+      containers:
+        - name: media-service
+          image: ghcr.io/arda-labs/media-service:latest
+          env:
+            - name: STORAGE_S3_ENDPOINT
+              value: 'http://seaweedfs-s3.infra.svc.cluster.local:8333'
+            - name: DATABASE_URL
+              value: 'postgres://user:pass@postgres-external.infra.svc.cluster.local:5432/media?sslmode=disable'
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: media-service
+spec:
+  selector:
+    app: media-service
+  ports:
+    - port: 80
+      targetPort: 8080
