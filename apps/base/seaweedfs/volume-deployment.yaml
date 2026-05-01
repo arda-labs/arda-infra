@@ -20,7 +20,13 @@ spec:
             - "volume"
             - "-master=seaweedfs-master.infra.svc.cluster.local:9333"
             - "-port=8080"
-            - "-s3"
+            - "-ip=$(POD_IP)"
+            - "-ip.bind=0.0.0.0"
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
           ports:
             - containerPort: 8080
             - containerPort: 18080

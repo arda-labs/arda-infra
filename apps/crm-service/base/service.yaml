@@ -20,6 +20,10 @@ spec:
               value: 'camunda8-zeebe.infra.svc.cluster.local:26500'
             - name: SPRING_R2DBC_URL
               value: 'r2dbc:postgresql://postgres-external.infra.svc.cluster.local:5432/crm'
+            - name: SPRING_R2DBC_USERNAME
+              value: 'postgres'
+            - name: SPRING_R2DBC_PASSWORD
+              value: 'postgres'
           ports:
             - containerPort: 8080
 ---
