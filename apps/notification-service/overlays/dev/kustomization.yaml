@@ -6,7 +6,7 @@ resources:
 images:
 - name: ghcr.io/arda-labs/notification-service
   newName: ghcr.io/arda-labs/notification-service
-  newTag: latest
+  newTag: b84c3a9
 patches:
 - path: route-dev-hosts.patch.yaml
   target:
