@@ -1,0 +1,19 @@
+server:
+  http:
+    addr: 0.0.0.0:8080
+    timeout: 10s
+
+data:
+  database:
+    driver: postgres
+    source: "postgres://media:media%40123@thinkcenter:5432/media?sslmode=disable"
+
+storage:
+  s3:
+    endpoint: "http://100.113.50.120:8333"
+    region: "us-east-1"
+    bucket: "arda-media"
+    access_key: "admin"
+    secret_key: "admin"
+    upload_url_ttl: "15m"
+    download_url_ttl: "15m"

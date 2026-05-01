@@ -15,13 +15,16 @@ spec:
       containers:
         - name: media-service
           image: ghcr.io/arda-labs/media-service:latest
-          env:
-            - name: STORAGE_S3_ENDPOINT
-              value: 'http://seaweedfs-s3.infra.svc.cluster.local:8333'
-            - name: DATABASE_URL
-              value: 'postgres://user:pass@postgres-external.infra.svc.cluster.local:5432/media'
+          volumeMounts:
+            - name: config
+              mountPath: /app/configs/config.yaml
+              subPath: config.yaml
           ports:
             - containerPort: 8080
+      volumes:
+        - name: config
+          configMap:
+            name: media-service-config
 ---
 apiVersion: v1
 kind: Service
