@@ -19,7 +19,7 @@ spec:
             - name: STORAGE_S3_ENDPOINT
               value: 'http://seaweedfs-s3.infra.svc.cluster.local:8333'
             - name: DATABASE_URL
-              value: 'postgres://user:pass@postgres-external.infra.svc.cluster.local:5432/media?sslmode=disable'
+              value: 'postgres://user:pass@postgres-external.infra.svc.cluster.local:5432/media'
           ports:
             - containerPort: 8080
 ---
