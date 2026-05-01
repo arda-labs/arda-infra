@@ -6,4 +6,4 @@ resources:
 images:
 - name: ghcr.io/arda-labs/media-service
   newName: ghcr.io/arda-labs/media-service
-  newTag: f7d4094
+  newTag: a7c8b20
