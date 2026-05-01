@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: seaweedfs-volume
-  namespace: arda-apps
+  namespace: infra
 spec:
   replicas: 1
   selector:
@@ -16,7 +16,7 @@ spec:
       containers:
         - name: volume
           image: chrislusf/seaweedfs:latest
-          args: ["volume", "-mserver=seaweedfs-master:9333", "-port=8080", "-s3"]
+          args: ["volume", "-mserver=seaweedfs-master.infra.svc.cluster.local:9333", "-port=8080", "-s3"]
           ports:
             - containerPort: 8080
             - containerPort: 18080

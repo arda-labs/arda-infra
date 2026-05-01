@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: seaweedfs-master
-  namespace: arda-apps
+  namespace: infra
 spec:
   replicas: 1
   selector:
@@ -16,7 +16,7 @@ spec:
       containers:
         - name: master
           image: chrislusf/seaweedfs:latest
-          args: ["master", "-ip=seaweedfs-master", "-port=9333"]
+          args: ["master", "-ip=seaweedfs-master.infra.svc.cluster.local", "-port=9333"]
           ports:
             - containerPort: 9333
             - containerPort: 19333
