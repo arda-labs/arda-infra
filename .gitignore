@@ -1,3 +1,4 @@
 .tools/
 .tmp/
 .tmp-chart/
+.worktrees/
