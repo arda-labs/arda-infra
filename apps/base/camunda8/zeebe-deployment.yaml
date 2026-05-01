@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zeebe
+  namespace: arda-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zeebe
+  template:
+    metadata:
+      labels:
+        app: zeebe
+    spec:
+      containers:
+        - name: zeebe
+          image: camunda/zeebe:8.4.0
+          env:
+            - name: ZEEBE_BROKER_DATA_DISKUSAGECOMMANDWATERMARK
+              value: "0.99"
+            - name: ZEEBE_BROKER_DATA_DISKUSAGEREPLICATIONWATERMARK
+              value: "0.99"
+          ports:
+            - containerPort: 26500
+              name: gateway
+            - containerPort: 26501
+              name: command
+            - containerPort: 26502
+              name: internal
+            - containerPort: 9600
+              name: monitoring
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              memory: 512Mi
