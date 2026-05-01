@@ -164,6 +164,20 @@ Quick cluster-side check:
 
 ```powershell
 kubectl -n arda-apps exec statefulset/redpanda -- rpk cluster info --brokers redpanda.arda-apps.svc.cluster.local:9092
+kubectl -n arda-apps exec statefulset/redpanda -- rpk topic list --brokers redpanda.arda-apps.svc.cluster.local:9092
+```
+
+Notification events topic:
+
+```text
+arda.notification.events.v1
+```
+
+Manual test event:
+
+```powershell
+'{"eventId":"manual-login-001","sourceService":"IAM","eventType":"SECURITY_LOGIN","correlationId":"manual-login-001","templateCode":"IAM_SECURITY_LOGIN","recipientType":"USER","recipientId":"user-001","channels":["IN_APP"],"language":"vi","payload":{"login_time":"2026-05-01 09:00","ip_address":"127.0.0.1"},"priority":10}' |
+  kubectl -n arda-apps exec -i statefulset/redpanda -- rpk topic produce arda.notification.events.v1 --brokers redpanda.arda-apps.svc.cluster.local:9092
 ```
 
 ## APISIX Dashboard

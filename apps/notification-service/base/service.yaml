@@ -36,6 +36,13 @@ spec:
           ports:
             - containerPort: 8002
             - containerPort: 9002
+          env:
+            - name: KAFKA_BROKERS
+              value: redpanda.arda-apps.svc.cluster.local:9092
+            - name: KAFKA_NOTIFICATION_TOPIC
+              value: arda.notification.events.v1
+            - name: KAFKA_NOTIFICATION_GROUP
+              value: notification-service
           args:
             - -conf
             - /data/conf
