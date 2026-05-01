@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bpm-bridge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bpm-bridge
+  template:
+    metadata:
+      labels:
+        app: bpm-bridge
+    spec:
+      containers:
+        - name: bpm-bridge
+          image: ghcr.io/arda-labs/bpm-bridge:latest
+          env:
+            - name: ZEEBE_ADDRESS
+              value: 'camunda8-zeebe.infra.svc.cluster.local:26500'
+            - name: DATABASE_URL
+              value: 'postgres://user:pass@postgres-external.infra.svc.cluster.local:5432/bpm_bridge?sslmode=disable'
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bpm-bridge
+spec:
+  selector:
+    app: bpm-bridge
+  ports:
+    - port: 80
+      targetPort: 8080

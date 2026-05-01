@@ -127,14 +127,56 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: mfe-mdm
+  name: media-service
   namespace: argocd
 spec:
   project: arda-platform
   source:
     repoURL: https://github.com/arda-labs/arda-infra.git
     targetRevision: main
-    path: apps/mfe-mdm/overlays/dev
+    path: apps/media-service/overlays/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arda-apps
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bpm-bridge
+  namespace: argocd
+spec:
+  project: arda-platform
+  source:
+    repoURL: https://github.com/arda-labs/arda-infra.git
+    targetRevision: main
+    path: apps/bpm-bridge/overlays/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arda-apps
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crm-service
+  namespace: argocd
+spec:
+  project: arda-platform
+  source:
+    repoURL: https://github.com/arda-labs/arda-infra.git
+    targetRevision: main
+    path: apps/crm-service/overlays/dev
   destination:
     server: https://kubernetes.default.svc
     namespace: arda-apps
