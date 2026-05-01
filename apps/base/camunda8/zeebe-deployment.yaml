@@ -18,9 +18,9 @@ spec:
           image: camunda/zeebe:8.4.0
           env:
             - name: ZEEBE_BROKER_DATA_DISKUSAGECOMMANDWATERMARK
-              value: "100MB"
+              value: "0.999"
             - name: ZEEBE_BROKER_DATA_DISKUSAGEREPLICATIONWATERMARK
-              value: "50MB"
+              value: "0.99"
           ports:
             - containerPort: 26500
               name: gateway
