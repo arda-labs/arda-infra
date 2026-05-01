@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seaweedfs-filer
+  namespace: infra
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: seaweedfs-filer
+  template:
+    metadata:
+      labels:
+        app: seaweedfs-filer
+    spec:
+      containers:
+        - name: filer
+          image: chrislusf/seaweedfs:latest
+          args:
+            - "filer"
+            - "-master=seaweedfs-master.infra.svc.cluster.local:9333"
+            - "-port=8888"
+          ports:
+            - containerPort: 8888
+            - containerPort: 18888

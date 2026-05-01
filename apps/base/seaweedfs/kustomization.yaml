@@ -3,5 +3,6 @@ kind: Kustomization
 resources:
   - master-deployment.yaml
   - volume-deployment.yaml
+  - filer-deployment.yaml
   - s3-deployment.yaml
   - service.yaml
