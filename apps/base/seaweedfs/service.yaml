@@ -22,4 +22,4 @@ spec:
       targetPort: 8333
       name: s3
   selector:
-    app: seaweedfs-volume
+    app: seaweedfs-s3

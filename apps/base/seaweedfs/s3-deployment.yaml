@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seaweedfs-s3
+  namespace: infra
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: seaweedfs-s3
+  template:
+    metadata:
+      labels:
+        app: seaweedfs-s3
+    spec:
+      containers:
+        - name: s3
+          image: chrislusf/seaweedfs:latest
+          args:
+            - "s3"
+            - "-master=seaweedfs-master.infra.svc.cluster.local:9333"
+            - "-port=8333"
+          ports:
+            - containerPort: 8333
