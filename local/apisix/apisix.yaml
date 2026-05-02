@@ -1,4 +1,6 @@
 routes:
+  # === Backend APIs ===
+
   - id: arda-notification-api
     name: arda-notification-api
     uri: /api/v1/notifications/*
@@ -7,7 +9,7 @@ routes:
       proxy-rewrite:
         regex_uri: ["^/api/(.*)", "/$1"]
       cors:
-        allow_origins: "http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_origins: "http://localhost:4200,http://localhost:3000,http://localhost:9080,https://arda.io.vn"
         allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
         allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
         expose_headers: "content-length,x-tenant-id,x-request-id"
@@ -16,7 +18,7 @@ routes:
     upstream:
       type: roundrobin
       nodes:
-        "host.docker.internal:8002": 1
+        "host.docker.internal:8004": 1
 
   - id: arda-mdm-api
     name: arda-mdm-api
@@ -26,7 +28,7 @@ routes:
       proxy-rewrite:
         regex_uri: ["^/api/(.*)", "/$1"]
       cors:
-        allow_origins: "http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_origins: "http://localhost:4200,http://localhost:3000,http://localhost:9080,https://arda.io.vn"
         allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
         allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
         expose_headers: "content-length,x-tenant-id,x-request-id"
@@ -37,6 +39,25 @@ routes:
       nodes:
         "host.docker.internal:8001": 1
 
+  - id: arda-media-api
+    name: arda-media-api
+    uri: /api/v1/media/*
+    priority: 95
+    plugins:
+      proxy-rewrite:
+        regex_uri: ["^/api/(.*)", "/$1"]
+      cors:
+        allow_origins: "http://localhost:4200,http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+        allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
+        expose_headers: "content-length,x-tenant-id,x-request-id"
+        allow_credential: true
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8002": 1
+
   - id: arda-iam-api
     name: arda-iam-api
     uri: /api/v1/*
@@ -45,7 +66,7 @@ routes:
       proxy-rewrite:
         regex_uri: ["^/api/(.*)", "/$1"]
       cors:
-        allow_origins: "http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_origins: "http://localhost:4200,http://localhost:3000,http://localhost:9080,https://arda.io.vn"
         allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
         allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
         expose_headers: "content-length,x-tenant-id,x-request-id"
@@ -55,6 +76,80 @@ routes:
       type: roundrobin
       nodes:
         "host.docker.internal:8000": 1
+
+  # BPM Service (Go)
+  - id: arda-bpm-api
+    name: arda-bpm-api
+    uri: /api/v1/bpm/*
+    priority: 100
+    plugins:
+      proxy-rewrite:
+        regex_uri: ["^/api/(.*)", "/$1"]
+      cors:
+        allow_origins: "http://localhost:4200,http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+        allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
+        expose_headers: "content-length,x-tenant-id,x-request-id"
+        allow_credential: true
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8003": 1
+
+  # Java services use full /api/v1 paths (no rewrite)
+  - id: arda-crm-api
+    name: arda-crm-api
+    uri: /api/v1/customers/*
+    priority: 100
+    plugins:
+      cors:
+        allow_origins: "http://localhost:4200,http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+        allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
+        expose_headers: "content-length,x-tenant-id,x-request-id"
+        allow_credential: true
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8010": 1
+
+  - id: arda-hrm-api
+    name: arda-hrm-api
+    uri: /api/v1/hrm/*
+    priority: 100
+    plugins:
+      cors:
+        allow_origins: "http://localhost:4200,http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+        allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
+        expose_headers: "content-length,x-tenant-id,x-request-id"
+        allow_credential: true
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8011": 1
+
+  - id: arda-loan-api
+    name: arda-loan-api
+    uri: /api/v1/loan/*
+    priority: 100
+    plugins:
+      cors:
+        allow_origins: "http://localhost:4200,http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+        allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
+        expose_headers: "content-length,x-tenant-id,x-request-id"
+        allow_credential: true
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8012": 1
+
+  # === Micro-frontends ===
 
   - id: arda-mfe-mdm
     name: arda-mfe-mdm
@@ -66,7 +161,7 @@ routes:
       proxy-rewrite:
         regex_uri: ["^/mfe-mdm/?(.*)", "/$1"]
       cors:
-        allow_origins: "http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_origins: "http://localhost:4200,http://localhost:3000,http://localhost:9080,https://arda.io.vn"
         allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
         allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
         expose_headers: "content-length,x-tenant-id,x-request-id"
@@ -75,7 +170,7 @@ routes:
     upstream:
       type: roundrobin
       nodes:
-        "host.docker.internal:3001": 1
+        "host.docker.internal:4202": 1
 
   - id: arda-mfe-ntf
     name: arda-mfe-ntf
@@ -87,7 +182,7 @@ routes:
       proxy-rewrite:
         regex_uri: ["^/mfe-ntf/?(.*)", "/$1"]
       cors:
-        allow_origins: "http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_origins: "http://localhost:4200,http://localhost:3000,http://localhost:9080,https://arda.io.vn"
         allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
         allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
         expose_headers: "content-length,x-tenant-id,x-request-id"
@@ -96,7 +191,7 @@ routes:
     upstream:
       type: roundrobin
       nodes:
-        "host.docker.internal:3003": 1
+        "host.docker.internal:4204": 1
 
   - id: arda-mfe-iam
     name: arda-mfe-iam
@@ -108,7 +203,7 @@ routes:
       proxy-rewrite:
         regex_uri: ["^/mfe-iam/?(.*)", "/$1"]
       cors:
-        allow_origins: "http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_origins: "http://localhost:4200,http://localhost:3000,http://localhost:9080,https://arda.io.vn"
         allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
         allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
         expose_headers: "content-length,x-tenant-id,x-request-id"
@@ -117,7 +212,91 @@ routes:
     upstream:
       type: roundrobin
       nodes:
-        "host.docker.internal:3002": 1
+        "host.docker.internal:4201": 1
+
+  - id: arda-mfe-crm
+    name: arda-mfe-crm
+    uris:
+      - /mfe-crm
+      - /mfe-crm/*
+    priority: 80
+    plugins:
+      proxy-rewrite:
+        regex_uri: ["^/mfe-crm/?(.*)", "/$1"]
+      cors:
+        allow_origins: "http://localhost:4200,http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+        allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
+        expose_headers: "content-length,x-tenant-id,x-request-id"
+        allow_credential: true
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:4210": 1
+
+  - id: arda-mfe-hrm
+    name: arda-mfe-hrm
+    uris:
+      - /mfe-hrm
+      - /mfe-hrm/*
+    priority: 80
+    plugins:
+      proxy-rewrite:
+        regex_uri: ["^/mfe-hrm/?(.*)", "/$1"]
+      cors:
+        allow_origins: "http://localhost:4200,http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+        allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
+        expose_headers: "content-length,x-tenant-id,x-request-id"
+        allow_credential: true
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:4211": 1
+
+  - id: arda-mfe-loan
+    name: arda-mfe-loan
+    uris:
+      - /mfe-loan
+      - /mfe-loan/*
+    priority: 80
+    plugins:
+      proxy-rewrite:
+        regex_uri: ["^/mfe-loan/?(.*)", "/$1"]
+      cors:
+        allow_origins: "http://localhost:4200,http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+        allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
+        expose_headers: "content-length,x-tenant-id,x-request-id"
+        allow_credential: true
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:4212": 1
+
+  - id: arda-mfe-bpm
+    name: arda-mfe-bpm
+    uris:
+      - /mfe-bpm
+      - /mfe-bpm/*
+    priority: 80
+    plugins:
+      proxy-rewrite:
+        regex_uri: ["^/mfe-bpm/?(.*)", "/$1"]
+      cors:
+        allow_origins: "http://localhost:4200,http://localhost:3000,http://localhost:9080,https://arda.io.vn"
+        allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+        allow_headers: "content-type,authorization,x-tenant-id,x-request-id,accept-language"
+        expose_headers: "content-length,x-tenant-id,x-request-id"
+        allow_credential: true
+        max_age: 3600
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:4213": 1
 
   - id: arda-shell
     name: arda-shell
@@ -126,5 +305,5 @@ routes:
     upstream:
       type: roundrobin
       nodes:
-        "host.docker.internal:3000": 1
+        "host.docker.internal:4200": 1
 #END
