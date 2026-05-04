@@ -6,7 +6,7 @@ resources:
 images:
 - name: ghcr.io/arda-labs/mfe-ntf
   newName: ghcr.io/arda-labs/mfe-ntf
-  newTag: 80d9327
+  newTag: 63db649
 patches:
 - path: route-dev-local.patch.yaml
   target:
