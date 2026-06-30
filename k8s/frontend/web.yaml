@@ -17,24 +17,17 @@ spec:
         - name: ghcr-pull
       containers:
         - name: web
-          image: ghcr.io/arda-labs/arda-fe/web:ea34fefd9f81abd07307e988a028adf83cb9a974
+          image: ghcr.io/arda-labs/arda-mfe/web:main
           imagePullPolicy: Always
           ports:
             - name: http
-              containerPort: 5000
-          env:
-            - name: HOST
-              value: 0.0.0.0
-            - name: PORT
-              value: "5000"
-            - name: NODE_OPTIONS
-              value: "--max-old-space-size=96"
+              containerPort: 8080
           resources:
             requests:
               cpu: 50m
-              memory: 128Mi
+              memory: 32Mi
             limits:
-              memory: 256Mi
+              memory: 96Mi
           readinessProbe:
             httpGet:
               path: /

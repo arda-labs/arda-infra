@@ -1,0 +1,58 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: arda
+  namespace: argocd
+spec:
+  writeBackConfig:
+    method: argocd
+  applicationRefs:
+    - namePattern: arda-backend
+      images:
+        - alias: authgateway
+          imageName: ghcr.io/arda-labs/arda-be/auth-gateway:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: iamservice
+          imageName: ghcr.io/arda-labs/arda-be/iam-service:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: platformservice
+          imageName: ghcr.io/arda-labs/arda-be/platform-service:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: financeservice
+          imageName: ghcr.io/arda-labs/arda-be/finance-service:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: mediaservice
+          imageName: ghcr.io/arda-labs/arda-be/media-service:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: workflowservice
+          imageName: ghcr.io/arda-labs/arda-be/workflow-service:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: crmservice
+          imageName: ghcr.io/arda-labs/arda-be/crm-service:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: notificationservice
+          imageName: ghcr.io/arda-labs/arda-be/notification-service:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull
+    - namePattern: arda-frontend
+      images:
+        - alias: web
+          imageName: ghcr.io/arda-labs/arda-mfe/web:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull

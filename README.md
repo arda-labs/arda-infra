@@ -17,6 +17,12 @@ SealedSecrets, SOPS, or ExternalSecrets before moving production credentials her
 ## Cutover
 
 ```bash
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj-labs/argocd-image-updater/stable/config/install.yaml
+kubectl -n argocd create secret docker-registry ghcr-pull \
+  --docker-server=ghcr.io \
+  --docker-username=<github-user> \
+  --docker-password=<pat-with-read-packages> \
+  --docker-email=<email>
 kubectl apply -k argocd
 ```
 
