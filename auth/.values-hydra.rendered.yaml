@@ -1,0 +1,39 @@
+replicaCount: 2
+
+hydra:
+  automigration:
+    enabled: true
+
+  dangerousForceHttp: true
+
+  config:
+    dsn: postgres://arda_hydra:123456@pg-main-rw.database.svc.cluster.local:5432/hydra?sslmode=disable
+
+    urls:
+      self:
+        issuer: https://auth.arda.io.vn/
+      login: http://localhost:5000/login
+      consent: http://localhost:5000/consent
+      logout: http://localhost:5000/logout
+
+    secrets:
+      system:
+        - R0viU8eA33gXuHkbRTJ1gS/oS9hm+TZso/jTlVXGk64=
+      cookie:
+        - pBq1nUuB9r54PCQgEnylgUT9HmpluFqqeEtXx51D6/Q=
+
+ingress:
+  public:
+    enabled: true
+    className: traefik
+    hosts:
+      - host: auth.arda.io.vn
+        paths:
+          - path: /
+            pathType: Prefix
+
+  admin:
+    enabled: false
+
+maester:
+  enabled: false
