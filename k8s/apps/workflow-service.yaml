@@ -33,7 +33,7 @@ spec:
                   name: arda-app-secrets
                   key: WORKFLOW_DATABASE_DSN
             - name: ZEEBE_ADDR
-              value: zeebe-gateway.platform.svc.cluster.local:26500
+              value: zeebe85-zeebe-gateway.platform.svc.cluster.local:26500
           readinessProbe:
             httpGet:
               path: /health/ready
