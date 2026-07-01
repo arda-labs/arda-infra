@@ -17,7 +17,7 @@ spec:
         - name: ghcr-pull
       containers:
         - name: web
-          image: ghcr.io/arda-labs/arda-mfe/web:main
+          image: ghcr.io/arda-labs/arda-mfe/web:87f54b36328096cf9f3ed84afb61315d0d05bfb2
           imagePullPolicy: Always
           ports:
             - name: http
