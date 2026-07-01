@@ -32,6 +32,10 @@ spec:
                 secretKeyRef:
                   name: arda-app-secrets
                   key: WORKFLOW_DATABASE_DSN
+            - name: DB_MAX_OPEN_CONNS
+              value: "4"
+            - name: DB_MAX_IDLE_CONNS
+              value: "2"
             - name: ZEEBE_ADDR
               value: zeebe85-zeebe-gateway.platform.svc.cluster.local:26500
           readinessProbe:

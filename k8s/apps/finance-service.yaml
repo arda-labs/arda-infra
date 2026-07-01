@@ -32,6 +32,10 @@ spec:
                 secretKeyRef:
                   name: arda-app-secrets
                   key: FINANCE_DATABASE_DSN
+            - name: DB_MAX_OPEN_CONNS
+              value: "4"
+            - name: DB_MAX_IDLE_CONNS
+              value: "2"
             - name: PLATFORM_GRPC_ADDR
               value: platform-service:9090
             - name: NATS_URL

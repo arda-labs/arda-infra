@@ -4,7 +4,7 @@ metadata:
   name: iam-service
   namespace: arda-app
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: iam-service
@@ -32,6 +32,10 @@ spec:
                 secretKeyRef:
                   name: arda-app-secrets
                   key: IAM_DATABASE_DSN
+            - name: DB_MAX_OPEN_CONNS
+              value: "12"
+            - name: DB_MAX_IDLE_CONNS
+              value: "6"
             - name: REDIS_URL
               valueFrom:
                 secretKeyRef:
