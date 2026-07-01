@@ -49,7 +49,7 @@ running the script.
 Deploy or reconcile auth:
 
 ```bash
-cd arda-be/deployments/auth
+cd arda-infra/auth
 chmod +x setup.sh
 SUPERADMIN_INITIAL_PASSWORD=admin123 ./setup.sh deploy
 ```

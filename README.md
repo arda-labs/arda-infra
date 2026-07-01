@@ -7,6 +7,7 @@ GitOps desired state for the Arda k3s cluster.
 ```text
 argocd/   ArgoCD project and applications
 auth/     Ory Hydra/Kratos values and bootstrap scripts
+dev/      Local dev endpoint examples
 k8s/      Arda application manifests
 traefik/  Traefik dynamic/static examples
 ```
@@ -26,5 +27,6 @@ kubectl -n argocd create secret docker-registry ghcr-pull \
 kubectl apply -k argocd
 ```
 
-Keep the copied deployment files in `arda-be` until ArgoCD is confirmed to sync
-from this repo, then delete the old copies in a separate cleanup commit.
+Argo CD applications in `argocd/apps` sync manifests from this repo. Backend
+images are published from `arda-be`; frontend images are published from
+`arda-mfe`.

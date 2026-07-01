@@ -36,7 +36,7 @@ Open `https://localhost:8080`.
 
 Create a GitHub PAT with the minimum repo read access needed for private repos.
 For classic tokens this usually means `repo`. For fine-grained tokens, grant
-read-only `Contents` access to `arda-be` and `arda-fe`.
+read-only `Contents` access to `arda-be`, `arda-mfe`, and `arda-infra`.
 
 Create Argo CD repo credentials:
 
@@ -55,8 +55,8 @@ kubectl -n argocd label secret arda-github-repo-creds \
 ## Apply Arda Applications
 
 ```bash
-cd arda-be
-kubectl apply -k deployments/argocd
+cd arda-infra
+kubectl apply -k argocd
 ```
 
 This creates:
@@ -85,7 +85,7 @@ kubectl -n arda-web create secret docker-registry ghcr-pull \
 ```
 
 Also create `arda-app-secrets` and `iam-service-secrets` as described in
-`../../docs/ghcr-k3s-deployment.md`.
+`../../arda-be/docs/ghcr-k3s-deployment.md`.
 
 ## Image Tags
 
