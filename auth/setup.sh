@@ -88,7 +88,8 @@ create_hydra_client() {
     --scope openid,email,offline_access \
     --redirect-uri https://arda.io.vn/callback \
     --redirect-uri http://localhost:5000/callback \
-    --token-endpoint-auth-method none
+    --token-endpoint-auth-method none \
+    --skip-consent
 }
 
 create_kratos_identity() {
