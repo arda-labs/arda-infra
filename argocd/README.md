@@ -87,6 +87,15 @@ kubectl -n arda-web create secret docker-registry ghcr-pull \
 Also create `arda-app-secrets` and `iam-service-secrets` as described in
 `../../arda-be/docs/ghcr-k3s-deployment.md`.
 
+For in-cluster Valkey, point app secrets at Sentinel instead of the `6379`
+service so writers always resolve the current primary:
+
+```bash
+kubectl create secret generic arda-app-secrets -n arda-app \
+  --from-literal=REDIS_URL='redis-sentinel://:<valkey-password>@valkey.platform.svc.cluster.local:26379/myprimary' \
+  --dry-run=client -o yaml | kubectl apply -f -
+```
+
 ## Image Tags
 
 The current manifests use the `main` tag for simplicity. After GitHub Actions
