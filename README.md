@@ -7,8 +7,10 @@ GitOps desired state for the Arda k3s cluster.
 ```text
 argocd/   ArgoCD project and applications
 auth/     Ory Hydra/Kratos values and bootstrap scripts
+database/ CloudNativePG PostgreSQL cluster manifests
 dev/      Local dev endpoint examples
-k8s/      Arda application manifests
+platform/ Shared platform runtime bootstrap: NATS, Valkey, Garage, Cloudflared, Zeebe
+k8s/      Arda backend/frontend application manifests
 traefik/  Traefik dynamic/static examples
 ```
 
@@ -18,6 +20,9 @@ SealedSecrets, SOPS, or ExternalSecrets before moving production credentials her
 ## Cutover
 
 ```bash
+# prerequisite: install CloudNativePG operator, then verify its CRDs exist
+kubectl get crd clusters.postgresql.cnpg.io
+
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj-labs/argocd-image-updater/stable/config/install.yaml
 kubectl -n argocd create secret docker-registry ghcr-pull \
   --docker-server=ghcr.io \
@@ -30,6 +35,31 @@ kubectl apply -k argocd
 Argo CD applications in `argocd/apps` sync manifests from this repo. Backend
 images are published from `arda-be`; frontend images are published from
 `arda-mfe`.
+
+For a non-Argo local setup, apply the database and platform runtime first:
+
+```bash
+kubectl apply -k database
+cd platform
+bash bootstrap/setup-permissions.sh
+./bootstrap/install-all.sh
+```
+
+Then bootstrap databases and auth before deploying app workloads:
+
+```bash
+cd ../auth
+./setup.sh reset
+cd ..
+bash k8s/bootstrap-app-databases.sh
+kubectl apply -k k8s
+```
+
+Optional local-only Postgres NodePort:
+
+```bash
+kubectl apply -k database/nodeport
+```
 
 ## Workflow runtime
 

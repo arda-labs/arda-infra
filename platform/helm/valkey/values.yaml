@@ -1,0 +1,20 @@
+architecture: standalone
+
+auth:
+  enabled: true
+  existingSecret: valkey-auth
+  existingSecretPasswordKey: password
+
+primary:
+  persistence:
+    enabled: false
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+metrics:
+  enabled: false

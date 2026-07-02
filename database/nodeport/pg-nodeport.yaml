@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pg-main-nodeport
+  namespace: database
+spec:
+  type: NodePort
+  selector:
+    cnpg.io/cluster: pg-main
+    role: primary
+  ports:
+    - port: 5432
+      targetPort: 5432
+      nodePort: 30432

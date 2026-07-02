@@ -3,6 +3,8 @@ set -euo pipefail
 
 NAMESPACE="${AUTH_NAMESPACE:-auth}"
 APP_NAMESPACE="${APP_NAMESPACE:-arda-app}"
+DB_NAMESPACE="${DB_NAMESPACE:-database}"
+DB_HOST="${DB_HOST:-pg-main-rw.database.svc.cluster.local}"
 IAM_DEPLOYMENT="${IAM_DEPLOYMENT:-iam-service}"
 IAM_SECRET="${IAM_SECRET:-iam-service-secrets}"
 HYDRA_RELEASE="${HYDRA_RELEASE:-hydra}"
@@ -31,26 +33,43 @@ kubectl get namespace "$NAMESPACE" >/dev/null 2>&1 || kubectl create namespace "
 helm repo add "$ORY_REPO_NAME" "$ORY_REPO_URL" >/dev/null 2>&1 || true
 helm repo update
 
+postgres_password() {
+  if [ -n "${POSTGRES_PASSWORD:-}" ]; then
+    echo "$POSTGRES_PASSWORD"
+    return 0
+  fi
+
+  kubectl get secret pg-main-superuser -n "$DB_NAMESPACE" -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || true
+}
+
 reset_databases() {
   echo "=== Reset Ory databases ==="
+  local pg_password
+  pg_password="$(postgres_password)"
+  if [ -z "$pg_password" ]; then
+    echo "Missing postgres password. Set POSTGRES_PASSWORD or wait for secret $DB_NAMESPACE/pg-main-superuser."
+    return 1
+  fi
+
   kubectl run psql-client --rm -i --restart=Never \
     --image postgres:16-alpine \
     --namespace "$NAMESPACE" \
-    --env="PGPASSWORD=123456" \
+    --env="PGPASSWORD=$pg_password" \
+    --env="DB_HOST=$DB_HOST" \
     --command -- sh -c '
-      psql -h pg-main-rw.database.svc.cluster.local -U postgres \
+      psql -h "$DB_HOST" -U postgres \
         -c "DO \$do\$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = \$q\$arda_hydra\$q\$) THEN CREATE ROLE arda_hydra LOGIN PASSWORD \$q\$123456\$q\$; END IF; END \$do\$;" 2>/dev/null || true
-      psql -h pg-main-rw.database.svc.cluster.local -U postgres \
+      psql -h "$DB_HOST" -U postgres \
         -c "DO \$do\$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = \$q\$arda_kratos\$q\$) THEN CREATE ROLE arda_kratos LOGIN PASSWORD \$q\$123456\$q\$; END IF; END \$do\$;" 2>/dev/null || true
-      psql -h pg-main-rw.database.svc.cluster.local -U postgres \
+      psql -h "$DB_HOST" -U postgres \
         -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname IN (\$q\$hydra\$q\$, \$q\$kratos\$q\$) AND pid <> pg_backend_pid();" 2>/dev/null || true
-      psql -h pg-main-rw.database.svc.cluster.local -U postgres \
+      psql -h "$DB_HOST" -U postgres \
         -c "DROP DATABASE IF EXISTS hydra;" 2>/dev/null || true
-      psql -h pg-main-rw.database.svc.cluster.local -U postgres \
+      psql -h "$DB_HOST" -U postgres \
         -c "DROP DATABASE IF EXISTS kratos;" 2>/dev/null || true
-      psql -h pg-main-rw.database.svc.cluster.local -U postgres \
+      psql -h "$DB_HOST" -U postgres \
         -c "CREATE DATABASE hydra OWNER arda_hydra;" 2>/dev/null || true
-      psql -h pg-main-rw.database.svc.cluster.local -U postgres \
+      psql -h "$DB_HOST" -U postgres \
         -c "CREATE DATABASE kratos OWNER arda_kratos;" 2>/dev/null || true
       echo "Ory databases reset done."
     ' 2>/dev/null || true

@@ -1,5 +1,6 @@
 resources:
   - project.yaml
+  - apps/arda-database.yaml
   - apps/arda-backend.yaml
   - apps/arda-frontend.yaml
   - image-updater.yaml

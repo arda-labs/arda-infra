@@ -8,6 +8,8 @@ spec:
   sourceRepos:
     - https://github.com/arda-labs/arda-infra.git
   destinations:
+    - namespace: database
+      server: https://kubernetes.default.svc
     - namespace: arda-app
       server: https://kubernetes.default.svc
     - namespace: arda-web

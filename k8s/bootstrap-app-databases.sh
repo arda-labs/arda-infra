@@ -3,7 +3,16 @@ set -euo pipefail
 
 NAMESPACE="${DB_NAMESPACE:-database}"
 HOST="${DB_HOST:-pg-main-rw.database.svc.cluster.local}"
-POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-123456}"
+POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-}"
+
+if [ -z "$POSTGRES_PASSWORD" ]; then
+  POSTGRES_PASSWORD="$(kubectl get secret pg-main-superuser -n "$NAMESPACE" -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || true)"
+fi
+
+if [ -z "$POSTGRES_PASSWORD" ]; then
+  echo "Missing postgres password. Set POSTGRES_PASSWORD or wait for secret $NAMESPACE/pg-main-superuser." >&2
+  exit 1
+fi
 
 kubectl run arda-app-db-bootstrap --rm -i --restart=Never \
   --image postgres:16-alpine \

@@ -1,4 +1,6 @@
 .DS_Store
 *.tmp
 *.bak
-
+platform/backups/
+platform/secrets/generated/
+platform/raw-uploaded/
