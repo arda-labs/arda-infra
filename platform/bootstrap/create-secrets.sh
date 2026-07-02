@@ -7,9 +7,10 @@ load_env
 ensure_ns
 
 if ! kubectl get secret valkey-auth -n "$NAMESPACE" >/dev/null 2>&1; then
-  VALKEY_PASSWORD="$(openssl rand -base64 32 | tr -d '\n')"
+  VALKEY_PASSWORD="$(openssl rand -base64 32 | tr -d '\r\n')"
   kubectl create secret generic valkey-auth -n "$NAMESPACE" \
-    --from-literal=password="$VALKEY_PASSWORD"
+    --from-literal=password="$VALKEY_PASSWORD" \
+    --from-literal=valkey-password="$VALKEY_PASSWORD"
   echo "Created secret: valkey-auth"
 else
   echo "Exists: valkey-auth"

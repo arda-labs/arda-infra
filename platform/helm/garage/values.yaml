@@ -1,16 +1,25 @@
-# Best-effort values for Garage Helm chart.
-# If your old Garage chart is local, put it under charts/garage.
-# install-garage.sh will prefer repo chart garage/garage, then ./charts/garage.
-
-replicaCount: 3
+# Values for the official Garage chart at garage/script/helm/garage.
 
 garage:
-  replicationMode: "3"
+  replicationFactor: "3"
+  s3:
+    api:
+      region: garage
+      rootDomain: ".s3.arda.io.vn"
+    web:
+      rootDomain: ".web.arda.io.vn"
+
+deployment:
+  replicaCount: 3
 
 persistence:
   enabled: true
-  storageClass: local-path
-  size: 5Gi
+  meta:
+    storageClass: local-path
+    size: 1Gi
+  data:
+    storageClass: local-path
+    size: 5Gi
 
 service:
   type: ClusterIP
