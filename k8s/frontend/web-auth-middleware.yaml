@@ -1,0 +1,9 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: arda-web-auth
+  namespace: arda-web
+spec:
+  forwardAuth:
+    address: http://auth-gateway.arda-app.svc.cluster.local:8080/auth/web-check
+    trustForwardHeader: true
