@@ -30,3 +30,13 @@ kubectl apply -k argocd
 Argo CD applications in `argocd/apps` sync manifests from this repo. Backend
 images are published from `arda-be`; frontend images are published from
 `arda-mfe`.
+
+## Workflow runtime
+
+Arda targets Zeebe 8.5 through the Zeebe Gateway. `workflow-service` is the
+Arda-facing facade for process APIs and is configured with `ZEEBE_ADDR` in
+`k8s/apps/workflow-service.yaml`.
+
+This repo should not deploy Camunda Tasklist, Operate, or Optimize for product
+UX. Arda-owned workflow, task, process admin, and monitoring screens live in
+`arda-mfe` and call Arda APIs.
