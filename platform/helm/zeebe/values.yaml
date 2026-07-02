@@ -1,4 +1,7 @@
 global:
+  elasticsearch:
+    enabled: false
+    disableExporter: true
   identity:
     auth:
       enabled: false
