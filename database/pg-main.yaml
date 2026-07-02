@@ -15,11 +15,11 @@ spec:
 
   resources:
     requests:
-      cpu: "250m"
-      memory: "512Mi"
-    limits:
-      cpu: "2"
+      cpu: "1"
       memory: "2Gi"
+    limits:
+      cpu: "4"
+      memory: "4Gi"
 
   affinity:
     enablePodAntiAffinity: true
@@ -30,6 +30,10 @@ spec:
 
   postgresql:
     parameters:
-      max_connections: "200"
-      shared_buffers: "256MB"
-      effective_cache_size: "1GB"
+      max_connections: "300"
+      shared_buffers: "1GB"
+      effective_cache_size: "3GB"
+      work_mem: "8MB"
+      maintenance_work_mem: "256MB"
+      max_wal_size: "4GB"
+      checkpoint_timeout: "15min"
