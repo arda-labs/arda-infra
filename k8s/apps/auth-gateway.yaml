@@ -56,9 +56,9 @@ spec:
             - name: OAUTH_CLIENT_ID
               value: arda-shell
             - name: OAUTH_REDIRECT_URI
-              value: https://arda.io.vn/callback
+              value: https://arda.io.vn/api/auth/callback
             - name: OAUTH_REDIRECT_URIS
-              value: https://arda.io.vn/callback,http://localhost:5000/callback
+              value: https://arda.io.vn/api/auth/callback,https://arda.io.vn/callback,http://localhost:5000/api/auth/callback,http://localhost:5000/callback
             - name: COOKIE_SECURE
               value: "true"
             - name: COOKIE_SAMESITE
