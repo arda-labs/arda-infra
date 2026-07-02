@@ -37,7 +37,7 @@ spec:
             - name: DB_MAX_IDLE_CONNS
               value: "5"
             - name: ZEEBE_ADDR
-              value: zeebe85-zeebe-gateway.platform.svc.cluster.local:26500
+              value: zeebe-zeebe-gateway.platform.svc.cluster.local:26500
             - name: NATS_URL
               valueFrom:
                 secretKeyRef:

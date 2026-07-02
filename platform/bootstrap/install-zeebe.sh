@@ -18,6 +18,7 @@ helm repo add camunda https://helm.camunda.io || true
 helm repo update
 
 helm upgrade --install "$ZEEBE_RELEASE" camunda/camunda-platform \
+  --version "$ZEEBE_CHART_VERSION" \
   -n "$NAMESPACE" \
   -f "$ROOT/helm/zeebe/values.yaml"
 

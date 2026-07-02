@@ -10,7 +10,7 @@ Hydra/Kratos are intentionally kept in `../auth` and namespace `auth`.
 - Valkey
 - Garage
 - Cloudflared, disabled by default
-- Zeebe, disabled by default
+- Zeebe 8.5
 
 ## Quick Setup
 
@@ -35,7 +35,7 @@ INSTALL_NATS=true
 INSTALL_VALKEY=true
 INSTALL_GARAGE=true
 INSTALL_CLOUDFLARED=false
-INSTALL_ZEEBE=false
+INSTALL_ZEEBE=true
 ```
 
 ## Check
@@ -62,26 +62,17 @@ The script creates layout, bucket `media`, S3 key, and secret `garage-s3`.
 
 ## Zeebe
 
-Zeebe is present but disabled by default:
-
-```env
-INSTALL_ZEEBE=false
-```
-
-To test it:
+Zeebe uses Camunda Platform chart 10.11.3 / Zeebe 8.5.x:
 
 ```env
 INSTALL_ZEEBE=true
+ZEEBE_CHART_VERSION=10.11.3
 ```
-
-Then run:
+Run:
 
 ```bash
 ./bootstrap/install-zeebe.sh
 ```
-
-Camunda Platform chart 10.x may require secondary storage. If that happens,
-disable Zeebe here and split it into a pinned chart/values setup later.
 
 ## Safety
 

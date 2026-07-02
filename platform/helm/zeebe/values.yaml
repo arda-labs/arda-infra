@@ -1,10 +1,3 @@
-# Zeebe/Camunda Platform chart values.
-# Disabled by default from config/platform.env.
-#
-# Warning:
-# Camunda Platform chart 10.x may require secondary storage.
-# Review carefully before enabling INSTALL_ZEEBE=true.
-
 global:
   identity:
     auth:
@@ -40,6 +33,7 @@ zeebe:
   partitionCount: 1
   replicationFactor: 1
   pvcSize: 8Gi
+  pvcStorageClassName: local-path
   resources:
     requests:
       cpu: 300m
