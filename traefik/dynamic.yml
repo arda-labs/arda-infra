@@ -39,6 +39,12 @@ http:
       middlewares:
         - arda-forward-auth
 
+    platform-public:
+      rule: "PathPrefix(`/api/platform/public`)"
+      service: platform-service
+      entryPoints:
+        - web
+
     platform-api:
       rule: "PathPrefix(`/api/platform`)"
       service: platform-service
