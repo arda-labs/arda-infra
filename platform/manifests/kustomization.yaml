@@ -4,6 +4,7 @@ resources:
   - namespace.yaml
   - nodeport/nats-nodeport.yaml
   - nodeport/valkey-nodeport.yaml
+  - nodeport/zeebe-gateway-nodeport.yaml
   - garage/garage-admin-svc.yaml
   - garage/garage-webui.yaml
   - garage/garage-webui-ingress.yaml
