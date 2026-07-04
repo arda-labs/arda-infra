@@ -7,4 +7,5 @@ resources:
   - media-service.yaml
   - workflow-service.yaml
   - crm-service.yaml
+  - hrm-service.yaml
   - notification-service.yaml

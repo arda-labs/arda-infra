@@ -26,6 +26,7 @@ for item in \
   arda_media:media \
   arda_workflow:workflow \
   arda_crm:crm \
+  arda_hrm:hrm \
   arda_notification:notification
 do
   role="${item%%:*}"

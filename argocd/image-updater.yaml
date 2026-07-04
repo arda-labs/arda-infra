@@ -44,6 +44,11 @@ spec:
           commonUpdateSettings:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: hrmservice
+          imageName: ghcr.io/arda-labs/arda-be/hrm-service:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull
         - alias: notificationservice
           imageName: ghcr.io/arda-labs/arda-be/notification-service:main
           commonUpdateSettings:

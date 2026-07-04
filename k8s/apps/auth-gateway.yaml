@@ -43,6 +43,8 @@ spec:
               value: http://workflow-service:8080
             - name: CRM_SERVICE_URL
               value: http://crm-service:8080
+            - name: HRM_SERVICE_URL
+              value: http://hrm-service:8080
             - name: NOTIFICATION_SERVICE_URL
               value: http://notification-service:8080
             - name: MDM_SERVICE_URL
