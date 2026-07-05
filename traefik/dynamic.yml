@@ -10,6 +10,8 @@ http:
           - "X-Username"
           - "X-User-Email"
           - "X-Tenant-Id"
+          - "X-User-Org-Ids"
+          - "X-User-Group-Ids"
           - "X-Roles"
           - "X-Permissions"
           - "X-Auth-Version"
