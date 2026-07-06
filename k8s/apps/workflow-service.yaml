@@ -44,6 +44,8 @@ spec:
               value: zeebe-zeebe-gateway.platform.svc.cluster.local:26500
             - name: ZEEBE_REST_ADDR
               value: http://zeebe-zeebe-gateway.platform.svc.cluster.local:8080
+            - name: ZEEBE_ES_URL
+              value: http://zeebe-elasticsearch.platform.svc.cluster.local:9200
             - name: CRM_GRPC_ADDR
               value: crm-service:9090
           readinessProbe:

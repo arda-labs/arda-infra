@@ -1,7 +1,7 @@
 global:
   elasticsearch:
-    enabled: false
-    disableExporter: true
+    enabled: true
+    disableExporter: false
   identity:
     auth:
       enabled: false
@@ -28,7 +28,16 @@ webModeler:
   enabled: false
 
 elasticsearch:
-  enabled: false
+  enabled: true
+  replicas: 1
+  minimumMasterNodes: 1
+  resources:
+    requests:
+      cpu: 200m
+      memory: 1Gi
+    limits:
+      cpu: "1"
+      memory: 2Gi
 
 zeebe:
   enabled: true
