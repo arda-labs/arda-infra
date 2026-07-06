@@ -29,8 +29,17 @@ webModeler:
 
 elasticsearch:
   enabled: true
-  replicas: 1
-  minimumMasterNodes: 1
+  # Bitnami subchart dùng master.replicaCount (không phải replicas).
+  # Pilot k3s: 1 master-only node đủ cho Zeebe exporter.
+  master:
+    masterOnly: true
+    replicaCount: 1
+  data:
+    replicaCount: 0
+  coordinating:
+    replicaCount: 0
+  ingest:
+    enabled: false
   resources:
     requests:
       cpu: 200m
