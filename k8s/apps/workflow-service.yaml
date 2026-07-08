@@ -48,6 +48,8 @@ spec:
               value: http://zeebe-elasticsearch.platform.svc.cluster.local:9200
             - name: CRM_GRPC_ADDR
               value: crm-service:9090
+            - name: IAM_GRPC_ADDR
+              value: iam-service:9090
           readinessProbe:
             httpGet:
               path: /health/ready
