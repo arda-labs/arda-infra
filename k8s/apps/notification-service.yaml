@@ -44,6 +44,20 @@ spec:
                   name: arda-app-secrets
                   key: NATS_URL
                   optional: true
+            - name: VAPID_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: arda-app-secrets
+                  key: VAPID_PUBLIC_KEY
+                  optional: true
+            - name: VAPID_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: arda-app-secrets
+                  key: VAPID_PRIVATE_KEY
+                  optional: true
+            - name: VAPID_SUBJECT
+              value: mailto:ops@arda.io.vn
           readinessProbe:
             httpGet:
               path: /health/ready
