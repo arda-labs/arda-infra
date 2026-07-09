@@ -50,6 +50,8 @@ spec:
               value: crm-service:9090
             - name: IAM_GRPC_ADDR
               value: iam-service:9090
+            - name: NOTIFICATION_SERVICE_URL
+              value: http://notification-service:8080
           readinessProbe:
             httpGet:
               path: /health/ready
