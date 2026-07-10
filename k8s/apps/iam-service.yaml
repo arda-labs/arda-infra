@@ -17,14 +17,18 @@ spec:
         - name: ghcr-pull
       containers:
         - name: iam-service
-          image: ghcr.io/arda-labs/arda-be/iam-service:4d6ac06502846150414f20fab8fee06c379cc77b
+          image: ghcr.io/arda-labs/arda-be/iam-service:main
           imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080
+            - name: grpc
+              containerPort: 9090
           env:
             - name: HTTP_ADDR
               value: 0.0.0.0:8080
+            - name: GRPC_ADDR
+              value: 0.0.0.0:9090
             - name: LOG_LEVEL
               value: info
             - name: DATABASE_DSN
@@ -84,3 +88,6 @@ spec:
     - name: http
       port: 8080
       targetPort: http
+    - name: grpc
+      port: 9090
+      targetPort: grpc
