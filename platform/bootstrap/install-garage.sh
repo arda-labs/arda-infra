@@ -14,18 +14,27 @@ require_cmd helm
 require_cmd kubectl
 ensure_ns
 
-if helm search repo garage/garage >/dev/null 2>&1; then
-  GARAGE_CHART="garage/garage"
-elif [ -d "$ROOT/charts/garage" ]; then
+if [ -f "$ROOT/charts/garage/Chart.yaml" ]; then
   GARAGE_CHART="$ROOT/charts/garage"
 else
   require_cmd git
   GARAGE_SRC="$ROOT/runtime/garage-src"
   GARAGE_CHART="$GARAGE_SRC/script/helm/garage"
-  if [ ! -d "$GARAGE_CHART" ]; then
-    rm -rf "$GARAGE_SRC"
-    git clone --depth 1 https://git.deuxfleurs.fr/Deuxfleurs/garage "$GARAGE_SRC"
+  if [ ! -f "$GARAGE_CHART/Chart.yaml" ]; then
+    if [ -d "$GARAGE_SRC/.git" ]; then
+      git -C "$GARAGE_SRC" pull --ff-only
+    elif [ -e "$GARAGE_SRC" ]; then
+      echo "Garage source exists but is not a Git checkout: $GARAGE_SRC" >&2
+      exit 1
+    else
+      git clone --depth 1 https://git.deuxfleurs.fr/Deuxfleurs/garage "$GARAGE_SRC"
+    fi
   fi
+fi
+
+if [ ! -f "$GARAGE_CHART/Chart.yaml" ]; then
+  echo "Garage Helm chart not found: $GARAGE_CHART" >&2
+  exit 1
 fi
 
 "$ROOT/bootstrap/create-secrets.sh"
