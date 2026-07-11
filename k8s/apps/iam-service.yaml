@@ -27,6 +27,8 @@ spec:
           env:
             - name: HTTP_ADDR
               value: 0.0.0.0:8080
+            - name: MEDIA_SERVICE_URL
+              value: http://media-service:8080
             - name: GRPC_ADDR
               value: 0.0.0.0:9090
             - name: LOG_LEVEL
