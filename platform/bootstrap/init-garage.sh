@@ -62,3 +62,17 @@ kubectl create secret generic garage-s3 -n "$NAMESPACE" \
   --dry-run=client -o yaml | kubectl apply -f -
 
 echo "Created secret: garage-s3"
+
+APP_NAMESPACE="${APP_NAMESPACE:-arda-app}"
+if kubectl get secret arda-app-secrets -n "$APP_NAMESPACE" >/dev/null 2>&1; then
+  kubectl patch secret arda-app-secrets -n "$APP_NAMESPACE" \
+    --type merge \
+    -p "{\"stringData\":{\"GARAGE_ACCESS_KEY\":\"$ACCESS_KEY\",\"GARAGE_SECRET_KEY\":\"$SECRET_KEY\"}}"
+  echo "Updated Garage credentials in $APP_NAMESPACE/arda-app-secrets"
+else
+  echo "Warning: $APP_NAMESPACE/arda-app-secrets does not exist; update GARAGE_ACCESS_KEY and GARAGE_SECRET_KEY before deploying media-service."
+fi
+
+kubectl rollout restart deployment/media-service -n "$APP_NAMESPACE" >/dev/null 2>&1 || true
+kubectl rollout status deployment/media-service -n "$APP_NAMESPACE" --timeout=120s >/dev/null 2>&1 || true
+echo "Garage initialization completed"
