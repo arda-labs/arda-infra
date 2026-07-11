@@ -38,13 +38,22 @@ ADMIN_TOKEN="$(kubectl get secret garage-admin-secret -n "$NAMESPACE" -o jsonpat
 CONFIG_TMP="$(mktemp)"
 PATCHED_TMP="$(mktemp)"
 kubectl get configmap "$GARAGE_RELEASE-config" -n "$NAMESPACE" -o jsonpath='{.data.garage\.toml}' > "$CONFIG_TMP"
-if ! grep -q '^admin_token[[:space:]]*=' "$CONFIG_TMP"; then
-  awk -v token="$ADMIN_TOKEN" '{ print; if ($0 == "[admin]") print "admin_token = \"" token "\"" }' "$CONFIG_TMP" > "$PATCHED_TMP"
-  kubectl create configmap "$GARAGE_RELEASE-config" -n "$NAMESPACE" \
-    --from-file=garage.toml="$PATCHED_TMP" \
-    --dry-run=client -o yaml | kubectl apply -f -
-  kubectl rollout restart "statefulset/$GARAGE_RELEASE" -n "$NAMESPACE"
-fi
+awk -v token="$ADMIN_TOKEN" '
+  $0 == "[admin]" { in_admin=1; found=0; print; next }
+  in_admin && $0 ~ /^admin_token[[:space:]]*=/ { print "admin_token = \"" token "\""; found=1; next }
+  in_admin && $0 ~ /^\[/ {
+    if (!found) print "admin_token = \"" token "\""
+    in_admin=0
+  }
+  { print }
+  END {
+    if (in_admin && !found) print "admin_token = \"" token "\""
+  }
+' "$CONFIG_TMP" > "$PATCHED_TMP"
+kubectl create configmap "$GARAGE_RELEASE-config" -n "$NAMESPACE" \
+  --from-file=garage.toml="$PATCHED_TMP" \
+  --dry-run=client -o yaml | kubectl apply -f -
+kubectl rollout restart "statefulset/$GARAGE_RELEASE" -n "$NAMESPACE"
 rm -f "$CONFIG_TMP" "$PATCHED_TMP"
 
 kubectl create secret generic garage-webui-secret -n "$NAMESPACE" \
@@ -60,6 +69,9 @@ for f in \
 do
   [ -f "$f" ] && kubectl apply -f "$f" || true
 done
+
+kubectl rollout restart deployment/garage-webui -n "$NAMESPACE" >/dev/null 2>&1 || true
+kubectl rollout status deployment/garage-webui -n "$NAMESPACE" --timeout=120s >/dev/null 2>&1 || true
 
 echo
 echo "Next:"
