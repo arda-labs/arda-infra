@@ -47,18 +47,20 @@ ADMIN_TOKEN="$(kubectl get secret garage-admin-secret -n "$NAMESPACE" -o jsonpat
 CONFIG_TMP="$(mktemp)"
 PATCHED_TMP="$(mktemp)"
 kubectl get configmap "$GARAGE_RELEASE-config" -n "$NAMESPACE" -o jsonpath='{.data.garage\.toml}' > "$CONFIG_TMP"
-awk -v token="$ADMIN_TOKEN" '
-  $0 == "[admin]" { in_admin=1; found=0; print; next }
-  in_admin && $0 ~ /^admin_token[[:space:]]*=/ { print "admin_token = \"" token "\""; found=1; next }
-  in_admin && $0 ~ /^\[/ {
-    if (!found) print "admin_token = \"" token "\""
-    in_admin=0
-  }
-  { print }
-  END {
-    if (in_admin && !found) print "admin_token = \"" token "\""
-  }
-' "$CONFIG_TMP" > "$PATCHED_TMP"
+if grep -q '^admin_token[[:space:]]*=' "$CONFIG_TMP"; then
+  awk -v token="$ADMIN_TOKEN" '
+    /^admin_token[[:space:]]*=/ { print "admin_token = \"" token "\""; next }
+    { print }
+  ' "$CONFIG_TMP" > "$PATCHED_TMP"
+elif grep -q '^\[admin\][[:space:]]*$' "$CONFIG_TMP"; then
+  awk -v token="$ADMIN_TOKEN" '
+    /^\[admin\][[:space:]]*$/ { print; print "admin_token = \"" token "\""; next }
+    { print }
+  ' "$CONFIG_TMP" > "$PATCHED_TMP"
+else
+  cat "$CONFIG_TMP" > "$PATCHED_TMP"
+  printf '\n[admin]\nadmin_token = "%s"\n' "$ADMIN_TOKEN" >> "$PATCHED_TMP"
+fi
 kubectl create configmap "$GARAGE_RELEASE-config" -n "$NAMESPACE" \
   --from-file=garage.toml="$PATCHED_TMP" \
   --dry-run=client -o yaml | kubectl apply -f -
