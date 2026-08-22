@@ -17,7 +17,7 @@ spec:
         - name: ghcr-pull
       containers:
         - name: iam-service
-          image: ghcr.io/arda-labs/arda-be/iam-service:main
+          image: ghcr.io/arda-labs/arda-be/iam-service:fbcbf6669611de1e60b4d98a123af4aa532dfa76
           imagePullPolicy: Always
           ports:
             - name: http
