@@ -11,6 +11,7 @@ database/ CloudNativePG PostgreSQL cluster manifests
 dev/      Local dev endpoint examples
 platform/ Shared platform runtime bootstrap: NATS, Valkey, Garage, Cloudflared, Zeebe
 k8s/      Arda backend/frontend application manifests
+docs/     Edge routing and operational architecture notes
 traefik/  Traefik dynamic/static examples
 ```
 
@@ -35,6 +36,10 @@ kubectl apply -k argocd
 Argo CD applications in `argocd/apps` sync manifests from this repo. Backend
 images are published from `arda-be`; frontend images are published from
 `arda-mfe`.
+
+Production API edge routing is documented in
+[`docs/api-edge-routing.md`](docs/api-edge-routing.md). The frontend is served
+from `arda.io.vn`; browser APIs use `api.arda.io.vn` through Cloudflare Tunnel.
 
 For a non-Argo local setup, apply the database and platform runtime first:
 

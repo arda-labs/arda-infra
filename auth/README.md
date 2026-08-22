@@ -91,13 +91,17 @@ admin@arda.local      / admin123
 ```text
 App
 -> Hydra /oauth2/auth
--> auth-gateway /api/auth/login
+-> https://api.arda.io.vn/api/auth/login
 -> FE /login?login_challenge=...
 -> Login app uses Kratos login
 -> auth-gateway accepts Hydra login/consent
--> /callback?code=...
+-> https://api.arda.io.vn/api/auth/callback?code=...
 -> auth-gateway session + IAM authorization context
 ```
+
+The session cookie is host-only to `api.arda.io.vn`. The frontend at
+`https://arda.io.vn` calls the API with credentials and Auth Gateway allows that
+exact CORS origin.
 
 ## Checks
 

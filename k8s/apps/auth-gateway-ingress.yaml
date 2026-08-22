@@ -6,6 +6,17 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
+    - host: api.arda.io.vn
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-gateway
+                port:
+                  number: 8080
+    # Kept during migration so older frontend builds continue to work.
     - host: arda.io.vn
       http:
         paths:

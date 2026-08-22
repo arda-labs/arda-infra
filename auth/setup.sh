@@ -105,7 +105,7 @@ create_hydra_client() {
     --grant-type refresh_token \
     --response-type code \
     --scope openid,email,offline_access \
-    --redirect-uri https://arda.io.vn/api/auth/callback \
+    --redirect-uri https://api.arda.io.vn/api/auth/callback \
     --redirect-uri https://arda.io.vn/callback \
     --redirect-uri http://localhost:5000/api/auth/callback \
     --redirect-uri http://localhost:5000/callback \
