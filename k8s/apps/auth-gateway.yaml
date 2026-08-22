@@ -63,6 +63,8 @@ spec:
               value: https://api.arda.io.vn/api/auth/callback,https://arda.io.vn/callback,http://localhost:5000/api/auth/callback,http://localhost:5000/callback
             - name: CORS_ALLOWED_ORIGINS
               value: https://arda.io.vn,http://localhost:5000
+            - name: FRONTEND_ORIGIN
+              value: https://arda.io.vn
             - name: COOKIE_SECURE
               value: "true"
             - name: COOKIE_SAMESITE

@@ -55,6 +55,10 @@ Preflight supports `GET, POST, PUT, PATCH, DELETE, OPTIONS` and the headers used
 by the frontend HTTP client. Wildcard CORS origins are not allowed with session
 cookies.
 
+OAuth state stores only a safe relative return path. Auth Gateway resolves that
+path against `FRONTEND_ORIGIN=https://arda.io.vn`; it must never resolve a
+post-login redirect against the API callback origin.
+
 Session and device cookies remain host-only. OAuth starts and completes on the
 API hostname, so broadening cookie scope to `.arda.io.vn` is unnecessary.
 
@@ -118,4 +122,3 @@ controls do not replace backend overload protection.
 Workers VPC was evaluated but is not used here. It is useful when a Worker must
 call private services, whereas this design intentionally keeps API requests out
 of the Worker execution path.
-
