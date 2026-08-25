@@ -59,6 +59,11 @@ spec:
           commonUpdateSettings:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: airuntime
+          imageName: ghcr.io/arda-labs/arda-be/ai-runtime:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull
     - namePattern: arda-frontend
       images:
         - alias: web
