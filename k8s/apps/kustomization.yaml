@@ -1,4 +1,5 @@
 resources:
+  - ai-service.yaml
   - auth-gateway-ingress.yaml
   - auth-gateway.yaml
   - iam-service.yaml

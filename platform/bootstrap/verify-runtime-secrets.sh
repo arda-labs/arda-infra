@@ -8,8 +8,9 @@ REQUIRE_MTLS="${REQUIRE_MTLS:-true}"
 command -v kubectl >/dev/null 2>&1 || { echo "Missing command: kubectl" >&2; exit 1; }
 
 required_keys=(
-  ARDA_SERVICE_AUTH_SECRET
-  IAM_DATABASE_DSN
+    ARDA_SERVICE_AUTH_SECRET
+    AI_DATABASE_DSN
+    IAM_DATABASE_DSN
   PLATFORM_DATABASE_DSN
   FINANCE_DATABASE_DSN
   MEDIA_DATABASE_DSN

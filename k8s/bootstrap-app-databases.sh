@@ -29,6 +29,7 @@ kubectl run arda-app-db-bootstrap --rm -i --restart=Never \
   --command -- sh -s <<'EOF'
 set -eu
 for item in \
+  arda_ai:ai \
   arda_finance:finance \
   arda_media:media \
   arda_workflow:workflow \

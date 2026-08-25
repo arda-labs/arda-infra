@@ -89,6 +89,9 @@ Also create `arda-app-secrets` and `iam-service-secrets` as described in
 database key referenced by a Deployment exists, including
 `HRM_DATABASE_DSN`; a missing key intentionally leaves that workload in
 `CreateContainerConfigError` rather than activating a database fallback.
+The AI workload additionally requires `AI_DATABASE_DSN`; it runs Goose
+migrations for the service-owned `ai` database at startup and fails closed when
+the key is absent.
 
 `arda-app-secrets` must include `ARDA_SERVICE_AUTH_SECRET`, a random value of at
 least 32 characters shared only by the Arda workloads that participate in
@@ -112,6 +115,7 @@ service so writers always resolve the current primary:
 ```bash
 kubectl create secret generic arda-app-secrets -n arda-app \
   --from-literal=IAM_DATABASE_DSN='<iam-dsn>' \
+  --from-literal=AI_DATABASE_DSN='<ai-dsn>' \
   --from-literal=PLATFORM_DATABASE_DSN='<platform-dsn>' \
   --from-literal=FINANCE_DATABASE_DSN='<finance-dsn>' \
   --from-literal=MEDIA_DATABASE_DSN='<media-dsn>' \
