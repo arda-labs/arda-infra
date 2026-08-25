@@ -27,6 +27,10 @@ spec:
               value: 0.0.0.0:8080
             - name: AI_MODE
               value: production
+            - name: AI_ENABLE_READ_TOOLS
+              value: "true"
+            - name: CRM_SERVICE_URL
+              value: http://crm-service:8080
             - name: ARDA_SERVICE_AUTH_SECRET
               valueFrom:
                 secretKeyRef:
