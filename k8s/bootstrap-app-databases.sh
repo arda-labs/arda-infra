@@ -4,9 +4,15 @@ set -euo pipefail
 NAMESPACE="${DB_NAMESPACE:-database}"
 HOST="${DB_HOST:-pg-main-rw.database.svc.cluster.local}"
 POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-}"
+APP_DATABASE_PASSWORD="${APP_DATABASE_PASSWORD:-}"
 
 if [ -z "$POSTGRES_PASSWORD" ]; then
   POSTGRES_PASSWORD="$(kubectl get secret pg-main-superuser -n "$NAMESPACE" -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || true)"
+fi
+
+if [ -z "$APP_DATABASE_PASSWORD" ]; then
+  echo "Missing application database password. Set APP_DATABASE_PASSWORD." >&2
+  exit 1
 fi
 
 if [ -z "$POSTGRES_PASSWORD" ]; then
@@ -19,6 +25,7 @@ kubectl run arda-app-db-bootstrap --rm -i --restart=Never \
   --namespace "$NAMESPACE" \
   --env="DB_HOST=$HOST" \
   --env="PGPASSWORD=$POSTGRES_PASSWORD" \
+  --env="APP_DATABASE_PASSWORD=$APP_DATABASE_PASSWORD" \
   --command -- sh -s <<'EOF'
 set -eu
 for item in \
@@ -31,8 +38,8 @@ for item in \
 do
   role="${item%%:*}"
   db="${item##*:}"
-  psql -h "$DB_HOST" -U postgres -v ON_ERROR_STOP=1 \
-    -c "DO \$do\$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$role') THEN EXECUTE format('CREATE ROLE %I LOGIN PASSWORD %L', '$role', '123456'); END IF; END \$do\$;"
+  psql -h "$DB_HOST" -U postgres -v ON_ERROR_STOP=1 -v app_database_password="$APP_DATABASE_PASSWORD" \
+    -c "DO \$do\$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$role') THEN EXECUTE format('CREATE ROLE %I LOGIN PASSWORD %L', '$role', :'app_database_password'); ELSE EXECUTE format('ALTER ROLE %I PASSWORD %L', '$role', :'app_database_password'); END IF; END \$do\$;"
   psql -h "$DB_HOST" -U postgres -v ON_ERROR_STOP=1 \
     -tc "SELECT 1 FROM pg_database WHERE datname = '$db'" | grep -q 1 || \
     psql -h "$DB_HOST" -U postgres -v ON_ERROR_STOP=1 \

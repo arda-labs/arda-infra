@@ -27,6 +27,11 @@ spec:
               value: 0.0.0.0:8080
             - name: LOG_LEVEL
               value: info
+            - name: ARDA_SERVICE_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: arda-app-secrets
+                  key: ARDA_SERVICE_AUTH_SECRET
             - name: TOKEN_STRATEGY
               value: jwks
             - name: JWKS_URL
@@ -74,6 +79,8 @@ spec:
                 secretKeyRef:
                   name: arda-app-secrets
                   key: REDIS_URL
+            - name: SESSION_STORE
+              value: redis
             - name: INTROSPECTION_CLIENT_ID
               valueFrom:
                 secretKeyRef:

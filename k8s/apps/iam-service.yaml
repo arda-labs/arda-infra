@@ -27,10 +27,21 @@ spec:
           env:
             - name: HTTP_ADDR
               value: 0.0.0.0:8080
-            - name: MEDIA_SERVICE_URL
-              value: http://media-service:8080
+            - name: MEDIA_GRPC_ADDR
+              value: media-service:9092
             - name: GRPC_ADDR
               value: 0.0.0.0:9090
+            - name: ARDA_SERVICE_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: arda-app-secrets
+                  key: ARDA_SERVICE_AUTH_SECRET
+            - name: ARDA_GRPC_CA_FILE
+              value: /var/run/arda-grpc-tls/ca.crt
+            - name: ARDA_GRPC_CERT_FILE
+              value: /var/run/arda-grpc-tls/tls.crt
+            - name: ARDA_GRPC_KEY_FILE
+              value: /var/run/arda-grpc-tls/tls.key
             - name: LOG_LEVEL
               value: info
             - name: DATABASE_DSN
@@ -42,29 +53,12 @@ spec:
               value: "12"
             - name: DB_MAX_IDLE_CONNS
               value: "6"
-            - name: REDIS_URL
-              valueFrom:
-                secretKeyRef:
-                  name: arda-app-secrets
-                  key: REDIS_URL
-            - name: SUPERADMIN_INITIAL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: iam-service-secrets
-                  key: SUPERADMIN_INITIAL_PASSWORD
-                  optional: true
-            - name: HYDRA_ADMIN_URL
-              value: http://hydra-admin.auth.svc.cluster.local:4445
-            - name: HYDRA_PUBLIC_URL
-              value: https://auth.arda.io.vn
-            - name: HYDRA_ISSUER_URL
-              value: https://auth.arda.io.vn
-            - name: HYDRA_CLIENT_ID
-              value: arda-shell
-            - name: HYDRA_REDIRECT_URI
-              value: https://arda.io.vn/callback
             - name: KRATOS_ADMIN_URL
               value: http://kratos-admin.auth.svc.cluster.local
+          volumeMounts:
+            - name: grpc-tls
+              mountPath: /var/run/arda-grpc-tls
+              readOnly: true
           readinessProbe:
             httpGet:
               path: /health/ready
@@ -77,6 +71,10 @@ spec:
               port: http
             initialDelaySeconds: 20
             periodSeconds: 20
+      volumes:
+        - name: grpc-tls
+          secret:
+            secretName: arda-grpc-tls-iam
 ---
 apiVersion: v1
 kind: Service

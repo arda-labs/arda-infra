@@ -85,14 +85,43 @@ kubectl -n arda-web create secret docker-registry ghcr-pull \
 ```
 
 Also create `arda-app-secrets` and `iam-service-secrets` as described in
-`../../arda-be/docs/ghcr-k3s-deployment.md`.
+`../../arda-be/docs/ghcr-k3s-deployment.md`. Before syncing, verify every
+database key referenced by a Deployment exists, including
+`HRM_DATABASE_DSN`; a missing key intentionally leaves that workload in
+`CreateContainerConfigError` rather than activating a database fallback.
+
+`arda-app-secrets` must include `ARDA_SERVICE_AUTH_SECRET`, a random value of at
+least 32 characters shared only by the Arda workloads that participate in
+internal gRPC calls. It is injected through `secretKeyRef`; do not put it in a
+manifest, ConfigMap, image or Git history. Rotate it through a coordinated
+rolling deployment because old and new workload tokens overlap for one minute.
+
+Internal gRPC also requires one cluster-local mTLS Secret per workload:
+`arda-grpc-tls-crm`, `arda-grpc-tls-iam`, `arda-grpc-tls-platform`,
+`arda-grpc-tls-workflow`, `arda-grpc-tls-hrm`, `arda-grpc-tls-finance`,
+`arda-grpc-tls-media`, and `arda-grpc-tls-notification`.
+Each Secret contains only `ca.crt`, `tls.crt`, and `tls.key`, is mounted
+read-only at `/var/run/arda-grpc-tls`, and must be provisioned through the
+approved secret-management process. See
+`../../arda-be/docs/refactor-program/09-mtls-runbook.md`; generated certificate
+material must never be committed to Git or placed in a ConfigMap.
 
 For in-cluster Valkey, point app secrets at Sentinel instead of the `6379`
 service so writers always resolve the current primary:
 
 ```bash
 kubectl create secret generic arda-app-secrets -n arda-app \
+  --from-literal=IAM_DATABASE_DSN='<iam-dsn>' \
+  --from-literal=PLATFORM_DATABASE_DSN='<platform-dsn>' \
+  --from-literal=FINANCE_DATABASE_DSN='<finance-dsn>' \
+  --from-literal=MEDIA_DATABASE_DSN='<media-dsn>' \
+  --from-literal=WORKFLOW_DATABASE_DSN='<workflow-dsn>' \
+  --from-literal=CRM_DATABASE_DSN='<crm-dsn>' \
+  --from-literal=HRM_DATABASE_DSN='<hrm-dsn>' \
+  --from-literal=NOTIFICATION_DATABASE_DSN='<notification-dsn>' \
+  --from-literal=ARDA_SERVICE_AUTH_SECRET='<random-value-at-least-32-chars>' \
   --from-literal=REDIS_URL='redis-sentinel://:<valkey-password>@valkey.platform.svc.cluster.local:26379/myprimary' \
+  --from-literal=NATS_URL='nats://<nats-endpoint>' \
   --dry-run=client -o yaml | kubectl apply -f -
 ```
 

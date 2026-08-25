@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "rollout": {
+    "max_canary_replicas": 1,
+    "image_ref": "immutable-digest-or-commit-sha",
+    "schema_mode": "expand-contract",
+    "commands": "no-duplicate-non-idempotent-replay"
+  },
+  "observation": {
+    "minimum_minutes": 15,
+    "comparison": ["status_code", "error_rate", "p50_ms", "p95_ms", "p99_ms", "business_reconciliation"],
+    "required_correlation": ["request_id", "trace_id", "release_id", "cohort"]
+  },
+  "halt_thresholds": {
+    "5xx_rate_percent": 1,
+    "p95_regression_percent": 20,
+    "policy_denial_regression_percent": 10,
+    "db_lock_wait_ms": 500,
+    "event_redelivery_regression_percent": 10
+  },
+  "rollback": {
+    "automatic_for": ["5xx_rate", "readiness_failure", "policy_regression"],
+    "forward_recovery_for": ["committed_schema_change", "published_event", "data_backfill"],
+    "preserve_schema_compatibility": true,
+    "record": ["old_image", "new_image", "manifest_revision", "start", "end", "decision", "operator"]
+  }
+}

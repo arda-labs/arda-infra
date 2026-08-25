@@ -1,0 +1,39 @@
+name: verify
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: latest
+      - name: Render application manifests
+        run: kubectl kustomize k8s/apps > /tmp/arda-apps-rendered.yaml
+      - name: Ensure workload identity mounts are present
+        shell: bash
+        run: |
+          set -euo pipefail
+          for service in workflow iam platform finance crm hrm media notification; do
+            grep -q "arda-grpc-tls-${service}" k8s/apps/${service}-service.yaml
+            grep -q "ARDA_SERVICE_AUTH_SECRET" k8s/apps/${service}-service.yaml
+          done
+          grep -q "MEDIA_GRPC_ADDR" k8s/apps/iam-service.yaml
+          grep -q "MEDIA_GRPC_ADDR" k8s/apps/platform-service.yaml
+      - name: Validate secret hygiene
+        run: node scripts/check-secret-hygiene.mjs
+      - name: Validate operational gate scripts
+        shell: bash
+        run: |
+          bash -n platform/bootstrap/backup.sh platform/bootstrap/restore.sh platform/bootstrap/preflight.sh platform/bootstrap/verify-runtime-secrets.sh
+          node scripts/check-operational-gates.mjs
+          node scripts/check-canary-policy.mjs
+      - run: git diff --check

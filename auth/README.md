@@ -5,7 +5,7 @@ This folder deploys the Ory auth dependencies for the k3s dev cluster:
 - Hydra: OAuth2/OIDC server.
 - Kratos: identity, password login, and Kratos browser/API sessions.
 - IAM app integration: `setup.sh` can patch the `iam-service` deployment with
-  `SUPERADMIN_INITIAL_PASSWORD` so the app bootstraps the canonical superadmin.
+`SUPERADMIN_INITIAL_PASSWORD` so the Ory seed identity can be created.
 
 The actual Arda authorization model lives in `iam-service`, not in Hydra or
 Kratos. A working superadmin therefore needs both sides:
@@ -32,17 +32,23 @@ auth/
 
 ```text
 AUTH_NAMESPACE=auth
-APP_NAMESPACE=arda-app
-IAM_DEPLOYMENT=iam-service
 SUPERADMIN_EMAIL=superadmin@arda.local
-SUPERADMIN_INITIAL_PASSWORD=admin123
+SUPERADMIN_INITIAL_PASSWORD=<provide-through-local-secret-manager>
+HYDRA_DATABASE_DSN=<provide-through-local-secret-manager>
+KRATOS_DATABASE_DSN=<provide-through-local-secret-manager>
+HYDRA_DATABASE_PASSWORD=<provide-through-local-secret-manager>
+KRATOS_DATABASE_PASSWORD=<provide-through-local-secret-manager>
+HYDRA_SYSTEM_SECRET=<provide-through-local-secret-manager>
+HYDRA_COOKIE_SECRET=<provide-through-local-secret-manager>
+KRATOS_DEFAULT_SECRET=<provide-through-local-secret-manager>
+KRATOS_COOKIE_SECRET=<provide-through-local-secret-manager>
 DEV_ADMIN_EMAIL=admin@arda.local
 ```
 
 For dev, the script also seeds `admin@arda.local` with the same password because
-older local IAM seed data still contains that account. For production-like
-environments, set `SUPERADMIN_INITIAL_PASSWORD` from a real secret before
-running the script.
+older local IAM seed data still contains that account. Always set
+`SUPERADMIN_INITIAL_PASSWORD` and the Ory database/system secrets from a local
+secret manager before running the script; there are no committed defaults.
 
 ## Usage
 
@@ -51,7 +57,12 @@ Deploy or reconcile auth:
 ```bash
 cd arda-infra/auth
 chmod +x setup.sh
-SUPERADMIN_INITIAL_PASSWORD=admin123 ./setup.sh deploy
+SUPERADMIN_INITIAL_PASSWORD='<secret>' \
+HYDRA_DATABASE_DSN='<dsn>' KRATOS_DATABASE_DSN='<dsn>' \
+HYDRA_DATABASE_PASSWORD='<secret>' KRATOS_DATABASE_PASSWORD='<secret>' \
+HYDRA_SYSTEM_SECRET='<secret>' HYDRA_COOKIE_SECRET='<secret>' \
+KRATOS_DEFAULT_SECRET='<secret>' KRATOS_COOKIE_SECRET='<secret>' \
+./setup.sh deploy
 ```
 
 Reset only Hydra/Kratos databases, then redeploy and reseed:
@@ -60,10 +71,10 @@ Reset only Hydra/Kratos databases, then redeploy and reseed:
 ./setup.sh reset
 ```
 
-Patch only the IAM deployment with the superadmin bootstrap secret:
+Seed only the Ory identities:
 
 ```bash
-SUPERADMIN_INITIAL_PASSWORD=admin123 ./setup.sh iam-secret
+SUPERADMIN_INITIAL_PASSWORD='<secret>' ./setup.sh client
 ```
 
 ## What `setup.sh deploy` Does
@@ -79,11 +90,11 @@ SUPERADMIN_INITIAL_PASSWORD=admin123 ./setup.sh iam-secret
 5. If `deploy/iam-service` exists in namespace `arda-app`, creates/updates
    secret `iam-service-secrets`, sets env from it, and restarts `iam-service`.
 
-After `iam-service` restarts, the expected dev logins are:
+After `iam-service` restarts, the expected identities are:
 
 ```text
-superadmin@arda.local / admin123
-admin@arda.local      / admin123
+superadmin@arda.local / password supplied through the secret manager
+admin@arda.local      / password supplied through the secret manager
 ```
 
 ## Flow

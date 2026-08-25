@@ -9,7 +9,7 @@ hydra:
   dangerousForceHttp: true
 
   config:
-    dsn: postgres://arda_hydra:123456@pg-main-rw.database.svc.cluster.local:5432/hydra?sslmode=disable
+    dsn: ""
 
     urls:
       self:
@@ -20,9 +20,9 @@ hydra:
 
     secrets:
       system:
-        - kW7XpL9mR4vB2nJ8qT5yF3cA1gH6sD0e
+        []
       cookie:
-        - mN5bV8cX2zL1pK6jR4tY9wQ3aH7uE0s
+        []
 
 ingress:
   public:

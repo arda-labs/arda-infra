@@ -22,9 +22,24 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+            - name: grpc
+              containerPort: 9092
           env:
             - name: HTTP_ADDR
               value: 0.0.0.0:8080
+            - name: GRPC_ADDR
+              value: 0.0.0.0:9092
+            - name: ARDA_SERVICE_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: arda-app-secrets
+                  key: ARDA_SERVICE_AUTH_SECRET
+            - name: ARDA_GRPC_CA_FILE
+              value: /var/run/arda-grpc-tls/ca.crt
+            - name: ARDA_GRPC_CERT_FILE
+              value: /var/run/arda-grpc-tls/tls.crt
+            - name: ARDA_GRPC_KEY_FILE
+              value: /var/run/arda-grpc-tls/tls.key
             - name: LOG_LEVEL
               value: info
             - name: MEDIA_DATABASE_DSN
@@ -60,6 +75,10 @@ spec:
                 secretKeyRef:
                   name: arda-app-secrets
                   key: GARAGE_SECRET_KEY
+          volumeMounts:
+            - name: grpc-tls
+              mountPath: /var/run/arda-grpc-tls
+              readOnly: true
           readinessProbe:
             httpGet:
               path: /health/ready
@@ -72,6 +91,10 @@ spec:
               port: http
             initialDelaySeconds: 20
             periodSeconds: 20
+      volumes:
+        - name: grpc-tls
+          secret:
+            secretName: arda-grpc-tls-media
 ---
 apiVersion: v1
 kind: Service
@@ -85,3 +108,6 @@ spec:
     - name: http
       port: 8080
       targetPort: http
+    - name: grpc
+      port: 9092
+      targetPort: grpc

@@ -7,7 +7,7 @@ kratos:
     enabled: true
 
   config:
-    dsn: postgres://arda_kratos:123456@pg-main-rw.database.svc.cluster.local:5432/kratos?sslmode=disable
+    dsn: ""
 
     serve:
       public:
@@ -72,17 +72,17 @@ kratos:
     log:
       level: debug
       format: text
-      leak_sensitive_values: true
+      leak_sensitive_values: false
 
     secrets:
       default:
-        - kratos-default-secret-arda-2026-fixed-key
+        []
       cookie:
-        - kratos-cookie-secret-arda-2026-fixed-key
+        []
 
     courier:
       smtp:
-        connection_uri: smtp://test:test@mailhog.auth.svc.cluster.local:1025/?skip_ssl_verify=true
+        connection_uri: smtp://mailhog.auth.svc.cluster.local:1025/?skip_ssl_verify=true
 
     identity:
       default_schema_id: default

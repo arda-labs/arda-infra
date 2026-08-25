@@ -22,9 +22,24 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+            - name: grpc
+              containerPort: 9095
           env:
             - name: HTTP_ADDR
               value: 0.0.0.0:8080
+            - name: GRPC_ADDR
+              value: 0.0.0.0:9095
+            - name: ARDA_SERVICE_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: arda-app-secrets
+                  key: ARDA_SERVICE_AUTH_SECRET
+            - name: ARDA_GRPC_CA_FILE
+              value: /var/run/arda-grpc-tls/ca.crt
+            - name: ARDA_GRPC_CERT_FILE
+              value: /var/run/arda-grpc-tls/tls.crt
+            - name: ARDA_GRPC_KEY_FILE
+              value: /var/run/arda-grpc-tls/tls.key
             - name: LOG_LEVEL
               value: info
             - name: DATABASE_DSN
@@ -43,7 +58,6 @@ spec:
                 secretKeyRef:
                   name: arda-app-secrets
                   key: NATS_URL
-                  optional: true
             - name: VAPID_PUBLIC_KEY
               valueFrom:
                 secretKeyRef:
@@ -58,6 +72,10 @@ spec:
                   optional: true
             - name: VAPID_SUBJECT
               value: mailto:ops@arda.io.vn
+          volumeMounts:
+            - name: grpc-tls
+              mountPath: /var/run/arda-grpc-tls
+              readOnly: true
           readinessProbe:
             httpGet:
               path: /health/ready
@@ -70,6 +88,10 @@ spec:
               port: http
             initialDelaySeconds: 20
             periodSeconds: 20
+      volumes:
+        - name: grpc-tls
+          secret:
+            secretName: arda-grpc-tls-notification
 ---
 apiVersion: v1
 kind: Service
@@ -83,3 +105,6 @@ spec:
     - name: http
       port: 8080
       targetPort: http
+    - name: grpc
+      port: 9095
+      targetPort: grpc

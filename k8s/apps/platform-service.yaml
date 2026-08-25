@@ -29,6 +29,19 @@ spec:
               value: 0.0.0.0:8080
             - name: GRPC_ADDR
               value: 0.0.0.0:9090
+            - name: MEDIA_GRPC_ADDR
+              value: media-service:9092
+            - name: ARDA_SERVICE_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: arda-app-secrets
+                  key: ARDA_SERVICE_AUTH_SECRET
+            - name: ARDA_GRPC_CA_FILE
+              value: /var/run/arda-grpc-tls/ca.crt
+            - name: ARDA_GRPC_CERT_FILE
+              value: /var/run/arda-grpc-tls/tls.crt
+            - name: ARDA_GRPC_KEY_FILE
+              value: /var/run/arda-grpc-tls/tls.key
             - name: LOG_LEVEL
               value: info
             - name: DATABASE_DSN
@@ -46,6 +59,10 @@ spec:
                   name: arda-app-secrets
                   key: NATS_URL
                   optional: true
+          volumeMounts:
+            - name: grpc-tls
+              mountPath: /var/run/arda-grpc-tls
+              readOnly: true
           readinessProbe:
             httpGet:
               path: /health/ready
@@ -58,6 +75,10 @@ spec:
               port: http
             initialDelaySeconds: 20
             periodSeconds: 20
+      volumes:
+        - name: grpc-tls
+          secret:
+            secretName: arda-grpc-tls-platform
 ---
 apiVersion: v1
 kind: Service
