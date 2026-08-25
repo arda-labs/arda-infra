@@ -29,6 +29,8 @@ spec:
               value: production
             - name: AI_ENABLE_READ_TOOLS
               value: "true"
+            - name: AI_ENABLE_HITL_PROPOSALS
+              value: "false"
             - name: CRM_SERVICE_URL
               value: http://crm-service:8080
             - name: ARDA_SERVICE_AUTH_SECRET
