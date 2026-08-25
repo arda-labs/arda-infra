@@ -60,6 +60,10 @@ bash k8s/bootstrap-app-databases.sh
 kubectl apply -k k8s
 ```
 
+The database bootstrap enables the CNPG-provided `vector` extension in the
+service-owned `ai` database before the AI service's Goose migrations run. The
+application role remains non-superuser.
+
 Optional local-only Postgres NodePort:
 
 ```bash

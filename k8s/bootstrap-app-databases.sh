@@ -46,4 +46,9 @@ do
     psql -h "$DB_HOST" -U postgres -v ON_ERROR_STOP=1 \
       -c "CREATE DATABASE $db OWNER $role;"
 done
+
+# pgvector is a database capability and must be installed by the bootstrap
+# superuser before the service-owned Goose migrations run as arda_ai.
+psql -h "$DB_HOST" -U postgres -v ON_ERROR_STOP=1 -d ai \
+  -c "CREATE EXTENSION IF NOT EXISTS vector;"
 EOF
