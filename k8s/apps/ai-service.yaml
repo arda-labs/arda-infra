@@ -33,6 +33,17 @@ spec:
               value: "false"
             - name: CRM_SERVICE_URL
               value: http://crm-service:8080
+            - name: AI_ENABLE_AGENT
+              value: "true"
+            - name: AI_MODEL_BASE_URL
+              value: https://agentrouter.org/v1
+            - name: AI_MODEL_ID
+              value: deepseek-v4-flash
+            - name: AI_MODEL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: arda-app-secrets
+                  key: AI_MODEL_API_KEY
             - name: ARDA_SERVICE_AUTH_SECRET
               valueFrom:
                 secretKeyRef:
