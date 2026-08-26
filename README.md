@@ -64,6 +64,19 @@ The database bootstrap enables the CNPG-provided `vector` extension in the
 service-owned `ai` database before the AI service's Goose migrations run. The
 application role remains non-superuser.
 
+## AI assistant deployment
+
+The Olorin assistant runs as two workloads in `k8s/apps`:
+
+- `ai-service` — Go service owning the AG-UI stream, the CopilotKit envelope
+  endpoint, conversations, approvals, and the `ai` database.
+- `auth-gateway` — proxies `/api/copilotkit/**` and `/api/ai/**` to
+  `ai-service`; `COPILOTKIT_RUNTIME_URL=http://ai-service:8080`.
+
+The former internal Node.js `ai-runtime` deployment was removed from
+`k8s/apps/kustomization.yaml` and pruned by ArgoCD; do not re-add it. Details:
+`arda-be/docs/ai/go-native-copilotkit.md`.
+
 Optional local-only Postgres NodePort:
 
 ```bash
