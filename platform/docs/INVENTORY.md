@@ -15,7 +15,7 @@
 
 ## Garage
 
-- Chart: `garage/garage` or local `charts/garage`
+- Chart: `garage/garage`
 - Values: `helm/garage/values.yaml`
 - Admin token secret: `garage-admin-secret`
 - S3 app secret: `garage-s3`
@@ -30,4 +30,4 @@
 
 - Chart: `camunda/camunda-platform`
 - Values: `helm/zeebe/values.yaml`
-- Disabled by default.
+- Chart version pinned by `ZEEBE_CHART_VERSION` in `config/platform.env`.
