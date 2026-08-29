@@ -6,11 +6,14 @@ Hydra/Kratos are intentionally kept in `../auth` and namespace `auth`.
 
 ## Components
 
-- NATS
-- Valkey
-- Garage
-- Cloudflared, disabled by default
-- Zeebe 8.5
+```text
+platform            auth (separate namespace, see ../auth)
+├── nats            ├── hydra
+├── valkey          └── kratos
+├── garage
+├── cloudflared
+└── zeebe 8.5
+```
 
 ## Quick Setup
 
@@ -28,13 +31,13 @@ Edit:
 config/platform.env
 ```
 
-Defaults:
+Defaults (`config/platform.env`):
 
 ```env
 INSTALL_NATS=true
 INSTALL_VALKEY=true
 INSTALL_GARAGE=true
-INSTALL_CLOUDFLARED=false
+INSTALL_CLOUDFLARED=true
 INSTALL_ZEEBE=true
 ```
 
@@ -72,6 +75,33 @@ Run:
 
 ```bash
 ./bootstrap/install-zeebe.sh
+```
+
+## Operations
+
+Upgrade a Helm component by re-running its install script. Back up first:
+
+```bash
+./bootstrap/backup.sh
+./bootstrap/install-nats.sh     # or install-valkey.sh / install-garage.sh
+```
+
+Recover a lost `platform` namespace:
+
+```bash
+kubectl create namespace platform --dry-run=client -o yaml | kubectl apply -f -
+bash bootstrap/setup-permissions.sh
+./bootstrap/install-all.sh
+./bootstrap/init-garage.sh
+./bootstrap/status.sh
+```
+
+Cloudflared needs its secret restored before install:
+
+```bash
+cp secrets/examples/cloudflared-token-secret.yaml secrets/generated/cloudflared-token-secret.yaml
+vi secrets/generated/cloudflared-token-secret.yaml
+kubectl apply -f secrets/generated/cloudflared-token-secret.yaml
 ```
 
 ## Safety
