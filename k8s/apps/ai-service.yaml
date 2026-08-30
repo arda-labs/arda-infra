@@ -35,8 +35,6 @@ spec:
               value: http://crm-service:8080
             - name: AI_ENABLE_AGENT
               value: "true"
-            - name: AI_PROTOCOL
-              value: "v2"
             - name: AI_KNOWLEDGE_VECTOR
               value: "on"
             # --- AI Gateway go-live (docs/ai/agent-evolution-roadmap.md §3.5) ---
