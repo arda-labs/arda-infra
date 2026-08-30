@@ -40,14 +40,21 @@ spec:
             - name: AI_KNOWLEDGE_VECTOR
               value: "on"
             # --- AI Gateway go-live (docs/ai/agent-evolution-roadmap.md §3.5) ---
-            # The compat endpoint needs a `cf-aig-provider` header the Go model
-            # client does not send yet, and opencode/zen needs a gateway route
-            # (custom provider). Until that route exists, model traffic stays
-            # direct; flipping these two values switches the whole fleet:
+            # Gateway auth is ON (probe returns AiGatewayError 401), so requests
+            # need AI_MODEL_GATEWAY_TOKEN in arda-app-secrets (create it in
+            # AI Gateway → Authentication first). opencode/zen also needs a
+            # gateway route (custom provider) or a standard provider path.
+            # Until that exists, model traffic stays direct. Flipping all four
+            # at once switches the whole fleet:
             # - name: AI_MODEL_BASE_URL
             #   value: https://gateway.ai.cloudflare.com/v1/8daf04d9f3a2a26d996661b3a67d8710/arda/openai
             # - name: AI_MODEL_BASE_URL_ALLOWLIST
             #   value: https://gateway.ai.cloudflare.com
+            # - name: AI_MODEL_GATEWAY_TOKEN
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: arda-app-secrets
+            #       key: AI_MODEL_GATEWAY_TOKEN
             - name: AI_MODEL_BASE_URL
               value: https://opencode.ai/zen/v1
             - name: AI_MODEL_ID
