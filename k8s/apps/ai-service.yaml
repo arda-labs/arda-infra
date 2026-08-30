@@ -30,15 +30,46 @@ spec:
             - name: AI_ENABLE_READ_TOOLS
               value: "true"
             - name: AI_ENABLE_HITL_PROPOSALS
-              value: "false"
+              value: "true"
             - name: CRM_SERVICE_URL
               value: http://crm-service:8080
             - name: AI_ENABLE_AGENT
               value: "true"
+            - name: AI_PROTOCOL
+              value: "v2"
+            - name: AI_KNOWLEDGE_VECTOR
+              value: "on"
+            # --- AI Gateway go-live (docs/ai/agent-evolution-roadmap.md §3.5) ---
+            # Gateway auth is ON (probe returns AiGatewayError 401), so requests
+            # need AI_MODEL_GATEWAY_TOKEN in arda-app-secrets (create it in
+            # AI Gateway → Authentication first). opencode/zen also needs a
+            # gateway route (custom provider) or a standard provider path.
+            # Until that exists, model traffic stays direct. Flipping all four
+            # at once switches the whole fleet:
+            # - name: AI_MODEL_BASE_URL
+            #   value: https://gateway.ai.cloudflare.com/v1/8daf04d9f3a2a26d996661b3a67d8710/arda/openai
+            # - name: AI_MODEL_BASE_URL_ALLOWLIST
+            #   value: https://gateway.ai.cloudflare.com
+            # - name: AI_MODEL_GATEWAY_TOKEN
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: arda-app-secrets
+            #       key: AI_MODEL_GATEWAY_TOKEN
             - name: AI_MODEL_BASE_URL
               value: https://opencode.ai/zen/v1
             - name: AI_MODEL_ID
               value: x-preview-f-free
+            - name: AI_EMBEDDING_PROVIDER
+              value: workersai
+            - name: AI_EMBEDDING_MODEL
+              value: "@cf/qwen/qwen3-embedding-0.6b"
+            - name: AI_EMBEDDING_ACCOUNT_ID
+              value: "8daf04d9f3a2a26d996661b3a67d8710"
+            - name: AI_EMBEDDING_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: arda-app-secrets
+                  key: AI_EMBEDDING_API_TOKEN
             - name: AI_MODEL_API_KEY
               valueFrom:
                 secretKeyRef:
