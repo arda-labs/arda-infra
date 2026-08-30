@@ -30,7 +30,7 @@ spec:
             - name: AI_ENABLE_READ_TOOLS
               value: "true"
             - name: AI_ENABLE_HITL_PROPOSALS
-              value: "false"
+              value: "true"
             - name: CRM_SERVICE_URL
               value: http://crm-service:8080
             - name: AI_ENABLE_AGENT
