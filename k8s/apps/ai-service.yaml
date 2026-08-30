@@ -59,6 +59,10 @@ spec:
               value: https://api.b.ai/v1
             - name: AI_MODEL_ID
               value: deepseek-v4-flash
+            # Base URL / Model ID above are display defaults for the settings
+            # dialog (and spike-mode fallback); the runtime key comes from the
+            # saved tenant configuration (ai_tenant_settings), so no model API
+            # key is injected into this deployment.
             - name: AI_EMBEDDING_PROVIDER
               value: workersai
             - name: AI_EMBEDDING_MODEL
@@ -70,11 +74,6 @@ spec:
                 secretKeyRef:
                   name: arda-app-secrets
                   key: AI_EMBEDDING_API_TOKEN
-            - name: AI_MODEL_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: arda-app-secrets
-                  key: AI_MODEL_API_KEY
             - name: ARDA_SERVICE_AUTH_SECRET
               valueFrom:
                 secretKeyRef:
