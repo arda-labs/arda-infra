@@ -75,10 +75,10 @@ application role remains non-superuser.
 
 The Olorin assistant runs as two workloads in `k8s/apps`:
 
-- `ai-service` — Go service owning the AG-UI stream, the CopilotKit envelope
-  endpoint, conversations, approvals, and the `ai` database.
-- `auth-gateway` — proxies `/api/copilotkit/**` and `/api/ai/**` to
-  `ai-service`; `COPILOTKIT_RUNTIME_URL=http://ai-service:8080`.
+- `ai-service` — Go service owning the AG-UI stream (`/api/ai/agent`),
+  conversations, approvals, and the `ai` database.
+- `auth-gateway` — proxies `/api/ai/**` to `ai-service`;
+  `COPILOTKIT_RUNTIME_URL=http://ai-service:8080`.
 
 The former internal Node.js `ai-runtime` deployment was removed from
 `k8s/apps/kustomization.yaml` and pruned by ArgoCD; do not re-add it. Details:
@@ -89,6 +89,15 @@ Optional local-only Postgres NodePort:
 ```bash
 kubectl apply -k database/nodeport
 ```
+
+## MDM service (scaffold)
+
+`mdm-service` (Master Data Management) exists in `arda-be/apps` as a scaffold:
+it is referenced by `traefik/dynamic.yml` (router `mdm-api`) and by
+`auth-gateway` (`MDM_SERVICE_URL=http://mdm-service:8080`), but it has no
+dedicated manifest in `k8s/apps/` yet and no image in
+`argocd/image-updater.yaml`. Do not deploy it until its Go implementation lands
+in `arda-be`.
 
 ## Workflow runtime
 

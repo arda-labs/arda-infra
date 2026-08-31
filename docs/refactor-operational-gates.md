@@ -107,6 +107,9 @@ closed on a missing `HRM_DATABASE_DSN` or certificate Secret.
 
 ## Current evidence snapshot
 
+> **Snapshot:** dated 2026-08-25. Re-verify the live cluster before relying on
+> the degraded-state list below; the K3s nodes are reachable via SSH audit.
+
 As of 2026-08-25, `kubectl kustomize k8s/apps` passes and repository CI
 render/identity/secret checks are defined. The workstation kubeconfig has no
 current context, but a read-only SSH audit through `k3s-node1` confirmed all

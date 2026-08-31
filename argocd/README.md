@@ -64,6 +64,8 @@ This creates:
 - `AppProject/arda`
 - `Application/arda-backend`
 - `Application/arda-frontend`
+- `Application/arda-database`
+- `ImageUpdater/arda`
 
 ## Required Runtime Secrets
 
@@ -131,6 +133,10 @@ kubectl create secret generic arda-app-secrets -n arda-app \
 
 ## Image Tags
 
-The current manifests use the `main` tag for simplicity. After GitHub Actions
-pushes a new `main` image, restart the deployment or later add Argo CD Image
-Updater / SHA-tag manifest updates.
+Argo CD Image Updater is configured (`argocd/image-updater.yaml`,
+`writeBackConfig.method: argocd`), so it updates image digests in-cluster on
+each GHCR push. Most backend manifests (`auth-gateway`, `crm-service`,
+`finance-service`, `iam-service`, `media-service`, `notification-service`,
+`platform-service`) already carry SHA-digest image tags. A few still use the
+`:main` tag (`ai-service`, `hrm-service`, `workflow-service`) — they are
+updated on the next successful Image Updater run.

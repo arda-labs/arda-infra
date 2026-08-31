@@ -28,6 +28,17 @@ api.arda.io.vn -> http://auth-gateway.arda-app.svc.cluster.local:8080
 Tunnel ingress is account state and is not reconciled by Argo CD. When changing
 it in Cloudflare, update this document in the same change.
 
+## Traefik dynamic routing
+
+`traefik/dynamic.yml` defines the internal routing layer between
+`auth-gateway` and individual services. Routers (`iam-api`, `mdm-api`,
+`platform-public`/`platform-api`, `workflow-api`, `iam-public`) forward
+service-specific path prefixes, and the `arda-forward-auth` middleware enforces
+forward-auth through the gateway. Services not listed there (crm, finance,
+hrm, media, notification, ai) are reached through auth-gateway's own proxy
+routes (`k8s/apps/auth-gateway.yaml`). `mdm-service` has a Traefik router and
+service entry but no dedicated `k8s/apps` manifest yet — it is a scaffold.
+
 ## Migration compatibility
 
 During migration, `arda.io.vn/api/*` remains available through two controls:
