@@ -44,7 +44,7 @@ spec:
             - name: AI_ENABLE_AGENT
               value: "true"
             - name: AI_KNOWLEDGE_VECTOR
-              value: "on"
+              value: "true"
             # --- AI Gateway go-live (docs/ai/agent-evolution-roadmap.md §3.5) ---
             # Gateway auth is ON (probe returns AiGatewayError 401), so requests
             # need AI_MODEL_GATEWAY_TOKEN in arda-app-secrets (create it in
