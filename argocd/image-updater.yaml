@@ -59,6 +59,11 @@ spec:
           commonUpdateSettings:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: ragservice
+          imageName: ghcr.io/arda-labs/arda-be/rag-service:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull
     - namePattern: arda-frontend
       images:
         - alias: web
