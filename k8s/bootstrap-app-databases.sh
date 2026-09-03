@@ -35,8 +35,7 @@ for item in \
   arda_workflow:workflow \
   arda_crm:crm \
   arda_hrm:hrm \
-  arda_notification:notification \
-  arda_rag:rag
+  arda_notification:notification
 do
   role="${item%%:*}"
   db="${item##*:}"
@@ -49,13 +48,7 @@ do
 done
 
 # pgvector is a database capability and must be installed by the bootstrap
-# superuser before the service-owned Goose migrations run as arda_ai /
-# arda_rag. rag-service's 20260903090000_rag_foundation.sql migration runs
-# CREATE EXTENSION IF NOT EXISTS vector; itself, but the superuser install
-# here keeps the extension available on both databases regardless of which
-# role applies the migration.
+# superuser before the service-owned Goose migrations run as arda_ai.
 psql -h "$DB_HOST" -U postgres -v ON_ERROR_STOP=1 -d ai \
-  -c "CREATE EXTENSION IF NOT EXISTS vector;"
-psql -h "$DB_HOST" -U postgres -v ON_ERROR_STOP=1 -d rag \
   -c "CREATE EXTENSION IF NOT EXISTS vector;"
 EOF

@@ -57,7 +57,7 @@ spec:
             - name: AI_SERVICE_URL
               value: http://ai-service:8080
             - name: RAG_SERVICE_URL
-              value: http://rag-service:8099
+              value: http://ai-service:8080
             # The Go ai-service serves the CopilotKit envelope natively; the
             # separate Node runtime is retired.
             - name: COPILOTKIT_RUNTIME_URL
