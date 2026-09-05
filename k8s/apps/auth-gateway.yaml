@@ -58,10 +58,8 @@ spec:
               value: http://ai-service:8080
             - name: RAG_SERVICE_URL
               value: http://ai-service:8080
-            # The Go ai-service serves the CopilotKit envelope natively; the
-            # separate Node runtime is retired.
-            - name: COPILOTKIT_RUNTIME_URL
-              value: http://ai-service:8080
+            # The Go ai-service serves the AG-UI/SSE contract directly; the
+            # separate Node runtime and legacy envelope are retired.
             - name: KRATOS_PUBLIC_URL
               value: https://identity.arda.io.vn
             - name: HYDRA_ADMIN_URL

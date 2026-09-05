@@ -22,6 +22,19 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            failureThreshold: 30
+            periodSeconds: 5
           env:
             - name: HTTP_ADDR
               value: 0.0.0.0:8080
@@ -39,47 +52,28 @@ spec:
               value: http://hrm-service:8080
             - name: IAM_SERVICE_URL
               value: http://iam-service:8080
-            - name: IAM_SERVICE_URL
-              value: http://iam-service:8080
             - name: AI_ENABLE_AGENT
               value: "true"
-            - name: AI_KNOWLEDGE_VECTOR
-              value: "true"
-            # --- AI Gateway go-live (docs/ai/agent-evolution-roadmap.md §3.5) ---
-            # Gateway auth is ON (probe returns AiGatewayError 401), so requests
-            # need AI_MODEL_GATEWAY_TOKEN in arda-app-secrets (create it in
-            # AI Gateway → Authentication first). opencode/zen also needs a
-            # gateway route (custom provider) or a standard provider path.
-            # Until that exists, model traffic stays direct. Flipping all four
-            # at once switches the whole fleet:
-            # - name: AI_MODEL_BASE_URL
-            #   value: https://gateway.ai.cloudflare.com/v1/8daf04d9f3a2a26d996661b3a67d8710/arda/openai
-            # - name: AI_MODEL_BASE_URL_ALLOWLIST
-            #   value: https://gateway.ai.cloudflare.com
-            # - name: AI_MODEL_GATEWAY_TOKEN
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: arda-app-secrets
-            #       key: AI_MODEL_GATEWAY_TOKEN
             - name: AI_MODEL_BASE_URL
               value: https://api.b.ai/v1
             - name: AI_MODEL_ID
               value: deepseek-v4-flash
-            # Base URL / Model ID above are display defaults for the settings
-            # dialog (and spike-mode fallback); the runtime key comes from the
-            # saved tenant configuration (ai_tenant_settings), so no model API
-            # key is injected into this deployment.
-            - name: AI_EMBEDDING_PROVIDER
-              value: workersai
-            - name: AI_EMBEDDING_MODEL
+            # Embedding is intentionally explicit. The service accepts an
+            # OpenAI-compatible /embeddings endpoint; leaving this unset keeps
+            # production ingestion fail-closed until a compatible provider and
+            # secret are provisioned.
+            - name: AI_RAG_EMBEDDING_BASE_URL
+              value: ""
+            - name: AI_RAG_EMBEDDING_MODEL
               value: "@cf/qwen/qwen3-embedding-0.6b"
-            - name: AI_EMBEDDING_ACCOUNT_ID
-              value: "8daf04d9f3a2a26d996661b3a67d8710"
-            - name: AI_EMBEDDING_API_TOKEN
+            - name: AI_RAG_EMBEDDING_DIMENSIONS
+              value: "1024"
+            - name: AI_RAG_EMBEDDING_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: arda-app-secrets
-                  key: AI_EMBEDDING_API_TOKEN
+                  key: AI_RAG_EMBEDDING_API_KEY
+                  optional: true
             - name: ARDA_SERVICE_AUTH_SECRET
               valueFrom:
                 secretKeyRef:
