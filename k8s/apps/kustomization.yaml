@@ -10,3 +10,4 @@ resources:
   - crm-service.yaml
   - hrm-service.yaml
   - notification-service.yaml
+  - mdm-service.yaml

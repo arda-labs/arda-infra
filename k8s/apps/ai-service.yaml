@@ -58,6 +58,12 @@ spec:
               value: https://api.b.ai/v1
             - name: AI_MODEL_ID
               value: deepseek-v4-flash
+            - name: NATS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: arda-app-secrets
+                  key: NATS_URL
+                  optional: true
             # Embedding is intentionally explicit. The service accepts an
             # OpenAI-compatible /embeddings endpoint; leaving this unset keeps
             # production ingestion fail-closed until a compatible provider and

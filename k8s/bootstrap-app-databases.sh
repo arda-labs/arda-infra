@@ -35,7 +35,8 @@ for item in \
   arda_workflow:workflow \
   arda_crm:crm \
   arda_hrm:hrm \
-  arda_notification:notification
+  arda_notification:notification \
+  arda_mdm:mdm
 do
   role="${item%%:*}"
   db="${item##*:}"
