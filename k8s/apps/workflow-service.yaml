@@ -63,6 +63,8 @@ spec:
               value: iam-service:9090
             - name: NOTIFICATION_GRPC_ADDR
               value: notification-service:9095
+            - name: LOAN_GRPC_ADDR
+              value: loan-service:9090
           volumeMounts:
             - name: grpc-tls
               mountPath: /var/run/arda-grpc-tls

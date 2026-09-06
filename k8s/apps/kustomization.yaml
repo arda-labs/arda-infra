@@ -11,3 +11,4 @@ resources:
   - hrm-service.yaml
   - notification-service.yaml
   - mdm-service.yaml
+  - loan-service.yaml
