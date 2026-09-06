@@ -17,7 +17,7 @@ spec:
         - name: ghcr-pull
       containers:
         - name: loan-service
-          image: ghcr.io/arda-labs/arda-be/loan-service:bootstrap
+          image: ghcr.io/arda-labs/arda-be/loan-service:main
           imagePullPolicy: Always
           ports:
             - name: http
