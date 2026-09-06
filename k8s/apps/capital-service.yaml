@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: capital-service
+  namespace: arda-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: capital-service
+  template:
+    metadata:
+      labels:
+        app: capital-service
+    spec:
+      imagePullSecrets:
+        - name: ghcr-pull
+      containers:
+        - name: capital-service
+          image: ghcr.io/arda-labs/arda-be/capital-service:main
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8100
+          env:
+            - name: HTTP_ADDR
+              value: 0.0.0.0:8100
+            - name: LOG_LEVEL
+              value: info
+            - name: DATABASE_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: arda-app-secrets
+                  key: CAPITAL_DATABASE_DSN
+            - name: FINANCE_GRPC_ADDR
+              value: finance-service:9096
+            - name: ARDA_SERVICE_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: arda-app-secrets
+                  key: ARDA_SERVICE_AUTH_SECRET
+            - name: ARDA_GRPC_CA_FILE
+              value: /var/run/arda-grpc-tls/ca.crt
+            - name: ARDA_GRPC_CERT_FILE
+              value: /var/run/arda-grpc-tls/tls.crt
+            - name: ARDA_GRPC_KEY_FILE
+              value: /var/run/arda-grpc-tls/tls.key
+          volumeMounts:
+            - name: grpc-tls
+              mountPath: /var/run/arda-grpc-tls
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20
+      volumes:
+        - name: grpc-tls
+          secret:
+            secretName: arda-grpc-tls-deposit
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: capital-service
+  namespace: arda-app
+spec:
+  selector:
+    app: capital-service
+  ports:
+    - name: http
+      port: 8100
+      targetPort: http

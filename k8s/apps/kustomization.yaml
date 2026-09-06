@@ -12,3 +12,6 @@ resources:
   - notification-service.yaml
   - mdm-service.yaml
   - loan-service.yaml
+  - deposit-service.yaml
+  - capital-service.yaml
+  - statistical-service.yaml
