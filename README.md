@@ -90,15 +90,6 @@ Optional local-only Postgres NodePort:
 kubectl apply -k database/nodeport
 ```
 
-## MDM service (scaffold)
-
-`mdm-service` (Master Data Management) exists in `arda-be/apps` as a scaffold:
-it is referenced by `traefik/dynamic.yml` (router `mdm-api`) and by
-`auth-gateway` (`MDM_SERVICE_URL=http://mdm-service:8080`), but it has no
-dedicated manifest in `k8s/apps/` yet and no image in
-`argocd/image-updater.yaml`. Do not deploy it until its Go implementation lands
-in `arda-be`.
-
 ## Workflow runtime
 
 Arda targets Zeebe 8.5 through the Zeebe Gateway. `workflow-service` is the
