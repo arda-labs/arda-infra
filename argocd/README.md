@@ -101,10 +101,14 @@ internal gRPC calls. It is injected through `secretKeyRef`; do not put it in a
 manifest, ConfigMap, image or Git history. Rotate it through a coordinated
 rolling deployment because old and new workload tokens overlap for one minute.
 
-Internal gRPC also requires one cluster-local mTLS Secret per workload:
-`arda-grpc-tls-crm`, `arda-grpc-tls-iam`, `arda-grpc-tls-platform`,
-`arda-grpc-tls-workflow`, `arda-grpc-tls-hrm`, `arda-grpc-tls-finance`,
-`arda-grpc-tls-media`, and `arda-grpc-tls-notification`.
+Internal gRPC also requires one cluster-local mTLS Secret per workload that
+serves gRPC. The eight original triplets (`arda-grpc-tls-crm`,
+`arda-grpc-tls-iam`, `arda-grpc-tls-platform`, `arda-grpc-tls-workflow`,
+`arda-grpc-tls-hrm`, `arda-grpc-tls-finance`, `arda-grpc-tls-media`,
+`arda-grpc-tls-notification`) are provisioned; the newer gRPC services
+(`loan`, `deposit`, `capital`, `statistical`) need their own triplets
+provisioned through the same runbook before enabling internal gRPC calls
+toward them.
 Each Secret contains only `ca.crt`, `tls.crt`, and `tls.key`, is mounted
 read-only at `/var/run/arda-grpc-tls`, and must be provisioned through the
 approved secret-management process. See
@@ -125,6 +129,11 @@ kubectl create secret generic arda-app-secrets -n arda-app \
   --from-literal=CRM_DATABASE_DSN='<crm-dsn>' \
   --from-literal=HRM_DATABASE_DSN='<hrm-dsn>' \
   --from-literal=NOTIFICATION_DATABASE_DSN='<notification-dsn>' \
+  --from-literal=MDM_DATABASE_DSN='<mdm-dsn>' \
+  --from-literal=LOAN_DATABASE_DSN='<loan-dsn>' \
+  --from-literal=DEPOSIT_DATABASE_DSN='<deposit-dsn>' \
+  --from-literal=CAPITAL_DATABASE_DSN='<capital-dsn>' \
+  --from-literal=STATISTICAL_DATABASE_DSN='<statistical-dsn>' \
   --from-literal=ARDA_SERVICE_AUTH_SECRET='<random-value-at-least-32-chars>' \
   --from-literal=REDIS_URL='redis-sentinel://:<valkey-password>@valkey.platform.svc.cluster.local:26379/myprimary' \
   --from-literal=NATS_URL='nats://<nats-endpoint>' \
@@ -135,8 +144,10 @@ kubectl create secret generic arda-app-secrets -n arda-app \
 
 Argo CD Image Updater is configured (`argocd/image-updater.yaml`,
 `writeBackConfig.method: argocd`), so it updates image digests in-cluster on
-each GHCR push. Most backend manifests (`auth-gateway`, `crm-service`,
-`finance-service`, `iam-service`, `media-service`, `notification-service`,
-`platform-service`) already carry SHA-digest image tags. A few still use the
-`:main` tag (`ai-service`, `hrm-service`, `workflow-service`) — they are
+each GHCR push. Backend manifests with SHA-digest image tags (`auth-gateway`,
+`crm-service`, `finance-service`, `iam-service`, `media-service`,
+`notification-service`, `platform-service`) are pinned to exact builds. The
+remaining eight still use the `:main` tag (`ai-service`, `hrm-service`,
+`workflow-service`, `loan-service`, `mdm-service`, `deposit-service`,
+`capital-service`, `statistical-service`) — they are
 updated on the next successful Image Updater run.

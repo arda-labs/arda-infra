@@ -102,8 +102,11 @@ environment evidence.
 
 Run `platform/bootstrap/verify-runtime-secrets.sh` against the target cluster
 before applying workload revisions. It checks required database/broker/workload
-keys and all eight mTLS Secret triplets without printing Secret values; it fails
-closed on a missing `HRM_DATABASE_DSN` or certificate Secret.
+keys and all eight mTLS Secret triplets (crm, iam, platform, workflow, hrm,
+finance, media, notification) without printing Secret values; it fails
+closed on a missing `HRM_DATABASE_DSN` or certificate Secret. Note the newer
+gRPC services (loan, deposit, capital, statistical) are not yet covered by the
+script's triplet list — extend it when provisioning their certificates.
 
 ## Current evidence snapshot
 

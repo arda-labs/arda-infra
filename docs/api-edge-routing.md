@@ -1,6 +1,6 @@
 # API edge routing
 
-Last updated: 2026-08-22
+Last updated: 2026-09-07
 
 ## Production topology
 
@@ -35,9 +35,10 @@ it in Cloudflare, update this document in the same change.
 `platform-public`/`platform-api`, `workflow-api`, `iam-public`) forward
 service-specific path prefixes, and the `arda-forward-auth` middleware enforces
 forward-auth through the gateway. Services not listed there (crm, finance,
-hrm, media, notification, ai) are reached through auth-gateway's own proxy
-routes (`k8s/apps/auth-gateway.yaml`). `mdm-service` has a Traefik router and
-service entry but no dedicated `k8s/apps` manifest yet — it is a scaffold.
+hrm, media, notification, ai, loan, deposit, capital, statistical) are reached
+through auth-gateway's own proxy routes (`k8s/apps/auth-gateway.yaml`).
+`mdm-service` has a Traefik router (`mdm-api`) plus a dedicated
+`k8s/apps/mdm-service.yaml` manifest tracked by the Image Updater.
 
 ## Migration compatibility
 

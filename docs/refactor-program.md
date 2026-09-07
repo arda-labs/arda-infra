@@ -3,7 +3,12 @@
 Status: execution in progress; runtime changes are landed only with their
 corresponding backend/frontend contract and verification evidence.
 
-Last updated: 2026-08-25
+Last updated: 2026-09-07
+
+Post-2026-08-25 additions reflected in the manifests: `loan`, `mdm`,
+`deposit`, `capital` and `statistical` services now have `k8s/apps` manifests
+and Image Updater tracking (commits `89983e5`, `cb19db7`, `802cf29`); container
+ports are unified at HTTP 8080 / gRPC 9090 (`ae8b8de`).
 
 Runtime evidence status: repository render and CI gates are prepared; the local
 environment currently has no configured Kubernetes context, so cluster rollout,
