@@ -59,6 +59,31 @@ spec:
           commonUpdateSettings:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: loanservice
+          imageName: ghcr.io/arda-labs/arda-be/loan-service:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: mdmservice
+          imageName: ghcr.io/arda-labs/arda-be/mdm-service:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: depositservice
+          imageName: ghcr.io/arda-labs/arda-be/deposit-service:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: capitalservice
+          imageName: ghcr.io/arda-labs/arda-be/capital-service:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: statisticalservice
+          imageName: ghcr.io/arda-labs/arda-be/statistical-service:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull
     - namePattern: arda-frontend
       images:
         - alias: web
