@@ -58,6 +58,14 @@ spec:
               value: http://ai-service:8080
             - name: RAG_SERVICE_URL
               value: http://ai-service:8080
+            - name: LOAN_SERVICE_URL
+              value: http://loan-service:8080
+            - name: DEPOSIT_SERVICE_URL
+              value: http://deposit-service:8080
+            - name: CAPITAL_SERVICE_URL
+              value: http://capital-service:8080
+            - name: STATISTICAL_SERVICE_URL
+              value: http://statistical-service:8080
             # The Go ai-service serves the AG-UI/SSE contract directly; the
             # separate Node runtime and legacy envelope are retired.
             - name: KRATOS_PUBLIC_URL

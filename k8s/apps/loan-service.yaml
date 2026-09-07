@@ -37,7 +37,7 @@ spec:
                   name: arda-app-secrets
                   key: LOAN_DATABASE_DSN
             - name: WORKFLOW_GRPC_ADDR
-              value: workflow-service:9093
+              value: workflow-service:9090
             - name: ARDA_SERVICE_AUTH_SECRET
               valueFrom:
                 secretKeyRef:

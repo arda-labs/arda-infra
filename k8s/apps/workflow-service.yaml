@@ -62,9 +62,15 @@ spec:
             - name: IAM_GRPC_ADDR
               value: iam-service:9090
             - name: NOTIFICATION_GRPC_ADDR
-              value: notification-service:9095
+              value: notification-service:9090
             - name: LOAN_GRPC_ADDR
               value: loan-service:9090
+            - name: FINANCE_GRPC_ADDR
+              value: finance-service:9090
+            - name: HRM_GRPC_ADDR
+              value: hrm-service:9090
+            - name: DEPOSIT_GRPC_ADDR
+              value: deposit-service:9090
           volumeMounts:
             - name: grpc-tls
               mountPath: /var/run/arda-grpc-tls
