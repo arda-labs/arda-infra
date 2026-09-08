@@ -54,24 +54,23 @@ spec:
               value: http://iam-service:8080
             - name: AI_ENABLE_AGENT
               value: "true"
-            - name: AI_MODEL_BASE_URL
-              value: https://api.b.ai/v1
-            - name: AI_MODEL_ID
-              value: deepseek-v4-flash
+            # Chat model is tenant-managed: providers resolve per tenant from
+            # ai_tenant_settings (AI Settings UI, keys encrypted at rest with
+            # ARDA_SERVICE_AUTH_SECRET). No deployment-level AI_MODEL_* env.
             - name: NATS_URL
               valueFrom:
                 secretKeyRef:
                   name: arda-app-secrets
                   key: NATS_URL
                   optional: true
-            # Embedding is intentionally explicit. The service accepts an
-            # OpenAI-compatible /embeddings endpoint; leaving this unset keeps
-            # production ingestion fail-closed until a compatible provider and
-            # secret are provisioned.
+            # Embedding goes through the Cloudflare AI Gateway universal
+            # endpoint (workers-ai provider). The service expects an
+            # OpenAI-compatible /embeddings API; the key lives in
+            # arda-app-secrets/AI_RAG_EMBEDDING_API_KEY.
             - name: AI_RAG_EMBEDDING_BASE_URL
-              value: ""
+              value: https://ai-gateway.arda.io.vn/compat
             - name: AI_RAG_EMBEDDING_MODEL
-              value: "@cf/qwen/qwen3-embedding-0.6b"
+              value: "workers-ai/@cf/qwen/qwen3-embedding-0.6b"
             - name: AI_RAG_EMBEDDING_DIMENSIONS
               value: "1024"
             - name: AI_RAG_EMBEDDING_API_KEY
