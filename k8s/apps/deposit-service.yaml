@@ -38,6 +38,8 @@ spec:
                   key: DEPOSIT_DATABASE_DSN
             - name: FINANCE_GRPC_ADDR
               value: finance-service:9090
+            - name: WORKFLOW_GRPC_ADDR
+              value: workflow-service:9090
             - name: ARDA_SERVICE_AUTH_SECRET
               valueFrom:
                 secretKeyRef:
