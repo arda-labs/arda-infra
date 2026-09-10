@@ -65,6 +65,14 @@ spec:
                   name: arda-app-secrets
                   key: NATS_URL
                   optional: true
+            # Shared rate-limit window across replicas; falls back to the
+            # in-process limiter when Redis is unreachable.
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: arda-app-secrets
+                  key: REDIS_URL
+                  optional: true
             # Embedding goes through the Cloudflare AI Gateway universal
             # endpoint (workers-ai provider). The service expects an
             # OpenAI-compatible /embeddings API; the key lives in
