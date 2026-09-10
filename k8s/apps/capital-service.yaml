@@ -22,9 +22,13 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+            - name: grpc
+              containerPort: 9090
           env:
             - name: HTTP_ADDR
               value: 0.0.0.0:8080
+            - name: GRPC_ADDR
+              value: 0.0.0.0:9090
             - name: LOG_LEVEL
               value: info
             - name: DATABASE_DSN
@@ -34,6 +38,8 @@ spec:
                   key: CAPITAL_DATABASE_DSN
             - name: FINANCE_GRPC_ADDR
               value: finance-service:9090
+            - name: WORKFLOW_GRPC_ADDR
+              value: workflow-service:9090
             - name: ARDA_SERVICE_AUTH_SECRET
               valueFrom:
                 secretKeyRef:
@@ -64,7 +70,7 @@ spec:
       volumes:
         - name: grpc-tls
           secret:
-            secretName: arda-grpc-tls-deposit
+            secretName: arda-grpc-tls-capital
 ---
 apiVersion: v1
 kind: Service
@@ -78,3 +84,6 @@ spec:
     - name: http
       port: 8080
       targetPort: http
+    - name: grpc
+      port: 9090
+      targetPort: grpc
