@@ -56,8 +56,6 @@ spec:
             # Falls back to https://docs.arda.io.vn in code when unset.
             - name: PROBLEM_DOCS_URL
               value: https://docs.arda.io.vn
-            - name: AI_ENABLE_AGENT
-              value: "true"
             # Chat model is tenant-managed: providers resolve per tenant from
             # ai_tenant_settings (AI Settings UI, keys encrypted at rest with
             # ARDA_SERVICE_AUTH_SECRET). No deployment-level AI_MODEL_* env.
