@@ -52,6 +52,10 @@ spec:
               value: http://hrm-service:8080
             - name: IAM_SERVICE_URL
               value: http://iam-service:8080
+            # Public problem-catalog site backing arda.docs.problemLookup.
+            # Falls back to https://docs.arda.io.vn in code when unset.
+            - name: PROBLEM_DOCS_URL
+              value: https://docs.arda.io.vn
             - name: AI_ENABLE_AGENT
               value: "true"
             # Chat model is tenant-managed: providers resolve per tenant from
