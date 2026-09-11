@@ -31,7 +31,8 @@ for key in "${required_keys[@]}"; do
 done
 
 if [[ "$REQUIRE_MTLS" == "true" ]]; then
-  for service in crm iam platform workflow hrm finance media notification; do
+  ca_hashes=()
+  for service in capital crm deposit finance hrm iam loan media notification platform statistical workflow; do
     secret="arda-grpc-tls-$service"
     kubectl get secret "$secret" -n "$NAMESPACE" >/dev/null
     for key in ca.crt tls.crt tls.key; do
@@ -41,7 +42,16 @@ if [[ "$REQUIRE_MTLS" == "true" ]]; then
         exit 1
       fi
     done
+    ca_hashes+=("$(kubectl get secret "$secret" -n "$NAMESPACE" -o "jsonpath={.data.ca\.crt}" | sha256sum | cut -d' ' -f1)")
   done
+  # Every service must trust the same CA bundle(s): a mismatched ca.crt turns
+  # cross-service mTLS into a handshake failure (transport: failed to verify
+  # certificate). Keep the bundle identical (union of all CAs) across secrets.
+  unique_cas="$(printf '%s\n' "${ca_hashes[@]}" | sort -u | wc -l | tr -d ' ')"
+  if [[ "$unique_cas" != "1" ]]; then
+    echo "arda-grpc-tls-* ca.crt is inconsistent across services ($unique_cas distinct bundles); cross-service mTLS will fail" >&2
+    exit 1
+  fi
 fi
 
 echo "Runtime secret references OK: $NAMESPACE/$SECRET_NAME"
