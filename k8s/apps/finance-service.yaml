@@ -55,6 +55,8 @@ spec:
               value: "2"
             - name: PLATFORM_GRPC_ADDR
               value: platform-service:9090
+            - name: LOAN_GRPC_ADDR
+              value: loan-service:9090
             - name: NATS_URL
               valueFrom:
                 secretKeyRef:
