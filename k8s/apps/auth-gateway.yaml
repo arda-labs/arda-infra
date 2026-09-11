@@ -72,6 +72,8 @@ spec:
               value: https://identity.arda.io.vn
             - name: HYDRA_ADMIN_URL
               value: http://hydra-admin.auth.svc.cluster.local:4445
+            - name: INTROSPECTION_URL
+              value: http://hydra-admin.auth.svc.cluster.local:4445/oauth2/introspect
             - name: HYDRA_PUBLIC_URL
               value: https://auth.arda.io.vn
             - name: OAUTH_CLIENT_ID
