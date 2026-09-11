@@ -1,0 +1,69 @@
+# Gotenberg 8 — stateless conversion service (MIT, gotenberg/gotenberg).
+# Renders HTML→PDF (Chromium) and Office→PDF (LibreOffice) for the document
+# pipeline in arda-be libs/go/arda-doc. Image bundles Noto fonts, so
+# Vietnamese diacritics render correctly out of the box. ClusterIP only:
+# in-cluster consumers only, no ingress, no secrets needed.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gotenberg
+  namespace: platform
+  labels:
+    app: gotenberg
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gotenberg
+  template:
+    metadata:
+      labels:
+        app: gotenberg
+    spec:
+      containers:
+        - name: gotenberg
+          image: gotenberg/gotenberg:8.36.0
+          # LibreOffice serializes conversions behind an internal lock; a
+          # 120s API timeout covers statement-sized documents without
+          # wedging Chromium requests.
+          args:
+            - gotenberg
+            - --api-timeout=120s
+          ports:
+            - containerPort: 3000
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gotenberg
+  namespace: platform
+  labels:
+    app: gotenberg
+spec:
+  type: ClusterIP
+  selector:
+    app: gotenberg
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http

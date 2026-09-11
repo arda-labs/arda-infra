@@ -9,3 +9,4 @@ resources:
   - garage/garage-webui.yaml
   - garage/garage-webui-ingress.yaml
   - garage/garage-s3-ingress.yaml
+  - gotenberg/gotenberg.yaml
