@@ -69,12 +69,12 @@ spec:
               value: finance-service:9090
             - name: HRM_GRPC_ADDR
               value: hrm-service:9090
-        - name: DEPOSIT_GRPC_ADDR
-          value: deposit-service:9090
-        - name: CAPITAL_GRPC_ADDR
-          value: capital-service:9090
-        - name: STATISTICAL_GRPC_ADDR
-          value: statistical-service:9090
+            - name: DEPOSIT_GRPC_ADDR
+              value: deposit-service:9090
+            - name: CAPITAL_GRPC_ADDR
+              value: capital-service:9090
+            - name: STATISTICAL_GRPC_ADDR
+              value: statistical-service:9090
           volumeMounts:
             - name: grpc-tls
               mountPath: /var/run/arda-grpc-tls
