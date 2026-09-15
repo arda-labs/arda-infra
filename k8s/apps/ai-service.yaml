@@ -52,6 +52,25 @@ spec:
               value: http://hrm-service:8080
             - name: IAM_SERVICE_URL
               value: http://iam-service:8080
+            # Wave-1 AI read tools (WS5). The generated catalog refuses to
+            # start in production when a contracted service is unwired.
+            - name: WORKFLOW_SERVICE_URL
+              value: http://workflow-service:8080
+            - name: NOTIFICATION_SERVICE_URL
+              value: http://notification-service:8080
+            - name: PLATFORM_SERVICE_URL
+              value: http://platform-service:8080
+            - name: MDM_SERVICE_URL
+              value: http://mdm-service:8080
+            # Wave-2 AI read tools.
+            - name: CAPITAL_SERVICE_URL
+              value: http://capital-service:8080
+            - name: STATISTICAL_SERVICE_URL
+              value: http://statistical-service:8080
+            - name: LOAN_SERVICE_URL
+              value: http://loan-service:8080
+            - name: DEPOSIT_SERVICE_URL
+              value: http://deposit-service:8080
             # Public problem-catalog site backing arda.docs.problemLookup.
             # Falls back to https://docs.arda.io.vn in code when unset.
             - name: PROBLEM_DOCS_URL

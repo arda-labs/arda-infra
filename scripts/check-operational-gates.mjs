@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises"
+import { readdir, readFile } from "node:fs/promises"
 
 const files = [
   "platform/bootstrap/backup.sh",
@@ -33,8 +33,32 @@ if (/kubectl\s+apply|helm\s+(install|upgrade)/i.test(restore)) {
 }
 
 const secrets = sources.get(files[3])
-for (const required of ["HRM_DATABASE_DSN", "ARDA_SERVICE_AUTH_SECRET", 'for service in crm iam platform workflow hrm finance media notification', 'secret="arda-grpc-tls-$service"']) {
+for (const required of ["HRM_DATABASE_DSN", "ARDA_SERVICE_AUTH_SECRET", 'secret="arda-grpc-tls-$service"']) {
   if (!secrets.includes(required)) throw new Error(`verify-runtime-secrets.sh: missing ${required}`)
+}
+
+// Every Deployment that mounts an arda-grpc-tls-* secret must be covered by the
+// verifier's mTLS service loop: a manifest added without updating the bootstrap
+// verifier would deploy a service nobody checked for mTLS readiness.
+const forLine = secrets.match(/for service in ([a-z0-9 ]+); do/)
+if (!forLine) {
+  throw new Error("verify-runtime-secrets.sh: mTLS service loop not found")
+}
+const covered = new Set(forLine[1].trim().split(/\s+/))
+const uncoveredMtls = []
+for (const name of await readdir("k8s/apps")) {
+  if (!name.endsWith(".yaml")) continue
+  const manifest = await readFile(`k8s/apps/${name}`, "utf8")
+  for (const ref of manifest.match(/arda-grpc-tls-([a-z-]+)/g) ?? []) {
+    if (!covered.has(ref.replace("arda-grpc-tls-", ""))) {
+      uncoveredMtls.push(`${name}: ${ref}`)
+    }
+  }
+}
+if (uncoveredMtls.length > 0) {
+  throw new Error(
+    `verify-runtime-secrets.sh: mTLS services not covered by the for-loop: ${uncoveredMtls.join(", ")}`,
+  )
 }
 
 const notificationManifest = await readFile("k8s/apps/notification-service.yaml", "utf8")
