@@ -1,20 +1,4 @@
 resources:
   - namespaces.yaml
-  - monitoring/victoria-metrics.yaml
-  - monitoring/monitoring-ingress.yaml
-  - monitoring/grafana.yaml
+  - monitoring
   - apps
-
-# Dashboard JSON lives as real files next to the manifests and is turned into
-# ConfigMaps here so both UIs can mount them read-only.
-configMapGenerator:
-  - name: vmui-dashboards
-    files:
-      - monitoring/dashboards/arda-overview.json
-    options:
-      disableNameSuffixHash: true
-  - name: grafana-dashboards
-    files:
-      - monitoring/dashboards/grafana-arda-overview.json
-    options:
-      disableNameSuffixHash: true
