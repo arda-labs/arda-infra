@@ -3,7 +3,9 @@ http:
     arda-forward-auth:
       forwardAuth:
         address: "http://auth-gateway:8080/auth/check"
-        trustForwardHeader: true
+        # Do not trust client-supplied X-Forwarded-Uri/Method: the gateway picks
+        # the policy route from those headers, so Traefik must generate them.
+        trustForwardHeader: false
         authResponseHeaders:
           - "X-User-Id"
           - "X-User-Subject"
@@ -14,6 +16,9 @@ http:
           - "X-User-Group-Ids"
           - "X-Roles"
           - "X-Permissions"
+          - "X-Global-Roles"
+          - "X-Global-Permissions"
+          - "X-Global-Admin"
           - "X-Auth-Version"
           - "X-Auth-Risk"
           - "X-Auth-Checked"
