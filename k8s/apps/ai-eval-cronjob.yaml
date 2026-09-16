@@ -1,0 +1,59 @@
+# Golden-set retrieval regression run (audit-2026-09 item A8).
+#
+# GitHub-hosted runners cannot reach the LAN-only cluster, so the eval runs
+# from inside it: the ai-service image bundles cmd/ai-eval (built by its
+# Dockerfile) and a verified copy of the dev golden set. The job signs its
+# requests with the shared workload secret, calls /api/rag/query on the service,
+# and fails (exit 2, AI_EVAL_STRICT=1) when recall or the no-answer cases
+# regress. Inspect runs with:
+#   kubectl -n arda-app logs job/ai-eval-<timestamp>
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ai-eval
+  namespace: arda-app
+spec:
+  schedule: "0 6 * * *"
+  timeZone: Asia/Ho_Chi_Minh
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 600
+      template:
+        metadata:
+          labels:
+            app: ai-eval
+        spec:
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: ghcr-pull
+          containers:
+            - name: ai-eval
+              image: ghcr.io/arda-labs/arda-be/ai-service:main
+              imagePullPolicy: Always
+              command: ["/app/ai-eval"]
+              env:
+                - name: AI_EVAL_SET
+                  value: /app/eval/evaluation-set.yaml
+                - name: AI_EVAL_BASE_URL
+                  value: http://ai-service:8080
+                - name: AI_EVAL_STRICT
+                  value: "1"
+                - name: AI_EVAL_USER_ID
+                  value: ai-eval-cronjob
+                - name: AI_EVAL_SERVICE_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: arda-app-secrets
+                      key: ARDA_SERVICE_AUTH_SECRET
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  cpu: 200m
+                  memory: 128Mi

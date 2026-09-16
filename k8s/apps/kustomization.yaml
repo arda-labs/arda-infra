@@ -1,5 +1,6 @@
 resources:
   - ai-service.yaml
+  - ai-eval-cronjob.yaml
   - auth-gateway-ingress.yaml
   - auth-gateway.yaml
   - iam-service.yaml
