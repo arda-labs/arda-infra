@@ -19,6 +19,12 @@ spec:
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace
+    # Needed by the monitoring stack: Alloy log shipping, kube-state-metrics
+    # and the vmsingle kubelet scrape all use cluster-scoped RBAC.
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
   namespaceResourceWhitelist:
     - group: "*"
       kind: "*"
