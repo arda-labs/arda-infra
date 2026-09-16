@@ -1,4 +1,5 @@
 resources:
   - namespaces.yaml
   - monitoring/victoria-metrics.yaml
+  - monitoring/monitoring-ingress.yaml
   - apps

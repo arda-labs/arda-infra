@@ -1,0 +1,45 @@
+# Monitoring UIs. These Ingresses only make the UIs reachable inside the
+# cluster (through the Traefik ingress class used by every other host); they do
+# NOT expose anything publicly until a Cloudflare Tunnel public hostname is
+# added for the same host, and that host MUST sit behind a Cloudflare Access
+# policy — VMUI and vmalert have no authentication of their own.
+#
+# VictoriaMetrics VMUI: query, graphing, and raw metric exploration.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: monitoring-vmui
+  namespace: monitoring
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: monitoring.arda.io.vn
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vmsingle
+                port:
+                  number: 8428
+---
+# vmalert UI: rule state, firing alerts, evaluation errors.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: monitoring-vmalert
+  namespace: monitoring
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: monitoring-alerts.arda.io.vn
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vmalert
+                port:
+                  number: 8880
