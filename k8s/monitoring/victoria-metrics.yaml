@@ -192,6 +192,9 @@ spec:
             - -remoteRead.url=http://vmsingle:8428
             - -remoteWrite.url=http://vmsingle:8428
             - -rule=/etc/alerts/*.yml
+            # No delivery channel yet (Alertmanager/Telegram): evaluate and
+            # log firing alerts instead of refusing to start.
+            - -notifier.blackhole
             - -evaluationInterval=30s
             - -httpListenAddr=:8880
             - -loggerLevel=INFO
