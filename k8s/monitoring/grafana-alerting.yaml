@@ -1,0 +1,339 @@
+# Grafana alert rules, provisioned from files. This replaces vmalert: Grafana
+# evaluates the rules against the VictoriaMetrics datasource (uid `vm`) and owns
+# the alert state visible in Alerting -> Alert rules.
+#
+# Editing: file provisioning is read when Grafana starts, so either
+#   kubectl -n monitoring rollout restart deploy/grafana
+# or hot-reload without a restart:
+#   POST /api/admin/provisioning/alerting/reload
+#
+# Notification delivery: rules carry severity/service labels but only show up in
+# the Grafana UI until a Telegram contact point exists. To enable Telegram,
+# create the contact point in the UI (Alerting -> Contact points, type
+# Telegram, bot token + chat id) and set it as the default receiver in
+# Alerting -> Notification policies — no manifest change needed. The
+# `telegram-alerts` secret in the cluster is what Gatus uses for the same bot.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-alerting
+  namespace: monitoring
+data:
+  rules.yaml: |
+    apiVersion: 1
+    groups:
+      - orgId: 1
+        name: arda-ai
+        folder: Arda
+        interval: 1m
+        rules:
+          - uid: arda-ai-event-publish-failures
+            title: ArdaAiEventPublishFailures
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange: { from: 900, to: 0 }
+                datasourceUid: vm
+                model:
+                  datasource: { type: prometheus, uid: vm }
+                  editorMode: code
+                  expr: 'increase(arda_ai_event_publish_failures_total[15m])'
+                  instant: true
+                  intervalMs: 1000
+                  legendFormat: __auto
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: B
+                relativeTimeRange: { from: 900, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [], type: gt }
+                      operator: { type: and }
+                      query: { params: [B] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  reducer: last
+                  refId: B
+                  type: reduce
+                  settings: { mode: dropNN }
+              - refId: C
+                relativeTimeRange: { from: 900, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [0], type: gt }
+                      operator: { type: and }
+                      query: { params: [C] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: B
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: threshold
+                  settings: {}
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            annotations:
+              summary: AI events are falling back to the in-memory buffer
+              description: '{{ $values.B }} NATS publish failures in the last 15m; the durable stream is not receiving AI events (audit-2026-09 A3).'
+            labels:
+              severity: warning
+              service: ai-service
+          - uid: arda-ai-model-unavailable
+            title: ArdaAiModelUnavailable
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange: { from: 900, to: 0 }
+                datasourceUid: vm
+                model:
+                  datasource: { type: prometheus, uid: vm }
+                  editorMode: code
+                  expr: 'increase(arda_ai_model_errors_total{code="ai.model_unavailable"}[15m])'
+                  instant: true
+                  intervalMs: 1000
+                  legendFormat: __auto
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: B
+                relativeTimeRange: { from: 900, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [], type: gt }
+                      operator: { type: and }
+                      query: { params: [B] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  reducer: last
+                  refId: B
+                  type: reduce
+                  settings: { mode: dropNN }
+              - refId: C
+                relativeTimeRange: { from: 900, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [0], type: gt }
+                      operator: { type: and }
+                      query: { params: [C] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: B
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: threshold
+                  settings: {}
+            noDataState: OK
+            execErrState: Error
+            for: 10m
+            annotations:
+              summary: Tenant AI model is unavailable
+              description: '{{ $values.B }} model-unavailable errors in the last 15m.'
+            labels:
+              severity: warning
+              service: ai-service
+          - uid: arda-ai-retrieval-embed-slow
+            title: ArdaAiRetrievalEmbedSlow
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange: { from: 1800, to: 0 }
+                datasourceUid: vm
+                model:
+                  datasource: { type: prometheus, uid: vm }
+                  editorMode: code
+                  expr: 'histogram_quantile(0.95, sum(rate(arda_ai_retrieval_embed_seconds_bucket[30m])) by (le))'
+                  instant: true
+                  intervalMs: 1000
+                  legendFormat: __auto
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: B
+                relativeTimeRange: { from: 1800, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [], type: gt }
+                      operator: { type: and }
+                      query: { params: [B] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  reducer: last
+                  refId: B
+                  type: reduce
+                  settings: { mode: dropNN }
+              - refId: C
+                relativeTimeRange: { from: 1800, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [5], type: gt }
+                      operator: { type: and }
+                      query: { params: [C] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: B
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: threshold
+                  settings: {}
+            noDataState: OK
+            execErrState: Error
+            for: 15m
+            annotations:
+              summary: Query embedding p95 above 5s
+              description: 'Embedding latency p95 is {{ $values.B }}s over 30m — knowledge searches may hit their deadline.'
+            labels:
+              severity: warning
+              service: ai-service
+          - uid: arda-ai-prompt-budget-high
+            title: ArdaAiPromptBudgetHigh
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange: { from: 3600, to: 0 }
+                datasourceUid: vm
+                model:
+                  datasource: { type: prometheus, uid: vm }
+                  editorMode: code
+                  expr: 'histogram_quantile(0.95, sum(rate(arda_ai_prompt_bytes_bucket[1h])) by (le))'
+                  instant: true
+                  intervalMs: 1000
+                  legendFormat: __auto
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: B
+                relativeTimeRange: { from: 3600, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [], type: gt }
+                      operator: { type: and }
+                      query: { params: [B] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  reducer: last
+                  refId: B
+                  type: reduce
+                  settings: { mode: dropNN }
+              - refId: C
+                relativeTimeRange: { from: 3600, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [131072], type: gt }
+                      operator: { type: and }
+                      query: { params: [C] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: B
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: threshold
+                  settings: {}
+            noDataState: OK
+            execErrState: Error
+            for: 30m
+            annotations:
+              summary: Prompt size p95 above 128 KiB
+              description: 'Context growth is approaching the budget; check history compaction (audit-2026-09 A6).'
+            labels:
+              severity: info
+              service: ai-service
+      - orgId: 1
+        name: arda-endpoints
+        folder: Arda
+        interval: 1m
+        rules:
+          - uid: arda-endpoint-down
+            title: ArdaEndpointDown
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange: { from: 300, to: 0 }
+                datasourceUid: vm
+                model:
+                  datasource: { type: prometheus, uid: vm }
+                  editorMode: code
+                  expr: 'count(gatus_results_endpoint_success == 0)'
+                  instant: true
+                  intervalMs: 1000
+                  legendFormat: __auto
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: B
+                relativeTimeRange: { from: 300, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [], type: gt }
+                      operator: { type: and }
+                      query: { params: [B] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  reducer: last
+                  refId: B
+                  type: reduce
+                  settings: { mode: dropNN }
+              - refId: C
+                relativeTimeRange: { from: 300, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [0], type: gt }
+                      operator: { type: and }
+                      query: { params: [C] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: B
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: threshold
+                  settings: {}
+            noDataState: OK
+            execErrState: Error
+            for: 2m
+            annotations:
+              summary: One or more Arda endpoints are failing their health check
+              description: '{{ $values.B }} endpoint(s) failing per Gatus; check the status page and the failing service logs.'
+            labels:
+              severity: critical
+              service: platform

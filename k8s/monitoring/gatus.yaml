@@ -1,0 +1,292 @@
+# Gatus (https://github.com/TwiN/gatus): the cheap "is every endpoint alive
+# right now?" layer, with a status page and Telegram notifications.
+#
+# Division of labour inside the monitoring namespace:
+#   - vmsingle   : metric storage + scraping (history, dashboards, Grafana Alerts)
+#   - Grafana    : the single UI (dashboards + alert rules + notification channel)
+#   - Gatus      : black-box endpoint watchdog (HTTP status/response time)
+#
+# Telegram: the provider is configured but stays inert until the cluster-local
+# `telegram-alerts` secret exists (keys: bot-token, chat-id). The env refs are
+# optional, so with the secret absent the variables resolve to empty strings,
+# Gatus logs "Ignoring provider=telegram" and keeps monitoring. Create the
+# secret and restart the deployment to turn notifications on.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gatus-config
+  namespace: monitoring
+data:
+  config.yaml: |
+    metrics: true
+    alerting:
+      telegram:
+        token: ${TELEGRAM_BOT_TOKEN}
+        id: ${TELEGRAM_CHAT_ID}
+        default-alert:
+          failure-threshold: 2
+          success-threshold: 2
+          description: "Arda endpoint health check failed"
+    endpoints:
+      # --- in-cluster services: readiness endpoint (process + dependencies) ---
+      - name: ai-service
+        group: arda-services
+        url: "http://ai-service.arda-app.svc.cluster.local:8080/health/ready"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: telegram
+      - name: auth-gateway
+        group: arda-services
+        url: "http://auth-gateway.arda-app.svc.cluster.local:8080/health/ready"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: telegram
+      - name: capital-service
+        group: arda-services
+        url: "http://capital-service.arda-app.svc.cluster.local:8080/health/ready"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: telegram
+      - name: crm-service
+        group: arda-services
+        url: "http://crm-service.arda-app.svc.cluster.local:8080/health/ready"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: telegram
+      - name: deposit-service
+        group: arda-services
+        url: "http://deposit-service.arda-app.svc.cluster.local:8080/health/ready"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: telegram
+      - name: finance-service
+        group: arda-services
+        url: "http://finance-service.arda-app.svc.cluster.local:8080/health/ready"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: telegram
+      - name: hrm-service
+        group: arda-services
+        url: "http://hrm-service.arda-app.svc.cluster.local:8080/health/ready"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: telegram
+      - name: iam-service
+        group: arda-services
+        url: "http://iam-service.arda-app.svc.cluster.local:8080/health/ready"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: telegram
+      - name: loan-service
+        group: arda-services
+        url: "http://loan-service.arda-app.svc.cluster.local:8080/health/ready"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: telegram
+      - name: mdm-service
+        group: arda-services
+        url: "http://mdm-service.arda-app.svc.cluster.local:8080/health/ready"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: telegram
+      - name: media-service
+        group: arda-services
+        url: "http://media-service.arda-app.svc.cluster.local:8080/health/ready"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: telegram
+      - name: notification-service
+        group: arda-services
+        url: "http://notification-service.arda-app.svc.cluster.local:8080/health/ready"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: telegram
+      - name: platform-service
+        group: arda-services
+        url: "http://platform-service.arda-app.svc.cluster.local:8080/health/ready"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: telegram
+      - name: statistical-service
+        group: arda-services
+        url: "http://statistical-service.arda-app.svc.cluster.local:8080/health/ready"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: telegram
+      - name: workflow-service
+        group: arda-services
+        url: "http://workflow-service.arda-app.svc.cluster.local:8080/health/ready"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: telegram
+      # --- public edge (Cloudflare -> Tunnel -> Traefik) ---
+      - name: web-app
+        group: arda-public
+        url: "https://arda.io.vn"
+        interval: 1m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: telegram
+      - name: api-gateway
+        group: arda-public
+        url: "https://api.arda.io.vn/health/live"
+        interval: 1m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: telegram
+      - name: docs-site
+        group: arda-public
+        url: "https://docs.arda.io.vn"
+        interval: 1m
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 5000"
+        alerts:
+          - type: telegram
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gatus
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gatus
+  template:
+    metadata:
+      labels:
+        app: gatus
+    spec:
+      containers:
+        - name: gatus
+          image: twinproduction/gatus:v5.36.0
+          env:
+            - name: GATUS_CONFIG_PATH
+              value: /config/config.yaml
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: telegram-alerts
+                  key: bot-token
+                  optional: true
+            - name: TELEGRAM_CHAT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: telegram-alerts
+                  key: chat-id
+                  optional: true
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: config
+          configMap:
+            name: gatus-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gatus
+  namespace: monitoring
+spec:
+  selector:
+    app: gatus
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+# Status page. Like the other monitoring UIs this is only reachable publicly
+# once a Cloudflare Tunnel hostname AND an Access policy are added; Gatus has no
+# authentication of its own.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: monitoring-gatus
+  namespace: monitoring
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: gatus.arda.io.vn
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gatus
+                port:
+                  number: 8080

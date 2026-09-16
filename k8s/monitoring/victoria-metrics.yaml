@@ -1,8 +1,8 @@
-# Minimal observability stack (audit-2026-09 A3): VictoriaMetrics scrapes the
-# Arda service /metrics endpoints (all 15 services expose arda_http_* there) and
-# vmalert evaluates the alert rules against it. Alert *delivery* still needs a
-# channel (Alertmanager/Telegram/email) — until then firing alerts are logged by
-# vmalert and exposed as vmalert_alerts_firing.
+# VictoriaMetrics single-node (audit-2026-09 A3): scrapes every Arda service
+# /metrics endpoint (all 15 services expose arda_http_* there) plus the
+# monitoring stack itself, and keeps 30 days of history. Alert evaluation lives
+# in Grafana now (k8s/monitoring/grafana-alerting.yaml) — vmalert was retired so
+# there is a single UI for dashboards, alert state and notifications.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -35,15 +35,15 @@ data:
               - workflow-service.arda-app.svc.cluster.local:8080
             labels:
               cluster: arda
-      # The monitoring stack supervises itself too: VictoriaMetrics, vmalert
-      # and Grafana own metrics are scraped as well.
+      # The monitoring stack supervises itself too: VictoriaMetrics, Grafana and
+      # Gatus own metrics are scraped as well.
       - job_name: monitoring
         metrics_path: /metrics
         static_configs:
           - targets:
               - vmsingle.monitoring.svc.cluster.local:8428
-              - vmalert.monitoring.svc.cluster.local:8880
               - grafana.monitoring.svc.cluster.local:3000
+              - gatus.monitoring.svc.cluster.local:8080
             labels:
               cluster: arda
 ---
@@ -78,7 +78,7 @@ spec:
     spec:
       containers:
         - name: vmsingle
-          image: victoriametrics/victoria-metrics:v1.102.1
+          image: victoriametrics/victoria-metrics:v1.152.0
           args:
             - -storageDataPath=/vm-data
             - -retentionPeriod=30d
@@ -136,118 +136,4 @@ spec:
   ports:
     - name: http
       port: 8428
-      targetPort: http
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: vmalert-rules
-  namespace: monitoring
-data:
-  arda-ai.yml: |
-    groups:
-      - name: arda-ai
-        interval: 1m
-        rules:
-          - alert: ArdaAiEventPublishFailures
-            expr: increase(arda_ai_event_publish_failures_total[15m]) > 0
-            for: 5m
-            labels:
-              severity: warning
-              service: ai-service
-            annotations:
-              summary: "AI events are falling back to the in-memory buffer"
-              description: "{{ $value }} NATS publish failures in the last 15m; the durable stream is not receiving AI events (audit-2026-09 A3)."
-          - alert: ArdaAiModelUnavailable
-            expr: increase(arda_ai_model_errors_total{code="ai.model_unavailable"}[15m]) > 0
-            for: 10m
-            labels:
-              severity: warning
-              service: ai-service
-            annotations:
-              summary: "Tenant AI model is unavailable"
-              description: "{{ $value }} model-unavailable errors in the last 15m."
-          - alert: ArdaAiRetrievalEmbedSlow
-            expr: histogram_quantile(0.95, sum(rate(arda_ai_retrieval_embed_seconds_bucket[30m])) by (le)) > 5
-            for: 15m
-            labels:
-              severity: warning
-              service: ai-service
-            annotations:
-              summary: "Query embedding p95 above 5s"
-              description: "Embedding latency p95 {{ $value }}s over 30m — knowledge searches may hit their deadline."
-          - alert: ArdaAiPromptBudgetHigh
-            expr: histogram_quantile(0.95, sum(rate(arda_ai_prompt_bytes_bucket[1h])) by (le)) > 131072
-            for: 30m
-            labels:
-              severity: info
-              service: ai-service
-            annotations:
-              summary: "Prompt size p95 above 128 KiB"
-              description: "Context growth is approaching the budget; check history compaction (audit-2026-09 A6)."
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: vmalert
-  namespace: monitoring
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: vmalert
-  template:
-    metadata:
-      labels:
-        app: vmalert
-    spec:
-      containers:
-        - name: vmalert
-          image: victoriametrics/vmalert:v1.102.1
-          args:
-            - -datasource.url=http://vmsingle:8428
-            - -remoteRead.url=http://vmsingle:8428
-            - -remoteWrite.url=http://vmsingle:8428
-            - -rule=/etc/alerts/*.yml
-            # No delivery channel yet (Alertmanager/Telegram): evaluate and
-            # log firing alerts instead of refusing to start.
-            - -notifier.blackhole
-            - -evaluationInterval=30s
-            - -httpListenAddr=:8880
-            - -loggerLevel=INFO
-          ports:
-            - name: http
-              containerPort: 8880
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: http
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          resources:
-            requests:
-              cpu: 20m
-              memory: 64Mi
-            limits:
-              cpu: 200m
-              memory: 128Mi
-          volumeMounts:
-            - name: rules
-              mountPath: /etc/alerts
-      volumes:
-        - name: rules
-          configMap:
-            name: vmalert-rules
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: vmalert
-  namespace: monitoring
-spec:
-  selector:
-    app: vmalert
-  ports:
-    - name: http
-      port: 8880
       targetPort: http

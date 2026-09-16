@@ -4,6 +4,8 @@ resources:
   - victoria-metrics.yaml
   - monitoring-ingress.yaml
   - grafana.yaml
+  - gatus.yaml
+  - grafana-alerting.yaml
 
 # Dashboard JSON lives as real files next to the manifests and is turned into
 # ConfigMaps here so both UIs can mount them read-only. The namespace field

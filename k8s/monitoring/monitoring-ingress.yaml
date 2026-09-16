@@ -2,9 +2,14 @@
 # cluster (through the Traefik ingress class used by every other host); they do
 # NOT expose anything publicly until a Cloudflare Tunnel public hostname is
 # added for the same host, and that host MUST sit behind a Cloudflare Access
-# policy — VMUI and vmalert have no authentication of their own.
+# policy — VMUI, Grafana and Gatus have no meaningful authentication of their
+# own.
 #
 # VictoriaMetrics VMUI: query, graphing, and raw metric exploration.
+#
+# The old vmalert UI (`monitoring-alerts.arda.io.vn`) went away with vmalert:
+# alert state now lives in Grafana (`grafana.arda.io.vn`) next to the
+# dashboards. Remove that Tunnel hostname in Cloudflare if it is still there.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -23,23 +28,3 @@ spec:
                 name: vmsingle
                 port:
                   number: 8428
----
-# vmalert UI: rule state, firing alerts, evaluation errors.
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: monitoring-vmalert
-  namespace: monitoring
-spec:
-  ingressClassName: traefik
-  rules:
-    - host: monitoring-alerts.arda.io.vn
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: vmalert
-                port:
-                  number: 8880

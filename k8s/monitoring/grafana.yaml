@@ -76,7 +76,7 @@ spec:
         fsGroup: 472
       containers:
         - name: grafana
-          image: grafana/grafana:11.2.0
+          image: grafana/grafana:13.2.2
           ports:
             - name: http
               containerPort: 3000
@@ -98,6 +98,22 @@ spec:
               value: "false"
             - name: GF_SERVER_ROOT_URL
               value: https://grafana.arda.io.vn
+            # Optional: the same Telegram bot Gatus uses (cluster-local
+            # `telegram-alerts` secret). Empty while the secret is absent; the
+            # contact point that consumes these is added when notifications are
+            # switched on.
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: telegram-alerts
+                  key: bot-token
+                  optional: true
+            - name: TELEGRAM_CHAT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: telegram-alerts
+                  key: chat-id
+                  optional: true
           readinessProbe:
             httpGet:
               path: /api/health
@@ -124,6 +140,8 @@ spec:
               mountPath: /etc/grafana/provisioning/dashboards
             - name: dashboards
               mountPath: /var/lib/grafana/dashboards
+            - name: alerting
+              mountPath: /etc/grafana/provisioning/alerting
             - name: data
               mountPath: /var/lib/grafana
       volumes:
@@ -136,6 +154,9 @@ spec:
         - name: dashboards
           configMap:
             name: grafana-dashboards
+        - name: alerting
+          configMap:
+            name: grafana-alerting
         - name: data
           persistentVolumeClaim:
             claimName: grafana-data

@@ -66,6 +66,30 @@
           "expr": ["sum(increase(arda_ai_event_publish_failures_total[1h])) or vector(0)"]
         }
       ]
+    },
+    {
+      "panels": [
+        {
+          "title": "Endpoints monitored (Gatus)",
+          "width": 3,
+          "expr": ["count(gatus_results_endpoint_success)"]
+        },
+        {
+          "title": "Endpoints down (Gatus)",
+          "width": 3,
+          "expr": ["count(gatus_results_endpoint_success == 0) or vector(0)"]
+        },
+        {
+          "title": "Endpoint success ratio (by group)",
+          "width": 3,
+          "expr": ["avg by (group) (gatus_results_endpoint_success)"]
+        },
+        {
+          "title": "Slowest endpoint response (s)",
+          "width": 3,
+          "expr": ["max(gatus_results_duration_seconds)"]
+        }
+      ]
     }
   ]
 }

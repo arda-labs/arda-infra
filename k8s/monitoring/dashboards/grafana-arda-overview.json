@@ -127,6 +127,51 @@
         }
       ],
       "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "id": 10,
+      "type": "stat",
+      "title": "Endpoints down (Gatus)",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 32 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "count(gatus_results_endpoint_success == 0) or vector(0)",
+          "legendFormat": "down"
+        }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Endpoint success ratio (by group)",
+      "gridPos": { "h": 10, "w": 9, "x": 6, "y": 32 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "avg by (group) (gatus_results_endpoint_success)",
+          "legendFormat": "{{group}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 }, "overrides": [] }
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Endpoint response time (by name)",
+      "gridPos": { "h": 10, "w": 9, "x": 15, "y": 32 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "max by (name) (gatus_results_duration_seconds)",
+          "legendFormat": "{{name}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] }
     }
   ]
 }
