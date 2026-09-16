@@ -52,6 +52,13 @@ data:
         regex         = "Succeeded|Failed"
         action        = "drop"
       }
+      # One DaemonSet pod per node: without this every Alloy instance would
+      # tail every pod in the cluster and Loki would receive 3x duplicates.
+      rule {
+        source_labels = ["__meta_kubernetes_pod_node_name"]
+        regex         = sys.env("NODE_NAME")
+        action        = "keep"
+      }
       rule {
         source_labels = ["__meta_kubernetes_namespace"]
         target_label  = "namespace"
@@ -91,9 +98,25 @@ data:
         }
       }
 
+      # The first tail of a container replays its whole log file; keep only a
+      # day of backlog instead of pushing entries Loki would reject anyway.
+      stage.drop {
+        older_than = "24h"
+      }
+
       stage.labels {
         values = {
           level = "",
+        }
+      }
+
+      # request_id / trace_id become structured metadata: filterable with
+      # `{app="ai-service"} | trace_id="..."` without parsing JSON again.
+      stage.structured_metadata {
+        values = {
+          request_id = "",
+          trace_id   = "",
+          actor      = "",
         }
       }
 
@@ -130,6 +153,11 @@ spec:
       containers:
         - name: alloy
           image: grafana/alloy:v1.19.2
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
           args:
             - run
             - /etc/alloy/config.alloy
