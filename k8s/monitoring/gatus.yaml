@@ -164,6 +164,24 @@ data:
           - "[RESPONSE_TIME] < 3000"
         alerts:
           - type: telegram
+      # --- the monitoring stack itself (so a dead Grafana/VM shows up in alerts) ---
+      - name: grafana
+        group: monitoring
+        url: "http://grafana.monitoring.svc.cluster.local:3000/api/health"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[BODY].database == ok"
+        alerts:
+          - type: telegram
+      - name: vmsingle
+        group: monitoring
+        url: "http://vmsingle.monitoring.svc.cluster.local:8428/health"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+        alerts:
+          - type: telegram
       # --- public edge (Cloudflare -> Tunnel -> Traefik) ---
       - name: web-app
         group: arda-public
