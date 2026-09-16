@@ -35,6 +35,17 @@ data:
               - workflow-service.arda-app.svc.cluster.local:8080
             labels:
               cluster: arda
+      # The monitoring stack supervises itself too: VictoriaMetrics, vmalert
+      # and Grafana own metrics are scraped as well.
+      - job_name: monitoring
+        metrics_path: /metrics
+        static_configs:
+          - targets:
+              - vmsingle.monitoring.svc.cluster.local:8428
+              - vmalert.monitoring.svc.cluster.local:8880
+              - grafana.monitoring.svc.cluster.local:3000
+            labels:
+              cluster: arda
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -73,6 +84,7 @@ spec:
             - -retentionPeriod=30d
             - -promscrape.config=/etc/vm/scrape.yml
             - -httpListenAddr=:8428
+            - -vmui.customDashboardsPath=/etc/vmui-dashboards
           ports:
             - name: http
               containerPort: 8428
@@ -98,12 +110,17 @@ spec:
           volumeMounts:
             - name: scrape
               mountPath: /etc/vm
+            - name: vmui-dashboards
+              mountPath: /etc/vmui-dashboards
             - name: data
               mountPath: /vm-data
       volumes:
         - name: scrape
           configMap:
             name: vmsingle-scrape
+        - name: vmui-dashboards
+          configMap:
+            name: vmui-dashboards
         - name: data
           persistentVolumeClaim:
             claimName: vmsingle-data

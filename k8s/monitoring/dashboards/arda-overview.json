@@ -1,0 +1,71 @@
+{
+  "title": "Arda overview",
+  "rows": [
+    {
+      "panels": [
+        {
+          "title": "Services up (expect 15)",
+          "width": 3,
+          "expr": ["count(up)"]
+        },
+        {
+          "title": "Requests/s by service",
+          "width": 9,
+          "expr": ["sum by (service) (rate(arda_http_requests_total[5m]))"]
+        }
+      ]
+    },
+    {
+      "panels": [
+        {
+          "title": "5xx/s by service",
+          "width": 6,
+          "expr": ["sum by (service) (rate(arda_http_responses_total{class=\"5xx\"}[5m]))"]
+        },
+        {
+          "title": "HTTP p95 by service (s)",
+          "width": 6,
+          "expr": ["histogram_quantile(0.95, sum by (le, service) (rate(arda_http_request_duration_seconds_bucket[5m])))"]
+        }
+      ]
+    },
+    {
+      "panels": [
+        {
+          "title": "AI runs (1h) by status",
+          "width": 4,
+          "expr": ["sum by (status) (increase(arda_ai_runs_total[1h]))"]
+        },
+        {
+          "title": "AI tokens (1h) by type",
+          "width": 4,
+          "expr": ["sum by (type) (increase(arda_ai_llm_tokens_total[1h]))"]
+        },
+        {
+          "title": "Model TTFT p95 (s)",
+          "width": 4,
+          "expr": ["histogram_quantile(0.95, sum by (le) (rate(arda_ai_model_ttft_seconds_bucket[15m])))"]
+        }
+      ]
+    },
+    {
+      "panels": [
+        {
+          "title": "Embedding p95 (s)",
+          "width": 4,
+          "expr": ["histogram_quantile(0.95, sum by (le) (rate(arda_ai_retrieval_embed_seconds_bucket[30m])))"]
+        },
+        {
+          "title": "Prompt size p95 (bytes)",
+          "width": 4,
+          "expr": ["histogram_quantile(0.95, sum by (le) (rate(arda_ai_prompt_bytes_bucket[1h])))"]
+        },
+        {
+          "title": "Event publish failures (1h)",
+          "width": 4,
+          "expr": ["sum(increase(arda_ai_event_publish_failures_total[1h])) or vector(0)"]
+        }
+      ]
+    }
+  ]
+}
