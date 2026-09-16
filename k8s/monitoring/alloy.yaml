@@ -98,10 +98,11 @@ data:
         }
       }
 
-      // The first tail of a container replays its whole log file; keep only a
-      // day of backlog instead of pushing entries Loki would reject anyway.
+      // The first tail of a container replays its whole log file; Loki rejects
+      // entries that fall more than ~1h behind the stream head (and anything
+      // older than 7d), so drop everything older than 30m here instead.
       stage.drop {
-        older_than = "24h"
+        older_than = "30m"
       }
 
       stage.labels {
