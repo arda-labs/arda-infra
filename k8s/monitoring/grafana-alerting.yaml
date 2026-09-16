@@ -337,3 +337,130 @@ data:
             labels:
               severity: critical
               service: platform
+      - orgId: 1
+        name: arda-platform
+        folder: Arda
+        interval: 1m
+        rules:
+          - uid: arda-pod-crash-looping
+            title: ArdaPodCrashLooping
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange: { from: 900, to: 0 }
+                datasourceUid: vm
+                model:
+                  datasource: { type: prometheus, uid: vm }
+                  editorMode: code
+                  expr: 'increase(kube_pod_container_status_restarts_total{namespace=~"arda-app|monitoring"}[15m])'
+                  instant: true
+                  intervalMs: 1000
+                  legendFormat: __auto
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: B
+                relativeTimeRange: { from: 900, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [], type: gt }
+                      operator: { type: and }
+                      query: { params: [B] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  reducer: last
+                  refId: B
+                  type: reduce
+                  settings: { mode: dropNN }
+              - refId: C
+                relativeTimeRange: { from: 900, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [3], type: gt }
+                      operator: { type: and }
+                      query: { params: [C] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: B
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: threshold
+                  settings: {}
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            annotations:
+              summary: A pod in arda-app/monitoring keeps restarting
+              description: '{{ $values.B }} container restarts in 15m — check the pod events and logs (this is how the Grafana OOM/probe flapping would have shown up).'
+            labels:
+              severity: warning
+              service: platform
+          - uid: arda-node-disk-filling-up
+            title: ArdaNodeDiskFillingUp
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange: { from: 1800, to: 0 }
+                datasourceUid: vm
+                model:
+                  datasource: { type: prometheus, uid: vm }
+                  editorMode: code
+                  expr: '100 * (1 - node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|fuse.*"} / node_filesystem_size_bytes{mountpoint="/",fstype!~"tmpfs|fuse.*"})'
+                  instant: true
+                  intervalMs: 1000
+                  legendFormat: __auto
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: B
+                relativeTimeRange: { from: 1800, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [], type: gt }
+                      operator: { type: and }
+                      query: { params: [B] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  reducer: last
+                  refId: B
+                  type: reduce
+                  settings: { mode: dropNN }
+              - refId: C
+                relativeTimeRange: { from: 1800, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [85], type: gt }
+                      operator: { type: and }
+                      query: { params: [C] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: B
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: threshold
+                  settings: {}
+            noDataState: OK
+            execErrState: Error
+            for: 15m
+            annotations:
+              summary: A k3s node is above 85% disk usage
+              description: '{{ printf "%.1f" $values.B }}% used on the node root filesystem — local-path volumes (Loki, VictoriaMetrics, Grafana) live there.'
+            labels:
+              severity: warning
+              service: platform

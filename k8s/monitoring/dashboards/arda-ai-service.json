@@ -1,0 +1,168 @@
+{
+  "uid": "arda-ai",
+  "title": "Arda AI Service",
+  "timezone": "browser",
+  "refresh": "30s",
+  "time": { "from": "now-24h", "to": "now" },
+  "schemaVersion": 39,
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Runs (24h)",
+      "gridPos": { "h": 5, "w": 4, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [ { "refId": "A", "expr": "sum(increase(arda_ai_runs_total[24h]))", "legendFormat": "runs" } ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Failed runs (24h)",
+      "gridPos": { "h": 5, "w": 4, "x": 4, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [ { "refId": "A", "expr": "sum(increase(arda_ai_runs_total{status=~\"error|failed|aborted|timeout\"}[24h])) or vector(0)", "legendFormat": "failed" } ],
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "LLM tokens (24h)",
+      "gridPos": { "h": 5, "w": 4, "x": 8, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [ { "refId": "A", "expr": "sum(increase(arda_ai_llm_tokens_total[24h]))", "legendFormat": "tokens" } ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Model errors (24h)",
+      "gridPos": { "h": 5, "w": 4, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [ { "refId": "A", "expr": "sum(increase(arda_ai_model_errors_total[24h])) or vector(0)", "legendFormat": "errors" } ],
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Invented citations removed (24h)",
+      "gridPos": { "h": 5, "w": 4, "x": 16, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [ { "refId": "A", "expr": "sum(increase(arda_ai_invented_citations_total[24h])) or vector(0)", "legendFormat": "removed" } ],
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Context truncated (24h)",
+      "gridPos": { "h": 5, "w": 4, "x": 20, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [ { "refId": "A", "expr": "sum(increase(arda_ai_context_truncated_total[24h])) or vector(0)", "legendFormat": "truncated" } ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Runs/s by status",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 5 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [ { "refId": "A", "expr": "sum by (status) (rate(arda_ai_runs_total[$__rate_interval]))", "legendFormat": "{{status}}" } ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Tokens/s by type",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 5 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [ { "refId": "A", "expr": "sum by (type) (rate(arda_ai_llm_tokens_total[$__rate_interval]))", "legendFormat": "{{type}}" } ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Tool executions/s by risk and status",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 5 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [ { "refId": "A", "expr": "sum by (risk, status) (rate(arda_ai_tool_executions_total[$__rate_interval]))", "legendFormat": "{{risk}} / {{status}}" } ]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Run duration p95",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 13 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [ { "refId": "A", "expr": "histogram_quantile(0.95, sum by (le) (rate(arda_ai_run_duration_seconds_bucket[$__rate_interval])))", "legendFormat": "p95" } ],
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Model TTFT p95 vs model duration p95",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 13 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [
+        { "refId": "A", "expr": "histogram_quantile(0.95, sum by (le) (rate(arda_ai_model_ttft_seconds_bucket[$__rate_interval])))", "legendFormat": "ttft p95" },
+        { "refId": "B", "expr": "histogram_quantile(0.95, sum by (le) (rate(arda_ai_model_duration_seconds_bucket[$__rate_interval])))", "legendFormat": "duration p95" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] }
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Model errors/s by code",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 13 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [ { "refId": "A", "expr": "sum by (code) (rate(arda_ai_model_errors_total[$__rate_interval]))", "legendFormat": "{{code}}" } ]
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Retrieval p95: embed vs search",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 21 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [
+        { "refId": "A", "expr": "histogram_quantile(0.95, sum by (le) (rate(arda_ai_retrieval_embed_seconds_bucket[$__rate_interval])))", "legendFormat": "embed p95" },
+        { "refId": "B", "expr": "histogram_quantile(0.95, sum by (le) (rate(arda_ai_retrieval_search_seconds_bucket[$__rate_interval])))", "legendFormat": "search p95" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] }
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Prompt size p95 (bytes)",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 21 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [ { "refId": "A", "expr": "histogram_quantile(0.95, sum by (le) (rate(arda_ai_prompt_bytes_bucket[$__rate_interval])))", "legendFormat": "p95" } ],
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] }
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Provider probes/s by outcome",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 21 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [ { "refId": "A", "expr": "sum by (provider, outcome) (rate(arda_ai_provider_probes_total[$__rate_interval]))", "legendFormat": "{{provider}} / {{outcome}}" } ]
+    },
+    {
+      "id": 16,
+      "type": "timeseries",
+      "title": "Citation guard outcomes/s",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 29 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [ { "refId": "A", "expr": "sum by (outcome) (rate(arda_ai_citation_guard_total[$__rate_interval]))", "legendFormat": "{{outcome}}" } ]
+    },
+    {
+      "id": 17,
+      "type": "timeseries",
+      "title": "Event publish failures and context truncations/s",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 29 },
+      "datasource": { "type": "prometheus", "uid": "vm" },
+      "targets": [
+        { "refId": "A", "expr": "sum by (subject) (rate(arda_ai_event_publish_failures_total[$__rate_interval]))", "legendFormat": "publish failure {{subject}}" },
+        { "refId": "B", "expr": "sum by (kind) (rate(arda_ai_context_truncated_total[$__rate_interval]))", "legendFormat": "context truncated {{kind}}" }
+      ]
+    }
+  ]
+}

@@ -35,17 +35,55 @@ data:
               - workflow-service.arda-app.svc.cluster.local:8080
             labels:
               cluster: arda
-      # The monitoring stack supervises itself too: VictoriaMetrics, Grafana and
-      # Gatus own metrics are scraped as well.
+      # The monitoring stack supervises itself too: VictoriaMetrics, Grafana,
+      # Loki and Gatus own metrics are scraped as well.
       - job_name: monitoring
         metrics_path: /metrics
         static_configs:
           - targets:
               - vmsingle.monitoring.svc.cluster.local:8428
               - grafana.monitoring.svc.cluster.local:3000
+              - loki.monitoring.svc.cluster.local:3100
               - gatus.monitoring.svc.cluster.local:8080
             labels:
               cluster: arda
+      # Node resources (DaemonSet on hostPort 9100, scraped over the node LAN).
+      - job_name: node-exporter
+        metrics_path: /metrics
+        static_configs:
+          - targets:
+              - 192.168.10.201:9100
+              - 192.168.10.202:9100
+              - 192.168.10.203:9100
+            labels:
+              cluster: arda
+      # Workload state: pod phases, restarts, OOM reasons, deployment health.
+      - job_name: kube-state-metrics
+        metrics_path: /metrics
+        static_configs:
+          - targets:
+              - kube-state-metrics.monitoring.svc.cluster.local:8080
+            labels:
+              cluster: arda
+      # Per-pod resource usage from the kubelet cAdvisor endpoint. The raw dump
+      # is huge, so only the series the Kubernetes dashboard uses are kept.
+      - job_name: kubelet-cadvisor
+        scheme: https
+        metrics_path: /metrics/cadvisor
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        tls_config:
+          insecure_skip_verify: true
+        static_configs:
+          - targets:
+              - 192.168.10.201:10250
+              - 192.168.10.202:10250
+              - 192.168.10.203:10250
+            labels:
+              cluster: arda
+        metric_relabel_configs:
+          - source_labels: [__name__]
+            regex: container_cpu_usage_seconds_total|container_memory_working_set_bytes|container_network_receive_bytes_total|container_network_transmit_bytes_total|container_fs_usage_bytes|machine_cpu_cores|machine_memory_bytes
+            action: keep
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -76,6 +114,7 @@ spec:
       labels:
         app: vmsingle
     spec:
+      serviceAccountName: vmsingle
       containers:
         - name: vmsingle
           image: victoriametrics/victoria-metrics:v1.152.0

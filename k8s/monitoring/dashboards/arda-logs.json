@@ -1,0 +1,109 @@
+{
+  "uid": "arda-logs",
+  "title": "Arda Logs",
+  "timezone": "browser",
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "schemaVersion": 39,
+  "templating": {
+    "list": [
+      {
+        "name": "app",
+        "label": "app label (regex)",
+        "type": "textbox",
+        "query": ".*",
+        "current": { "text": ".*", "value": ".*" }
+      },
+      {
+        "name": "level",
+        "label": "level",
+        "type": "textbox",
+        "query": "ERROR|WARN",
+        "current": { "text": "ERROR|WARN", "value": "ERROR|WARN" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Log volume by level",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        { "refId": "A", "expr": "sum by (level) (count_over_time({cluster=\"arda\"}[5m]))", "legendFormat": "{{level}}" }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Errors/warnings by app",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        { "refId": "A", "expr": "sum by (app) (count_over_time({cluster=\"arda\", level=~\"ERROR|WARN\"}[5m]))", "legendFormat": "{{app}}" }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Log volume by namespace",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        { "refId": "A", "expr": "sum by (namespace) (count_over_time({cluster=\"arda\"}[5m]))", "legendFormat": "{{namespace}}" }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "logs",
+      "title": "Recent errors",
+      "gridPos": { "h": 11, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        { "refId": "A", "expr": "{cluster=\"arda\", level=\"ERROR\"}" }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending",
+        "enableLogDetails": true
+      }
+    },
+    {
+      "id": 5,
+      "type": "logs",
+      "title": "Stream by app (edit the app variable to filter)",
+      "gridPos": { "h": 11, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        { "refId": "A", "expr": "{cluster=\"arda\", app=~\"${app}\"}" }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending",
+        "enableLogDetails": true
+      }
+    },
+    {
+      "id": 6,
+      "type": "logs",
+      "title": "Filtered by level (level variable: default ERROR|WARN)",
+      "gridPos": { "h": 11, "w": 24, "x": 0, "y": 19 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        { "refId": "A", "expr": "{cluster=\"arda\", app=~\"${app}\", level=~\"${level}\"}" }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending",
+        "enableLogDetails": true
+      }
+    }
+  ]
+}

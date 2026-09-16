@@ -6,6 +6,10 @@ resources:
   - grafana.yaml
   - gatus.yaml
   - grafana-alerting.yaml
+  - loki.yaml
+  - alloy.yaml
+  - cluster-metrics.yaml
+  - scrape-rbac.yaml
 
 # Dashboard JSON lives as real files next to the manifests and is turned into
 # ConfigMaps here so both UIs can mount them read-only. The namespace field
@@ -20,5 +24,9 @@ configMapGenerator:
   - name: grafana-dashboards
     files:
       - dashboards/grafana-arda-overview.json
+      - dashboards/arda-services-http.json
+      - dashboards/arda-ai-service.json
+      - dashboards/arda-kubernetes.json
+      - dashboards/arda-logs.json
     options:
       disableNameSuffixHash: true

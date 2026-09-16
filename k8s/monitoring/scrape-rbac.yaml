@@ -1,0 +1,35 @@
+# RBAC for vmsingle so it can also scrape the kubelet's cAdvisor endpoint
+# (/metrics/cadvisor on :10250) — that is where per-pod CPU/memory usage comes
+# from, and the Kubernetes dashboard needs it. Scraping is read-only over the
+# node LAN; kubelet authorizes the request through the API server with the
+# non-resource URL rules below.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vmsingle
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vmsingle-kubelet-scrape
+rules:
+  - nonResourceURLs:
+      - /metrics
+      - /metrics/cadvisor
+      - /stats
+      - /stats/summary
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: vmsingle-kubelet-scrape
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: vmsingle-kubelet-scrape
+subjects:
+  - kind: ServiceAccount
+    name: vmsingle
+    namespace: monitoring
