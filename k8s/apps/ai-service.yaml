@@ -108,6 +108,13 @@ spec:
                   name: arda-app-secrets
                   key: AI_RAG_EMBEDDING_API_KEY
                   optional: true
+            # Temporary mitigation (2026-09-16): query rewrite calls the tenant
+            # chat model inside the Code Mode sandbox, whose 3s budget the call
+            # cannot meet (ai.sandbox_timeout on arda.knowledge.search). The
+            # service now bounds the rewrite itself, so this flag can be removed
+            # once a build with the bounded rewrite is deployed.
+            - name: AI_RAG_QUERY_REWRITE
+              value: "false"
             - name: ARDA_SERVICE_AUTH_SECRET
               valueFrom:
                 secretKeyRef:
