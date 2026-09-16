@@ -191,7 +191,7 @@ spec:
             - -datasource.url=http://vmsingle:8428
             - -remoteRead.url=http://vmsingle:8428
             - -remoteWrite.url=http://vmsingle:8428
-            - -rule=/etc/alerts
+            - -rule=/etc/alerts/*.yml
             - -evaluationInterval=30s
             - -httpListenAddr=:8880
             - -loggerLevel=INFO
