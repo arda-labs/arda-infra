@@ -5,15 +5,16 @@ GitOps desired state for the Arda k3s cluster.
 ## Layout
 
 ```text
-argocd/   ArgoCD project and applications
-auth/     Ory Hydra/Kratos values and bootstrap scripts
-database/ CloudNativePG PostgreSQL cluster manifests
-dev/      Local dev endpoint examples
-platform/ Shared platform runtime bootstrap: NATS, Valkey, Garage, Cloudflared, Zeebe
-k8s/      Arda backend/frontend application manifests
-scripts/  CI invariant checks (check-secret-hygiene.mjs, check-canary-policy.mjs, check-operational-gates.mjs)
-docs/     Edge routing and operational architecture notes
-traefik/  Traefik dynamic/static examples
+argocd/          ArgoCD project and applications
+auth/            Ory Hydra/Kratos values and bootstrap scripts
+database/        CloudNativePG PostgreSQL cluster manifests
+dev/             Local dev endpoint examples
+platform/        Shared platform runtime bootstrap: NATS, Valkey, Garage, Cloudflared, Zeebe
+k8s/             Arda backend/frontend application manifests
+k8s/monitoring/  Observability stack: VictoriaMetrics, Grafana, Loki/Alloy, Gatus
+scripts/         CI invariant checks (check-secret-hygiene.mjs, check-canary-policy.mjs, check-operational-gates.mjs)
+docs/            Edge routing and operational architecture notes
+traefik/         Traefik dynamic/static examples
 ```
 
 Secrets should not be committed as raw values. Use Kubernetes Secret references,
@@ -99,3 +100,20 @@ Arda-facing facade for process APIs and is configured with `ZEEBE_ADDR` in
 This repo should not deploy Camunda Tasklist, Operate, or Optimize for product
 UX. Arda-owned workflow, task, process admin, and monitoring screens live in
 `arda-mfe` and call Arda APIs.
+
+## Monitoring and logs
+
+The `monitoring` namespace runs the observability stack: VictoriaMetrics
+(scrapes every service and the cluster itself, 30 days retention), Grafana
+(single UI for dashboards and Grafana Alerting — `vmalert` was retired), Loki +
+Alloy (central container logs, 14 days, JSON fields promoted to labels and
+structured metadata), Gatus (20 black-box endpoint checks, status page,
+Telegram) and node-exporter / kube-state-metrics / kubelet cAdvisor for cluster
+and per-pod metrics.
+
+Manifests live in `k8s/monitoring/`, dashboard JSON in
+`k8s/monitoring/dashboards/` (kustomize generator), alert rules in
+`k8s/monitoring/grafana-alerting.yaml` (reload provisioning through the Grafana
+admin API after edits — Argo sync alone does not apply provisioning changes).
+Runbook, access requirements and LogQL examples:
+[`docs/monitoring.md`](docs/monitoring.md).
