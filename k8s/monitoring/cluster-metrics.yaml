@@ -34,20 +34,17 @@ spec:
             - name: metrics
               containerPort: 9100
               hostPort: 9100
+          # node_exporter 1.12 no longer serves /-/healthy, so probe the port.
           readinessProbe:
-            httpGet:
-              path: /-/healthy
+            tcpSocket:
               port: metrics
             initialDelaySeconds: 10
             periodSeconds: 15
-            timeoutSeconds: 5
           livenessProbe:
-            httpGet:
-              path: /-/healthy
+            tcpSocket:
               port: metrics
             initialDelaySeconds: 30
             periodSeconds: 30
-            timeoutSeconds: 5
             failureThreshold: 6
           resources:
             requests:
