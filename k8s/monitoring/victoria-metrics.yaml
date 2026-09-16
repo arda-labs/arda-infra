@@ -1,0 +1,233 @@
+# Minimal observability stack (audit-2026-09 A3): VictoriaMetrics scrapes the
+# Arda service /metrics endpoints (all 15 services expose arda_http_* there) and
+# vmalert evaluates the alert rules against it. Alert *delivery* still needs a
+# channel (Alertmanager/Telegram/email) — until then firing alerts are logged by
+# vmalert and exposed as vmalert_alerts_firing.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vmsingle-scrape
+  namespace: monitoring
+data:
+  scrape.yml: |
+    global:
+      scrape_interval: 30s
+      scrape_timeout: 10s
+    scrape_configs:
+      - job_name: arda-services
+        metrics_path: /metrics
+        static_configs:
+          - targets:
+              - ai-service.arda-app.svc.cluster.local:8080
+              - auth-gateway.arda-app.svc.cluster.local:8080
+              - capital-service.arda-app.svc.cluster.local:8080
+              - crm-service.arda-app.svc.cluster.local:8080
+              - deposit-service.arda-app.svc.cluster.local:8080
+              - finance-service.arda-app.svc.cluster.local:8080
+              - hrm-service.arda-app.svc.cluster.local:8080
+              - iam-service.arda-app.svc.cluster.local:8080
+              - loan-service.arda-app.svc.cluster.local:8080
+              - mdm-service.arda-app.svc.cluster.local:8080
+              - media-service.arda-app.svc.cluster.local:8080
+              - notification-service.arda-app.svc.cluster.local:8080
+              - platform-service.arda-app.svc.cluster.local:8080
+              - statistical-service.arda-app.svc.cluster.local:8080
+              - workflow-service.arda-app.svc.cluster.local:8080
+            labels:
+              cluster: arda
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vmsingle-data
+  namespace: monitoring
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vmsingle
+  namespace: monitoring
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: vmsingle
+  template:
+    metadata:
+      labels:
+        app: vmsingle
+    spec:
+      containers:
+        - name: vmsingle
+          image: victoriametrics/victoria-metrics:v1.102.1
+          args:
+            - -storageDataPath=/vm-data
+            - -retentionPeriod=30d
+            - -promscrape.config=/etc/vm/scrape.yml
+            - -httpListenAddr=:8428
+          ports:
+            - name: http
+              containerPort: 8428
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: scrape
+              mountPath: /etc/vm
+            - name: data
+              mountPath: /vm-data
+      volumes:
+        - name: scrape
+          configMap:
+            name: vmsingle-scrape
+        - name: data
+          persistentVolumeClaim:
+            claimName: vmsingle-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vmsingle
+  namespace: monitoring
+spec:
+  selector:
+    app: vmsingle
+  ports:
+    - name: http
+      port: 8428
+      targetPort: http
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vmalert-rules
+  namespace: monitoring
+data:
+  arda-ai.yml: |
+    groups:
+      - name: arda-ai
+        interval: 1m
+        rules:
+          - alert: ArdaAiEventPublishFailures
+            expr: increase(arda_ai_event_publish_failures_total[15m]) > 0
+            for: 5m
+            labels:
+              severity: warning
+              service: ai-service
+            annotations:
+              summary: "AI events are falling back to the in-memory buffer"
+              description: "{{ $value }} NATS publish failures in the last 15m; the durable stream is not receiving AI events (audit-2026-09 A3)."
+          - alert: ArdaAiModelUnavailable
+            expr: increase(arda_ai_model_errors_total{code="ai.model_unavailable"}[15m]) > 0
+            for: 10m
+            labels:
+              severity: warning
+              service: ai-service
+            annotations:
+              summary: "Tenant AI model is unavailable"
+              description: "{{ $value }} model-unavailable errors in the last 15m."
+          - alert: ArdaAiRetrievalEmbedSlow
+            expr: histogram_quantile(0.95, sum(rate(arda_ai_retrieval_embed_seconds_bucket[30m])) by (le)) > 5
+            for: 15m
+            labels:
+              severity: warning
+              service: ai-service
+            annotations:
+              summary: "Query embedding p95 above 5s"
+              description: "Embedding latency p95 {{ $value }}s over 30m — knowledge searches may hit their deadline."
+          - alert: ArdaAiPromptBudgetHigh
+            expr: histogram_quantile(0.95, sum(rate(arda_ai_prompt_bytes_bucket[1h])) by (le)) > 131072
+            for: 30m
+            labels:
+              severity: info
+              service: ai-service
+            annotations:
+              summary: "Prompt size p95 above 128 KiB"
+              description: "Context growth is approaching the budget; check history compaction (audit-2026-09 A6)."
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vmalert
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vmalert
+  template:
+    metadata:
+      labels:
+        app: vmalert
+    spec:
+      containers:
+        - name: vmalert
+          image: victoriametrics/vmalert:v1.102.1
+          args:
+            - -datasource.url=http://vmsingle:8428
+            - -remoteRead.url=http://vmsingle:8428
+            - -remoteWrite.url=http://vmsingle:8428
+            - -rule=/etc/alerts
+            - -evaluationInterval=30s
+            - -httpListenAddr=:8880
+            - -loggerLevel=INFO
+          ports:
+            - name: http
+              containerPort: 8880
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          volumeMounts:
+            - name: rules
+              mountPath: /etc/alerts
+      volumes:
+        - name: rules
+          configMap:
+            name: vmalert-rules
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vmalert
+  namespace: monitoring
+spec:
+  selector:
+    app: vmalert
+  ports:
+    - name: http
+      port: 8880
+      targetPort: http

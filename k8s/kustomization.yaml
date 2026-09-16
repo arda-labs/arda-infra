@@ -1,3 +1,4 @@
 resources:
   - namespaces.yaml
+  - monitoring/victoria-metrics.yaml
   - apps
