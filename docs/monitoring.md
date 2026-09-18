@@ -29,16 +29,17 @@ in Grafana.
 | URL | What | Protection |
 |---|---|---|
 | `https://monitoring.arda.io.vn/vmui` | VictoriaMetrics VMUI + the "Arda overview" dashboard | Cloudflare Access |
-| `https://grafana.arda.io.vn` | Grafana (dashboards, alerts, Explore → Loki) | Cloudflare Access + Grafana login (`admin`, password in the `grafana-admin` secret) |
+| `https://grafana.arda.io.vn` | Grafana (dashboards, alerts, Explore → Loki) | Grafana login (`admin`, password in the `grafana-admin` secret); Cloudflare Access not required |
 | `https://gatus.arda.io.vn` | Gatus status page | Cloudflare Access |
 
-Every host needs **both** a Cloudflare Tunnel public hostname (service
-`http://traefik.kube-system.svc.cluster.local:80`) **and** an Access policy.
-`grafana.arda.io.vn` served Grafana's login page directly during the first
-rollout — check with
-`curl -s -o /dev/null -w "%{http_code}" https://grafana.arda.io.vn/login`: a
-`302` to `*.cloudflareaccess.com` is the desired answer, `200` means Access is
-missing.
+Every host needs a Cloudflare Tunnel public hostname (service
+`http://traefik.kube-system.svc.cluster.local:80`). An Access policy is
+**required** for the hosts without their own authentication — VMUI
+(`monitoring.`) and Gatus. `grafana.arda.io.vn` deliberately does not use
+Access: it ships its own login and unauthenticated API calls return `401`
+(checked 2026-09-18). Verify with
+`curl -s -o /dev/null -w "%{http_code}" https://<host>/`: a `302` to
+`*.cloudflareaccess.com` means Access is enforced.
 
 ## Dashboards
 
@@ -128,9 +129,10 @@ stays unusable until OTel/Tempo is added.
 - Example calls: `query_loki_logs` with `{app="auth-gateway"} | trace_id="<id>"`
   (structured metadata, no `| json` needed), `query_prometheus` with datasource
   uid `vm`, `generate_deeplink` to open Grafana Explore.
-- Once `grafana.arda.io.vn` sits behind Cloudflare Access, add an Access service
-  token and set `GRAFANA_EXTRA_HEADERS` in `dev/mcp-grafana.env` (see the
-  example file); otherwise Access blocks the MCP server.
+- Grafana is not behind Cloudflare Access (its own login gates the API), so the
+  MCP needs no Access service token today. If it is ever placed behind Access,
+  add a service token and set `GRAFANA_EXTRA_HEADERS` in `dev/mcp-grafana.env`
+  (see the example file); otherwise Access blocks the MCP server.
 
 ## Operational notes (learned the hard way)
 
@@ -171,8 +173,8 @@ stays unusable until OTel/Tempo is added.
 
 ## Still open
 
-- Cloudflare Access for `grafana.arda.io.vn`, and the Tunnel hostname + Access
-  for `gatus.arda.io.vn`.
+- Tunnel hostname + Cloudflare Access for `gatus.arda.io.vn` (Grafana needs no
+  Access: it has its own login).
 - Telegram bot token/chat id (`telegram-alerts` secret) plus the Grafana
   contact point/notification policy.
 - Trace spans (OTel) across AI service, tools and provider calls — Loki holds

@@ -1,9 +1,9 @@
 # Monitoring UIs. These Ingresses only make the UIs reachable inside the
 # cluster (through the Traefik ingress class used by every other host); they do
 # NOT expose anything publicly until a Cloudflare Tunnel public hostname is
-# added for the same host, and that host MUST sit behind a Cloudflare Access
-# policy — VMUI, Grafana and Gatus have no meaningful authentication of their
-# own.
+# added for the same host. VMUI and Gatus have no authentication of their own
+# and MUST sit behind a Cloudflare Access policy; Grafana has its own login and
+# deliberately does not use Access.
 #
 # VictoriaMetrics VMUI: query, graphing, and raw metric exploration.
 #
