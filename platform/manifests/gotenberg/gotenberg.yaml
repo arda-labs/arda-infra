@@ -32,6 +32,14 @@ spec:
           ports:
             - containerPort: 3000
               name: http
+          volumeMounts:
+            # Legacy/VN Office documents often name fonts that are not
+            # installed (e.g. "Times New Roman Bold" as a family). Without an
+            # alias fontconfig falls back to Noto Sans, whose metrics differ
+            # from the serif original and push content across pages.
+            - name: font-aliases
+              mountPath: /etc/fonts/conf.d/99-arda-font-aliases.conf
+              subPath: 99-arda-font-aliases.conf
           readinessProbe:
             httpGet:
               path: /health
@@ -51,6 +59,51 @@ spec:
             limits:
               cpu: "1"
               memory: 2Gi
+      volumes:
+        - name: font-aliases
+          configMap:
+            name: gotenberg-font-aliases
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gotenberg-font-aliases
+  namespace: platform
+data:
+  99-arda-font-aliases.conf: |
+    <?xml version="1.0"?>
+    <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+    <fontconfig>
+      <!-- Legacy Vietnamese templates frequently name these families, which
+           are not installed (MS fonts are not redistributable). Map them to
+           the metric-compatible substitutes shipped with Gotenberg so
+           paragraph and table layout matches the original document. -->
+      <match target="pattern">
+        <test name="family"><string>Times New Roman Bold</string></test>
+        <edit name="family" mode="assign" binding="strong"><string>Liberation Serif</string></edit>
+        <edit name="weight" mode="assign" binding="strong"><const>bold</const></edit>
+      </match>
+      <match target="pattern">
+        <test name="family"><string>Tahoma</string></test>
+        <edit name="family" mode="assign" binding="strong"><string>DejaVu Sans</string></edit>
+      </match>
+      <match target="pattern">
+        <test name="family"><string>Verdana</string></test>
+        <edit name="family" mode="assign" binding="strong"><string>DejaVu Sans</string></edit>
+      </match>
+      <match target="pattern">
+        <test name="family"><string>.VnTime</string></test>
+        <edit name="family" mode="assign" binding="strong"><string>Liberation Serif</string></edit>
+      </match>
+      <match target="pattern">
+        <test name="family"><string>.VnArial</string></test>
+        <edit name="family" mode="assign" binding="strong"><string>Liberation Sans</string></edit>
+      </match>
+      <match target="pattern">
+        <test name="family"><string>ITCCentury Book</string></test>
+        <edit name="family" mode="assign" binding="strong"><string>Liberation Serif</string></edit>
+      </match>
+    </fontconfig>
 ---
 apiVersion: v1
 kind: Service
