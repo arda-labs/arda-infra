@@ -8,7 +8,7 @@ GitOps desired state for the Arda k3s cluster.
 argocd/          ArgoCD project and applications
 auth/            Ory Hydra/Kratos values and bootstrap scripts
 database/        CloudNativePG PostgreSQL cluster manifests
-dev/             Local dev endpoint examples
+dev/             Local dev endpoint examples + read-only MCP wrappers (Grafana, Postgres)
 platform/        Shared platform runtime bootstrap: NATS, Valkey, Garage, Cloudflared, Zeebe
 k8s/             Arda backend/frontend application manifests
 k8s/monitoring/  Observability stack: VictoriaMetrics, Grafana, Loki/Alloy, Gatus
@@ -116,4 +116,5 @@ Manifests live in `k8s/monitoring/`, dashboard JSON in
 `k8s/monitoring/grafana-alerting.yaml` (reload provisioning through the Grafana
 admin API after edits — Argo sync alone does not apply provisioning changes).
 Runbook, access requirements and LogQL examples:
-[`docs/monitoring.md`](docs/monitoring.md).
+[`docs/monitoring.md`](docs/monitoring.md). Read-only agent access (kubectl,
+Grafana MCP, Postgres MCP): [`docs/agent-access.md`](docs/agent-access.md).

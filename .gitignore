@@ -2,6 +2,7 @@
 *.tmp
 *.bak
 dev/mcp-grafana.env
+dev/mcp-postgres.env
 platform/backups/
 platform/secrets/generated/
 platform/raw-uploaded/

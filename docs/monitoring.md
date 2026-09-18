@@ -117,6 +117,10 @@ read-only `mcp-grafana` MCP server instead of the UI. No trace backend yet, so
 "tracing" means grouping log lines by `trace_id`/`request_id`; `get_tempo_trace`
 stays unusable until OTel/Tempo is added.
 
+Read-only Postgres access to the service databases is a separate MCP
+(`postgres`, role `arda_agent_ro`): see
+[`agent-access.md`](agent-access.md).
+
 - OpenCode config: workspace `opencode.jsonc` (`mcp.servers.grafana`) calls the
   wrapper `arda-infra/dev/mcp-grafana.ps1`.
 - Wrapper runs `uvx mcp-grafana --disable-write --disable-oncall
