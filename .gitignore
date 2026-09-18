@@ -1,6 +1,7 @@
 .DS_Store
 *.tmp
 *.bak
+dev/mcp-grafana.env
 platform/backups/
 platform/secrets/generated/
 platform/raw-uploaded/

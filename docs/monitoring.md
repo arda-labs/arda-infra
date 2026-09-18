@@ -99,11 +99,38 @@ as **structured metadata**, so filtering does not need `| json` at query time:
 sum by (app) (count_over_time({cluster="arda", level=~"ERROR|WARN"}[5m]))
 ```
 
+Loki logs its own queries under `app="loki"` and stores the query text in the
+line, so a `|=` search that contains the searched string also matches those
+entries. Add `app!="loki"` when counting real matches.
+
 Labels per stream: `cluster`, `namespace`, `pod`, `container`, `app`, `node`,
 `level` (only when the line is JSON with a `level` field). Retention is 14
 days; when a tailer starts it re-reads the container log from the beginning and
 Alloy drops everything older than 30 minutes, because Loki rejects entries that
 fall too far behind the stream head.
+
+## MCP for dev agents (read-only log/metric access)
+
+Dev agents (OpenCode/Claude) query Loki and VictoriaMetrics through the
+read-only `mcp-grafana` MCP server instead of the UI. No trace backend yet, so
+"tracing" means grouping log lines by `trace_id`/`request_id`; `get_tempo_trace`
+stays unusable until OTel/Tempo is added.
+
+- OpenCode config: workspace `opencode.jsonc` (`mcp.servers.grafana`) calls the
+  wrapper `arda-infra/dev/mcp-grafana.ps1`.
+- Wrapper runs `uvx mcp-grafana --disable-write --disable-oncall
+  --disable-incident`. Credentials come from `dev/mcp-grafana.env` (gitignored;
+  copy `dev/mcp-grafana.env.example`) or the User environment variable
+  `GRAFANA_SERVICE_ACCOUNT_TOKEN`.
+- The token belongs to Grafana service account `mcp-dev` (role Viewer). Rotate at
+  Grafana → Administration → Users and access → Service accounts, then update
+  `dev/mcp-grafana.env`.
+- Example calls: `query_loki_logs` with `{app="auth-gateway"} | trace_id="<id>"`
+  (structured metadata, no `| json` needed), `query_prometheus` with datasource
+  uid `vm`, `generate_deeplink` to open Grafana Explore.
+- Once `grafana.arda.io.vn` sits behind Cloudflare Access, add an Access service
+  token and set `GRAFANA_EXTRA_HEADERS` in `dev/mcp-grafana.env` (see the
+  example file); otherwise Access blocks the MCP server.
 
 ## Operational notes (learned the hard way)
 
@@ -119,6 +146,16 @@ fall too far behind the stream head.
 - **Alloy configuration** comments use `//`, not `#`. The DaemonSet is
   node-scoped on purpose (each instance tails only pods on its own node) —
   without that filter Loki receives one copy per node.
+- **inotify limits on nodes.** Kubelet creates one inotify instance per
+  log-follow stream (`kubectl logs -f`, Alloy's `loki.source.kubernetes`);
+  containerd-shims hold ~2 per container and udev workers add more, so the
+  default `fs.inotify.max_user_instances=128` ran out on the busiest node (163
+  instances measured, shims alone 80). Kubelet then writes
+  `failed to create fsnotify watcher: too many open files` **into the pod's log
+  stream** — it looks like an app log but is not — Alloy enters a reconnect
+  storm (9k opens/hour, ~5.5k noise lines/hour) and `kubectl logs -f` breaks.
+  Every node keeps `/etc/sysctl.d/99-k8s-inotify.conf` with
+  `max_user_instances=1024` and `max_user_watches=524288` (applied 2026-09-18).
 - **kubelet cAdvisor scrape** needs the `nodes/metrics` resource grant (plus
   `nodes/stats`, `nodes/proxy`) on the `vmsingle` ServiceAccount; the kubelet
   authorizer checks resources, not non-resource URLs.
