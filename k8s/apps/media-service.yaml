@@ -63,6 +63,9 @@ spec:
             # >= 2MB); the internal endpoint stays the data path.
             - name: GARAGE_PUBLIC_ENDPOINT
               value: https://s3.arda.io.vn
+            # Office (Word/Excel/PPT) → PDF preview conversion.
+            - name: GOTENBERG_URL
+              value: http://gotenberg.platform.svc.cluster.local:3000
             - name: GARAGE_REGION
               value: garage
             - name: GARAGE_BUCKET
