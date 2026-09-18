@@ -59,6 +59,10 @@ spec:
                   optional: true
             - name: GARAGE_ENDPOINT
               value: http://garage.platform.svc.cluster.local:3900
+            # Public host used to presign browser-facing GET redirects (files
+            # >= 2MB); the internal endpoint stays the data path.
+            - name: GARAGE_PUBLIC_ENDPOINT
+              value: https://s3.arda.io.vn
             - name: GARAGE_REGION
               value: garage
             - name: GARAGE_BUCKET

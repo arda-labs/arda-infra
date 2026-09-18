@@ -1,0 +1,33 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: garage-s3-cors
+  namespace: platform
+spec:
+  headers:
+    # Credentialed browser fetches follow the api.arda.io.vn -> s3.arda.io.vn
+    # redirect, so the storage host must echo the exact origin (wildcards are
+    # rejected when credentials are included).
+    accessControlAllowCredentials: true
+    accessControlAllowMethods:
+      - GET
+      - HEAD
+      - OPTIONS
+    accessControlAllowHeaders:
+      - X-Org-Id
+      - X-Request-Id
+      - Accept-Language
+      - Range
+      - Content-Type
+      - If-None-Match
+    accessControlAllowOriginList:
+      - https://arda.io.vn
+      - http://localhost:5000
+    accessControlExposeHeaders:
+      - Content-Length
+      - Content-Range
+      - Accept-Ranges
+      - ETag
+      - Content-Disposition
+    accessControlMaxAge: 3600
+    addVaryHeader: true

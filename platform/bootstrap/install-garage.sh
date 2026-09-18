@@ -76,6 +76,7 @@ for f in \
   "$ROOT/manifests/garage/garage-admin-svc.yaml" \
   "$ROOT/manifests/garage/garage-webui.yaml" \
   "$ROOT/manifests/garage/garage-webui-ingress.yaml" \
+  "$ROOT/manifests/garage/garage-s3-cors-middleware.yaml" \
   "$ROOT/manifests/garage/garage-s3-ingress.yaml"
 do
   [ -f "$f" ] && kubectl apply -f "$f" || true

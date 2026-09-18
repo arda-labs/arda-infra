@@ -3,6 +3,11 @@ kind: Ingress
 metadata:
   name: garage-s3
   namespace: platform
+  annotations:
+    # CORS for browser fetches that follow the media-service presign redirect
+    # (see garage-s3-cors-middleware.yaml). Traefik answers preflight OPTIONS
+    # itself once CORS headers are configured.
+    traefik.ingress.kubernetes.io/router.middlewares: platform-garage-s3-cors@kubernetescrd
 spec:
   ingressClassName: traefik
   rules:
