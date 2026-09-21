@@ -464,3 +464,179 @@ data:
             labels:
               severity: warning
               service: platform
+      - orgId: 1
+        name: arda-workflow
+        folder: Arda
+        interval: 1m
+        rules:
+          - uid: arda-workflow-unrouted-decisions
+            title: ArdaWorkflowUnroutedDecisions
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange: { from: 3600, to: 0 }
+                datasourceUid: loki
+                model:
+                  datasource: { type: loki, uid: loki }
+                  editorMode: code
+                  expr: 'sum(count_over_time({app="workflow-service"} |= "no domain adapter for decision" [1h]))'
+                  instant: true
+                  queryType: instant
+                  refId: A
+              - refId: B
+                relativeTimeRange: { from: 3600, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [], type: gt }
+                      operator: { type: and }
+                      query: { params: [B] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: B
+                  type: reduce
+                  settings: { mode: dropNN }
+              - refId: C
+                relativeTimeRange: { from: 3600, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [0], type: gt }
+                      operator: { type: and }
+                      query: { params: [C] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: B
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: threshold
+                  settings: {}
+            noDataState: OK
+            execErrState: Error
+            for: 10m
+            annotations:
+              summary: Decision đã ghi nhận nhưng chưa domain nào xử lý
+              description: '{{ $values.B }} decision không có adapter trong 1h — case sẽ kẹt ở nhánh trả lại/submit cho tới khi bổ sung adapter.'
+            labels:
+              severity: warning
+              service: workflow-service
+          - uid: arda-workflow-decision-dispatch-failures
+            title: ArdaWorkflowDecisionDispatchFailures
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange: { from: 3600, to: 0 }
+                datasourceUid: loki
+                model:
+                  datasource: { type: loki, uid: loki }
+                  editorMode: code
+                  expr: 'sum(count_over_time({app="workflow-service"} |= "decision dispatcher: apply failed" [1h]))'
+                  instant: true
+                  queryType: instant
+                  refId: A
+              - refId: B
+                relativeTimeRange: { from: 3600, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [], type: gt }
+                      operator: { type: and }
+                      query: { params: [B] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: B
+                  type: reduce
+                  settings: { mode: dropNN }
+              - refId: C
+                relativeTimeRange: { from: 3600, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [0], type: gt }
+                      operator: { type: and }
+                      query: { params: [C] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: B
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: threshold
+                  settings: {}
+            noDataState: OK
+            execErrState: Error
+            for: 10m
+            annotations:
+              summary: Dispatcher không áp được decision sang domain
+              description: '{{ $values.B }} lần apply thất bại trong 1h — xem log workflow-service và cột last_error của workflow_task_decisions.'
+            labels:
+              severity: warning
+              service: workflow-service
+          - uid: arda-workflow-reconciler-drift
+            title: ArdaWorkflowReconcilerDrift
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange: { from: 3600, to: 0 }
+                datasourceUid: loki
+                model:
+                  datasource: { type: loki, uid: loki }
+                  editorMode: code
+                  expr: 'sum(count_over_time({app="workflow-service"} |= "workflow reconciler closed stale task" [1h]))'
+                  instant: true
+                  queryType: instant
+                  refId: A
+              - refId: B
+                relativeTimeRange: { from: 3600, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [], type: gt }
+                      operator: { type: and }
+                      query: { params: [B] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: B
+                  type: reduce
+                  settings: { mode: dropNN }
+              - refId: C
+                relativeTimeRange: { from: 3600, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [5], type: gt }
+                      operator: { type: and }
+                      query: { params: [C] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: B
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: threshold
+                  settings: {}
+            noDataState: OK
+            execErrState: Error
+            for: 15m
+            annotations:
+              summary: Reconciler liên tục đóng task cũ (lệch engine ↔ DB)
+              description: '{{ $values.B }} task bị đóng do engine đã kết thúc trong 1h — dấu hiệu complete-write thất bại lặp lại; kiểm tra log workflow-service.'
+            labels:
+              severity: warning
+              service: workflow-service
