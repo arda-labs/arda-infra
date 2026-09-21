@@ -58,6 +58,8 @@ spec:
                 secretKeyRef:
                   name: arda-app-secrets
                   key: NATS_URL
+            - name: IAM_GRPC_ADDR
+              value: iam-service:9090
             - name: VAPID_PUBLIC_KEY
               valueFrom:
                 secretKeyRef:
