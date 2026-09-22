@@ -48,6 +48,8 @@ spec:
               value: http://capital-service:8080
             - name: CRM_SERVICE_URL
               value: http://crm-service:8080
+            - name: FINANCE_SERVICE_URL
+              value: http://finance-service:8080
             # PDF rendering of report documents (xlsx/html work without it).
             - name: GOTENBERG_URL
               value: http://gotenberg.platform.svc.cluster.local:3000
