@@ -17,7 +17,7 @@ spec:
         - name: ghcr-pull
       containers:
         - name: crm-service
-          image: ghcr.io/arda-labs/arda-be/crm-service:6f504ef505da71fb7dd3ee3b57ae673acd221613
+          image: ghcr.io/arda-labs/arda-be/crm-service:f7bdfd200ea1e3be168267de33499e8c5374b320
           imagePullPolicy: Always
           ports:
             - name: http
