@@ -17,7 +17,7 @@ spec:
         - name: ghcr-pull
       containers:
         - name: statistical-service
-          image: ghcr.io/arda-labs/arda-be/statistical-service:018117bb1c11577af62d42cfed1816f9c276ca5a
+          image: ghcr.io/arda-labs/arda-be/statistical-service:320570d1b4bf818e240e6fcfd4bc7cfe963409ee
           imagePullPolicy: Always
           ports:
             - name: http
