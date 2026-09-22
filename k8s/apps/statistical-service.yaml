@@ -50,6 +50,15 @@ spec:
               value: http://crm-service:8080
             - name: FINANCE_SERVICE_URL
               value: http://finance-service:8080
+            # Event-bus relay for the reporting outbox (indicator alerts). The
+            # relay is disabled when NATS is missing: alerts stay durable, just
+            # not delivered.
+            - name: NATS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: arda-app-secrets
+                  key: NATS_URL
+                  optional: true
             # PDF rendering of report documents (xlsx/html work without it).
             - name: GOTENBERG_URL
               value: http://gotenberg.platform.svc.cluster.local:3000
