@@ -91,13 +91,14 @@ spec:
           commonUpdateSettings:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
-    # Third-party gateway built from the agr-gateway fork by its own workflow,
-    # not by arda-be. It lives under arda-backend because that Application
-    # syncs the whole k8s/ path, which now includes k8s/gateway.
+    # Public upstream image, used unmodified — no pull secret, Docker Hub
+    # anonymous pulls are enough for a public image. Tracked so the release tag
+    # in k8s/gateway is resolved to a digest in-cluster, like every other
+    # workload here. Lives under arda-backend because that Application syncs
+    # the whole k8s/ path, which includes k8s/gateway.
     - namePattern: arda-backend
       images:
         - alias: aigiaregateway
-          imageName: ghcr.io/hoan02/aigiare-gateway:main
+          imageName: calciumion/new-api:v1.0.0-rc.40
           commonUpdateSettings:
             updateStrategy: digest
-            pullSecret: pullsecret:argocd/ghcr-pull

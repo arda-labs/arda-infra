@@ -26,33 +26,36 @@ is the internet egress grant, scoped by excluding every private range.
 
 ## Image
 
-Built by `.github/workflows/aigiare-gateway-image.yml` in the
-[`agr-gateway`](../../../../aigiare.site/agr-gateway) fork, from upstream's
-**unmodified** Dockerfile, and pushed to `ghcr.io/hoan02/aigiare-gateway`.
-Argo CD Image Updater rewrites the `:main` tag to a digest; see
-`argocd/image-updater.yaml`.
+The upstream release image is used **unmodified**:
 
-If the image is published somewhere else, change the tag in
-`k8s/gateway/aigiare-gateway.yaml` and the `imageName` in
-`argocd/image-updater.yaml` in the same commit. They must agree or Image
-Updater will not track the image.
+```text
+calciumion/new-api:v1.0.0-rc.40
+```
+
+Nothing in this deployment patches new-api, so there is nothing to build, no
+fork to keep in sync, and no pipeline to own. Argo CD Image Updater resolves
+the tag to a digest and writes it back, which is what
+`platform/policy/canary-policy-v1.json` requires
+(`immutable-digest-or-commit-sha`). The image is public, so no pull secret is
+needed.
+
+To change version, update the tag in `k8s/gateway/aigiare-gateway.yaml` and
+the matching `imageName` in `argocd/image-updater.yaml` in the same commit.
+They must agree or Image Updater will not track it.
+
+A local clone of the upstream source is still useful for reading the code, but
+it is not a build input. new-api's console already ships a Vietnamese locale
+(`web/src/i18n/locales/vi.json`), so no frontend work is needed for the UI.
 
 ## Prerequisites
 
-Before the first sync, three things are cluster-local and must exist:
+Before the first sync, two things are cluster-local and must exist:
 
 ```bash
-# 1. namespace-scoped pull secret for ghcr.io
-kubectl create secret docker-registry ghcr-pull -n aigiare-gw \
-  --docker-server=ghcr.io \
-  --docker-username=<github-user> \
-  --docker-password=<pat-with-read-packages> \
-  --docker-email=<email>
-
-# 2. role and database on pg-main
+# 1. role and database on pg-main
 GATEWAY_DATABASE_PASSWORD='<password>' bash k8s/bootstrap-gateway-database.sh
 
-# 3. runtime secret
+# 2. runtime secret
 kubectl create secret generic aigiare-gw-secrets -n aigiare-gw \
   --from-literal=SQL_DSN='<role>:<password>@pg-main-rw.database.svc.cluster.local:5432/<database>?sslmode=disable' \
   --from-literal=REDIS_CONN_STRING='redis://:<valkey-password>@valkey-master.platform.svc.cluster.local:6379/3' \
@@ -74,8 +77,7 @@ instead, which new-api cannot parse.
 1. Add the Tunnel public-hostname rule and the proxied DNS CNAME for
    `api.aigiare.com` in the Cloudflare Zero Trust dashboard, then record it in
    `docs/aigiare-gateway-edge-routing.md`. This step is not in Git.
-2. Create the pull secret, run the database bootstrap, create the runtime
-   secret.
+2. Run the database bootstrap and create the runtime secret.
 3. `kubectl apply -k k8s` and let the `arda-backend` Application sync.
 4. Register the first account through the console. The first account created
    becomes the root administrator.
@@ -120,8 +122,8 @@ Deliberate and load-bearing. Do not "fix" these without understanding why.
 | --- | --- | --- |
 | `readOnlyRootFilesystem: true` | `false` | Upstream image sets `WORKDIR /data` and writes logs plus the SQLite fallback database there |
 | `/health/live` and `/health/ready` probes | `/api/status`, plus a TCP liveness probe | new-api exposes no liveness endpoint; a DB-backed liveness probe would turn a Postgres blip into a restart loop on the only replica |
-| Images from `ghcr.io/arda-labs/*` | `ghcr.io/hoan02/aigiare-gateway` | Built from a third-party fork, not from `arda-be` |
-| `replicas: 2` with pod anti-affinity | `1`, `strategy: Recreate` | `canary-policy-v1.json` requires starting a rollout at exactly one replica; session and rate-limit state is not yet proven shared |
+| Images from `ghcr.io/arda-labs/*` | `calciumion/new-api`, no pull secret | Third-party public image. Pinned to a numbered release and resolved to a digest by Image Updater, so it is as immutable as the rest |
+| `replicas: 2` with pod anti-affinity | `1`, `strategy: Recreate` | `canary-policy-v1.json` requires a rollout to start at exactly one replica; session and rate-limit state is not yet proven shared |
 | No internet egress grant | `allow-egress-internet` | A relay must reach hosts that do not exist yet |
 
 ## Local database and Valkey

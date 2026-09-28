@@ -44,8 +44,9 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
-      imagePullSecrets:
-        - name: ghcr-pull
+      # No imagePullSecrets: this is a public Docker Hub image, so the
+      # namespace-scoped ghcr-pull secret the other workloads use is neither
+      # needed nor correct here.
       containers:
         - name: new-api
           securityContext:
@@ -58,12 +59,17 @@ spec:
             capabilities:
               drop:
                 - ALL
-          # Built by .github/workflows/aigiare-gateway-image.yml in the
-          # agr-gateway fork, from upstream's unmodified Dockerfile. Argo CD
-          # Image Updater rewrites this to a digest (see
-          # argocd/image-updater.yaml). Change both together.
-          image: ghcr.io/hoan02/aigiare-gateway:main
-          imagePullPolicy: Always
+          # Upstream release image, used unmodified. Nothing in this deployment
+          # patches new-api, so there is nothing to build and no fork to
+          # maintain. Pinned to a numbered release rather than `latest`; Argo CD
+          # Image Updater resolves the tag to a digest and writes it back, which
+          # is what platform/policy/canary-policy-v1.json requires
+          # (immutable-digest-or-commit-sha).
+          #
+          # To change version, update this tag and the matching imageName in
+          # argocd/image-updater.yaml in the same commit.
+          image: calciumion/new-api:v1.0.0-rc.40
+          imagePullPolicy: IfNotPresent
           args:
             - --log-dir
             - /data/logs
