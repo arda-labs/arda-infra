@@ -18,6 +18,8 @@ jobs:
           version: latest
       - name: Render application manifests
         run: kubectl kustomize k8s/apps > /tmp/arda-apps-rendered.yaml
+      - name: Render network policies
+        run: kubectl kustomize k8s/network-policies > /tmp/arda-netpol-rendered.yaml
       - name: Ensure workload identity mounts are present
         shell: bash
         run: |
@@ -30,10 +32,12 @@ jobs:
           grep -q "MEDIA_GRPC_ADDR" k8s/apps/platform-service.yaml
       - name: Validate secret hygiene
         run: node scripts/check-secret-hygiene.mjs
+      - name: Validate network policy coverage
+        run: node scripts/check-network-policy.mjs
       - name: Validate operational gate scripts
         shell: bash
         run: |
-          bash -n platform/bootstrap/backup.sh platform/bootstrap/restore.sh platform/bootstrap/preflight.sh platform/bootstrap/verify-runtime-secrets.sh
+          bash -n platform/bootstrap/backup.sh platform/bootstrap/restore.sh platform/bootstrap/preflight.sh platform/bootstrap/verify-runtime-secrets.sh platform/bootstrap/install-cilium.sh
           node scripts/check-operational-gates.mjs
           node scripts/check-canary-policy.mjs
       - run: git diff --check

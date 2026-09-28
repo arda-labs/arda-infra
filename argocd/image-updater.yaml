@@ -91,3 +91,13 @@ spec:
           commonUpdateSettings:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
+    # Third-party gateway built from the agr-gateway fork by its own workflow,
+    # not by arda-be. It lives under arda-backend because that Application
+    # syncs the whole k8s/ path, which now includes k8s/gateway.
+    - namePattern: arda-backend
+      images:
+        - alias: aigiaregateway
+          imageName: ghcr.io/hoan02/aigiare-gateway:main
+          commonUpdateSettings:
+            updateStrategy: digest
+            pullSecret: pullsecret:argocd/ghcr-pull

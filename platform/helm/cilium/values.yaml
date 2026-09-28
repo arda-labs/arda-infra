@@ -1,0 +1,116 @@
+# Cilium replaces the embedded Flannel VXLAN fabric.
+#
+# WHY: Flannel does not implement the NetworkPolicy API. Every NetworkPolicy in
+# this cluster (the ones Argo CD and the Valkey chart ship, plus the ones under
+# k8s/network-policies/) was accepted by the apiserver and enforced by nothing.
+# Cilium is the smallest change that makes those objects real.
+#
+# PREREQUISITE — the k3s agent must run with the Flannel backend disabled, on
+# every node, or the two CNIs will fight over the datapath and the cluster will
+# lose pod-to-pod connectivity:
+#
+#   /etc/rancher/k3s/config.yaml
+#     flannel-backend: none
+#
+# See docs/cni-migration.md for the ordered rollout and the rollback. Do not
+# apply this chart before that flag is in place on all three nodes.
+#
+# The rollout is deliberately NOT automated: Cilium replaces the CNI under a
+# running 3-node control plane, and the failure mode is a cluster that cannot
+# reach its own API server.
+
+cni:
+  # Own /var/lib/rancher/k3s/agent/etc/cni/net.d outright. Required when taking
+  # over from another CNI, otherwise K3s keeps rewriting the conflist.
+  exclusive: true
+
+# Trust the pod CIDRs the apiserver reports rather than deriving them from the
+# node. Keeps Cilium correct when the flannel annotations are still present on
+# the nodes during a staged migration.
+ipam:
+  mode: kubernetes
+
+# With flannel-backend=none K3s still serves the API through its own listener,
+# but the agents must be told where it is or the operator crash-loops on start.
+k8sServiceHost: 192.168.10.201
+k8sServicePort: 6443
+
+operator:
+  # Single control plane cluster: a second replica buys nothing and costs a pod.
+  replicas: 1
+  rollOutPods: true
+
+# The tunnel is VXLAN, same as Flannel, so the two fabrics use the same MTU and
+# no image needs a per-node resizing pass after cutover.
+tunnel: vxlan
+
+ipv4:
+  enabled: true
+  # Cluster-pool addresses come from the Kubernetes node CIDR.
+  enabledIpcamModes:
+    - kubernetes
+
+# L7 policy and the flow logs are what make a policy breach investigable after
+# the fact. Both are on by default in the chart; they are pinned here so a
+# values edit cannot quietly drop them.
+l7Proxy: true
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: false
+  metrics:
+    enabled:
+      - dns
+      - drop
+      - tcp
+      - flow
+      - port-distribution
+      - icmp
+      - httpV2
+
+# Read the apiserver directly instead of mirroring every object into etcd. Keeps
+# etcd — which this cluster co-locates with the control plane — small.
+k8s:
+  requireIPv4PodCIDR: true
+
+# The cluster reaches the internet only through the Cloudflare tunnel and the
+# LAN. Direct egress to the pod or node networks is not a path anything needs.
+egressMasqueradeInterfaces: []
+ipv4Masquerade: false
+
+# No BPF filesystem hostPath mount and no socket LB: this cluster keeps
+# kube-proxy, so Cilium only has to provide the CNI and the policy datapath.
+kubeProxyReplacement: false
+bpf:
+  masquerade: false
+
+# The node-exporter DaemonSet scrapes over the node LAN and the kubelet
+# cAdvisor endpoint is HTTPS on 10250. Both are host traffic, unaffected by
+# pod policies, but the operator still needs the node CIDR for ipBlock rules.
+nodePort:
+  enabled: true
+hostServices:
+  enabled: false
+externalIPs:
+  enabled: false
+
+agent:
+  # The DaemonSet must tolerate the drain-and-recreate of existing pods, so a
+  # NotReady agent is not grounds for killing the pod it is about to program.
+  healthStatusBindAddr: :4240
+
+prometheus:
+  enabled: true
+  serviceMonitor:
+    enabled: false
+
+dashboards:
+  enabled: false
+
+# The chart's own NetworkPolicy objects assume a CNI that enforces them. They are
+# correct for Cilium, but they are also the only policies in kube-system, so
+# they are kept explicit here rather than relying on chart defaults.
+extraConfig:
+  enable-bpf-clock-probe: "false"

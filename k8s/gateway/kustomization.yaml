@@ -1,0 +1,6 @@
+resources:
+  - aigiare-gateway.yaml
+  - ingress.yaml
+# secret.example.yaml is intentionally excluded. It is a template for an
+# operator to run `kubectl create secret` from, and including it would apply a
+# Secret whose values are literal placeholders.

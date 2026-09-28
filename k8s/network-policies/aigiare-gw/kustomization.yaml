@@ -1,0 +1,4 @@
+namespace: aigiare-gw
+
+resources:
+  - policies.yaml

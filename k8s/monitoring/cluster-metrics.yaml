@@ -18,10 +18,22 @@ spec:
       labels:
         app: node-exporter
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
       tolerations:
         - operator: Exists
       containers:
         - name: node-exporter
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           image: prom/node-exporter:v1.12.1
           args:
             - --path.procfs=/host/proc
@@ -145,8 +157,25 @@ spec:
         app: kube-state-metrics
     spec:
       serviceAccountName: kube-state-metrics
+      # Watches the apiserver under the list/watch ClusterRole above, so the
+      # token is the credential in use. Stated explicitly so it does not read as
+      # an oversight against the automountServiceAccountToken: false that every
+      # other workload in this repo now carries.
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: kube-state-metrics
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           image: registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0
           args:
             - --resources=pods,deployments,daemonsets,statefulsets,nodes,namespaces,persistentvolumeclaims,persistentvolumes,jobs,cronjobs

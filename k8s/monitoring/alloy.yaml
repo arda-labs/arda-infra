@@ -150,9 +150,22 @@ spec:
       labels:
         app: alloy
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
       serviceAccountName: alloy
       containers:
         - name: alloy
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           image: grafana/alloy:v1.19.2
           env:
             - name: NODE_NAME

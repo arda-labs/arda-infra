@@ -28,11 +28,24 @@ spec:
           labels:
             app: ai-eval
         spec:
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            seccompProfile:
+              type: RuntimeDefault
           restartPolicy: Never
           imagePullSecrets:
             - name: ghcr-pull
           containers:
             - name: ai-eval
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
               image: ghcr.io/arda-labs/arda-be/ai-service:main
               imagePullPolicy: Always
               command: ["/app/ai-eval"]
