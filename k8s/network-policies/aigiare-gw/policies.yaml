@@ -131,6 +131,12 @@ spec:
 # PostgreSQL. The database namespace has its own default-deny that only
 # admits arda-app, so that side needs a matching grant — see
 # k8s/network-policies/database/policies.yaml.
+#
+# Valkey is not in this rule because it is no longer borrowed from the platform
+# namespace: k8s/gateway/valkey.yaml runs a single-node Valkey inside
+# aigiare-gw, so the gateway reaches it over the loopback-like intra-namespace
+# path that allow-intra-namespace covers. Nothing in this namespace reaches
+# `platform` any more.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -148,13 +154,29 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
-    - to:
-        - namespaceSelector:
+---
+# The gateway talks to its own Valkey, and the Valkey readiness/liveness probes
+# are exec probes inside the pod rather than network calls, so only the
+# gateway -> valkey direction needs a grant.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-intra-namespace
+  namespace: aigiare-gw
+spec:
+  podSelector:
+    matchLabels:
+      app: aigiare-gw-valkey
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
             matchLabels:
-              kubernetes.io/metadata.name: platform
+              app: aigiare-gateway
       ports:
         - protocol: TCP
-          port: 6379 # Valkey primary
+          port: 6379
 ---
 # Upstream AI providers. This is the only namespace in the cluster allowed to
 # originate arbitrary internet traffic, and it is scoped as narrowly as a

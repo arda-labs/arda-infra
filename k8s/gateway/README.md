@@ -68,9 +68,30 @@ when it is absent, which logs every customer out on every restart.
 `CRYPTO_SECRET` keys cache digests and defaults to `SESSION_SECRET`, which is
 only safe while a single node shares Valkey.
 
-`valkey-master` is the bitnami primary Service for the `valkey` release.
-Confirm the name against the live cluster; the Arda apps use a Sentinel URL
-instead, which new-api cannot parse.
+`valkey-master` does not exist in this cluster and was never assumed here. The
+gateway uses its own single-node Valkey from `k8s/gateway/valkey.yaml`; see
+`Valkey` below.
+
+## Valkey
+
+`k8s/gateway/valkey.yaml` runs a single-node Valkey inside `aigiare-gw`. It
+does **not** use the shared platform Valkey, and the reason is not preference:
+
+The platform Valkey is a three-node StatefulSet behind Sentinel whose
+`valkey` Service selects `app.kubernetes.io/component: node` — all three pods,
+replicas included. Writing through that Service returns
+`READONLY You can't write against a read oneplica` whenever the connection
+lands on a replica, which is 2 times out of 3. new-api has no Sentinel support
+(it uses `redis.ParseURL` with a plain `redis.Client`), so it cannot follow a
+failover the way the Arda apps do through `redis-sentinel://`.
+
+A single node with no replication removes the whole problem: one writer, no
+failover, no Sentinel handshake. Persistence is off, because this holds cache
+and rate-limit state, never anything authoritative — PostgreSQL is that.
+
+If this gateway ever needs to scale past one replica, replace this with the
+platform Valkey via Sentinel and a new-api fork that understands it, at which
+point shared rate-limit state becomes mandatory rather than optional.
 
 ## Deployment order
 
@@ -124,6 +145,7 @@ Deliberate and load-bearing. Do not "fix" these without understanding why.
 | `/health/live` and `/health/ready` probes | `/api/status`, plus a TCP liveness probe | new-api exposes no liveness endpoint; a DB-backed liveness probe would turn a Postgres blip into a restart loop on the only replica |
 | Images from `ghcr.io/arda-labs/*` | `calciumion/new-api`, no pull secret | Third-party public image. Pinned to a numbered release and resolved to a digest by Image Updater, so it is as immutable as the rest |
 | `replicas: 2` with pod anti-affinity | `1`, `strategy: Recreate` | `canary-policy-v1.json` requires a rollout to start at exactly one replica; session and rate-limit state is not yet proven shared |
+| Shared platform Valkey via Sentinel | own single-node Valkey | The platform Service round-robins across replicas; new-api cannot speak Sentinel |
 | No internet egress grant | `allow-egress-internet` | A relay must reach hosts that do not exist yet |
 
 ## Local database and Valkey

@@ -154,8 +154,8 @@ spec:
               value: "true"
             - name: BATCH_UPDATE_ENABLED
               value: "true"
-            # Single replica, so an in-process cache is a valid first tier and
-            # keeps quota lookups serving if Valkey is briefly unreachable.
+            # Single replica with an in-process cache as the first tier, so
+            # quota lookups keep serving if Valkey is briefly unavailable.
             - name: MEMORY_CACHE_ENABLED
               value: "true"
             - name: NODE_NAME
