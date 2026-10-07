@@ -82,20 +82,28 @@ with restricted ACLs. No passwords or tokens are included in this report.
 Commit/push and reconnecting GitOps were explicitly authorized. The three
 backend migration fixes are published as
 `5e2c34d34f9babbe36d7907b47b37331793af852`. Unrelated working-tree changes
-remain excluded. CI builds the corrected registry images; the recovery overlay
+remain excluded. CI successfully published all 15 backend images; the recovery overlay
 references this immutable commit for IAM, AI, HRM and auth-gateway.
 
 Infrastructure uses `codex/thinkcenter-recovery`, retaining the necessary
 existing Cilium/network-policy foundation without moving `main`. Argo CD is
-installed with private repository and registry credentials. Backend
-reconciliation will use the recovery overlay after registry builds complete.
+installed with private repository and registry credentials. Both backend and database applications are `Synced / Healthy`. Image Updater
+successfully updated all 15 backend image digests with no errors.
 
 The supplied Cloudflare tunnel token is installed; two connectors are Ready.
 Public gateway, Hydra and Kratos readiness endpoints return HTTP 200, and
-public Kratos password login returns an active session. The old pinned gateway
-image redirects OAuth to the wrong UI host; the newly built gateway must pass
-that check before declaring browser login restored. Superadmin MFA enrollment
-is left for the owner rather than enrolling an operator-controlled factor.
+public Kratos password login returns an active session. The new gateway fixes the old image's incorrect OAuth UI host: OAuth lands
+on `https://arda.io.vn/login` with HTTP 200. Public gateway password login
+and IAM login acceptance succeed and reach the expected MFA enrollment step. Superadmin MFA is not activated by the recovery operator; the owner must
+scan the enrollment QR and verify a code at first login. A full authenticated
+OAuth callback after that user-owned step remains untested.
+
+Gatus application/public/self checks now pass after fixing selector mismatches
+and its explicit egress grants. The Image Updater manifest uses one reference
+per application, as required by its CRD. A startup NATS stream collision was
+resolved by provisioning ARDA_EVENTS with explicit business prefixes that do
+not overlap AI_EVENTS. `platform/bootstrap/init-event-streams.sh` records this
+prerequisite and preserves existing streams on repeated runs.
 
 ## Backups
 
@@ -105,6 +113,8 @@ All three snapshot backups completed successfully and passed `zstd -t`:
 - `/var/lib/vz/dump/vzdump-qemu-102-2026_10_07-19_01_58.vma.zst` (4.90 GB)
 - `/var/lib/vz/dump/vzdump-qemu-103-2026_10_07-19_03_20.vma.zst` (3.90 GB)
 
+A further node1 backup after GitOps/tunnel restoration completed at 19:18:
+`/var/lib/vz/dump/vzdump-qemu-101-2026_10_07-19_16_36.vma.zst` (5.87 GB).
 Archive integrity was verified; a restore drill has not been performed.
 The new VMs share one physical host; three guests do not protect against a
 host or disk failure. These archives are local recovery copies.
