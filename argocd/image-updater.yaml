@@ -84,6 +84,10 @@ spec:
           commonUpdateSettings:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: aigiaregateway
+          imageName: calciumion/new-api:v1.0.0-rc.40
+          commonUpdateSettings:
+            updateStrategy: digest
     - namePattern: arda-frontend
       images:
         - alias: web
@@ -91,14 +95,3 @@ spec:
           commonUpdateSettings:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
-    # Public upstream image, used unmodified — no pull secret, Docker Hub
-    # anonymous pulls are enough for a public image. Tracked so the release tag
-    # in k8s/gateway is resolved to a digest in-cluster, like every other
-    # workload here. Lives under arda-backend because that Application syncs
-    # the whole k8s/ path, which includes k8s/gateway.
-    - namePattern: arda-backend
-      images:
-        - alias: aigiaregateway
-          imageName: calciumion/new-api:v1.0.0-rc.40
-          commonUpdateSettings:
-            updateStrategy: digest
