@@ -20,6 +20,33 @@ traefik/         Traefik dynamic/static examples
 Secrets should not be committed as raw values. Use Kubernetes Secret references,
 SealedSecrets, SOPS, or ExternalSecrets before moving production credentials here.
 
+## Backend Argo CD source
+
+The checked-in Application at `argocd/apps/arda-backend.yaml` currently declares
+`targetRevision: codex/thinkcenter-recovery` and
+`path: overlays/thinkcenter-recovery` (with automated prune and self-heal). This
+is the GitOps desired source in this repository; it does not by itself confirm
+which revision is currently running in the cluster.
+
+The recovery overlay includes `k8s/` and applies these overrides:
+
+- Set every `Deployment` in `arda-app` to one replica.
+- Set every `Deployment` and `StatefulSet` in `aigiare-gw` to zero replicas.
+- Set `imagePullPolicy: IfNotPresent` for `iam-service`, `ai-service`,
+  `hrm-service`, and `auth-gateway`.
+- Pin those four images to tag
+  `5e2c34d34f9babbe36d7907b47b37331793af852`.
+- Add the `SUPERADMIN_INITIAL_PASSWORD` environment variable to `iam-service`,
+  sourced from key `SUPERADMIN_INITIAL_PASSWORD` in Secret
+  `iam-service-secrets`.
+
+Return `arda-backend` to `main` only after the recovery dependency has ended,
+the intended replica counts and image references are available on `main`, the
+IAM Secret reference is valid there, capacity has been reviewed, and rendering
+both sources shows the expected change. Then update `targetRevision` and
+`path` in the Application manifest in a reviewed Git change. Do not switch the
+source directly with `kubectl`.
+
 ## Cutover
 
 ```bash
