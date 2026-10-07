@@ -196,13 +196,13 @@ spec:
               kubernetes.io/metadata.name: monitoring
           podSelector:
             matchLabels:
-              app.kubernetes.io/name: vmsingle
+              app: vmsingle
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: monitoring
           podSelector:
             matchLabels:
-              app.kubernetes.io/name: gatus
+              app: gatus
       ports:
         - protocol: TCP
           port: 8080
