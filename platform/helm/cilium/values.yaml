@@ -42,7 +42,8 @@ operator:
 
 # The tunnel is VXLAN, same as Flannel, so the two fabrics use the same MTU and
 # no image needs a per-node resizing pass after cutover.
-tunnel: vxlan
+routingMode: tunnel
+tunnelProtocol: vxlan
 
 ipv4:
   enabled: true
@@ -75,10 +76,12 @@ hubble:
 k8s:
   requireIPv4PodCIDR: true
 
-# The cluster reaches the internet only through the Cloudflare tunnel and the
-# LAN. Direct egress to the pod or node networks is not a path anything needs.
-egressMasqueradeInterfaces: []
-ipv4Masquerade: false
+# Pod egress to the LAN and internet must use a routable node address.
+enableIPv4Masquerade: true
+# Existing ipBlock policies target the API server and node metrics addresses.
+policyCIDRMatchMode:
+  - nodes
+rollOutCiliumPods: true
 
 # No BPF filesystem hostPath mount and no socket LB: this cluster keeps
 # kube-proxy, so Cilium only has to provide the CNI and the policy datapath.
@@ -96,10 +99,8 @@ hostServices:
 externalIPs:
   enabled: false
 
-agent:
-  # The DaemonSet must tolerate the drain-and-recreate of existing pods, so a
-  # NotReady agent is not grounds for killing the pod it is about to program.
-  healthStatusBindAddr: :4240
+agent: true
+healthPort: 4240
 
 prometheus:
   enabled: true

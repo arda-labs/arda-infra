@@ -7,8 +7,8 @@ spec:
   project: arda
   source:
     repoURL: https://github.com/arda-labs/arda-infra.git
-    targetRevision: main
-    path: k8s
+    targetRevision: codex/thinkcenter-recovery
+    path: overlays/thinkcenter-recovery
   destination:
     server: https://kubernetes.default.svc
     namespace: arda-app
