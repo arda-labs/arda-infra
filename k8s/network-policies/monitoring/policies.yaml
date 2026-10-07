@@ -246,6 +246,20 @@ spec:
     - Egress
   egress:
     - to:
+        - podSelector:
+            matchLabels:
+              app: grafana
+      ports:
+        - protocol: TCP
+          port: 3000
+    - to:
+        - podSelector:
+            matchLabels:
+              app: vmsingle
+      ports:
+        - protocol: TCP
+          port: 8428
+    - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: arda-app
