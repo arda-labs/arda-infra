@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-repo-server
+  namespace: argocd
+spec:
+  template:
+    spec:
+      securityContext:
+        fsGroup: 999
+      initContainers:
+        - name: install-ksops
+          image: viaductoss/ksops:v4.5.1
+          command: ["/usr/local/bin/ksops"]
+          args: ["install", "/custom-tools"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: custom-tools
+              mountPath: /custom-tools
+      containers:
+        - name: sops-ksops
+          image: quay.io/argoproj/argocd:v3.5.4
+          command: [/var/run/argocd/argocd-cmp-server]
+          env:
+            - name: XDG_CONFIG_HOME
+              value: /home/argocd/.config
+            - name: SOPS_AGE_KEY_FILE
+              value: /home/argocd/.config/sops/age/keys.txt
+            - name: PATH
+              value: /custom-tools:/usr/local/bin:/usr/bin:/bin
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: var-files
+              mountPath: /var/run/argocd
+            - name: plugins
+              mountPath: /home/argocd/cmp-server/plugins
+            - name: cmp-plugin-config
+              mountPath: /home/argocd/cmp-server/config/plugin.yaml
+              subPath: plugin.yaml
+              readOnly: true
+            - name: cmp-tmp
+              mountPath: /tmp
+            - name: custom-tools
+              mountPath: /custom-tools
+              readOnly: true
+            - name: sops-age-key
+              mountPath: /home/argocd/.config/sops/age
+              readOnly: true
+      volumes:
+        - name: custom-tools
+          emptyDir: {}
+        - name: cmp-plugin-config
+          configMap:
+            name: argocd-cmp-ksops
+        - name: cmp-tmp
+          emptyDir: {}
+        - name: sops-age-key
+          secret:
+            secretName: argocd-sops-age
+            items:
+              - key: keys.txt
+                path: keys.txt

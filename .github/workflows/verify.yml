@@ -34,6 +34,7 @@ jobs:
           frontend k8s/frontend
           recovery-overlay overlays/thinkcenter-recovery
           platform-manifests platform/manifests
+          argocd argocd
           EOF
       - name: Install pinned kubeconform
         shell: bash
@@ -62,6 +63,8 @@ jobs:
         run: node scripts/check-secret-hygiene.mjs
       - name: Validate workload hardening
         run: node scripts/check-workload-hardening.mjs
+      - name: Validate SOPS integration
+        run: node scripts/check-sops-integration.mjs
       - name: Validate network policy coverage
         run: node scripts/check-network-policy.mjs
       - name: Validate operational gate scripts

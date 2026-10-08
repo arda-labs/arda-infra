@@ -1,0 +1,4 @@
+creation_rules:
+  - path_regex: .*\.enc\.ya?ml$
+    age: age10vlll2zww6wph94zp7nqekxytslusutelm0h4gr59gvm9kzrmdpqqr9r0z
+    unencrypted_regex: '^(apiVersion|kind|metadata|type)$'

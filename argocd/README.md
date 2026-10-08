@@ -69,8 +69,16 @@ This creates:
 
 ## Required Runtime Secrets
 
-Argo CD will create app resources, but runtime secrets are still cluster-local.
-Create them before syncing apps:
+Git-managed secrets use the age/SOPS + KSOPS flow documented in
+[`sops/README.md`](sops/README.md). The Argo CD repository server is installed
+outside the Applications in this repository, so enable the tracked sidecar
+configuration once after reviewing and merging that setup. Do not commit the
+age identity.
+
+Argo CD will create app resources. `platform-secrets` manages the encrypted
+`platform/valkey-auth` Secret. Other runtime secrets remain cluster-local until
+they are deliberately migrated to encrypted manifests. Create the remaining
+cluster-local credentials before syncing workloads:
 
 ```bash
 kubectl -n arda-app create secret docker-registry ghcr-pull \

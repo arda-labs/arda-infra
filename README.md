@@ -17,8 +17,11 @@ docs/            Edge routing and operational architecture notes
 traefik/         Traefik dynamic/static examples
 ```
 
-Secrets should not be committed as raw values. Use Kubernetes Secret references,
-SealedSecrets, SOPS, or ExternalSecrets before moving production credentials here.
+Secrets should not be committed as raw values. The Git-managed secret path uses
+SOPS with age and the scoped KSOPS Argo CD sidecar; see
+[`argocd/sops/README.md`](argocd/sops/README.md). Keep the age identity outside
+Git and back it up offline. Cluster-local secrets must be migrated deliberately
+before Argo CD takes ownership of them.
 
 ## Backend Argo CD source
 
