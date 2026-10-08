@@ -75,6 +75,11 @@ spec:
               value: capital-service:9090
             - name: STATISTICAL_GRPC_ADDR
               value: statistical-service:9090
+            - name: NATS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: arda-app-secrets
+                  key: NATS_URL
           volumeMounts:
             - name: grpc-tls
               mountPath: /var/run/arda-grpc-tls
