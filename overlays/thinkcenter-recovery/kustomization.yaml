@@ -77,9 +77,9 @@ images:
     newTag: 5e2c34d34f9babbe36d7907b47b37331793af852
 
   - name: ghcr.io/arda-labs/arda-be/platform-service
-    newTag: a24d0ae8e60992b418e76a9b805cd7f1f0b97b39
-    digest: sha256:0067a87d3d88eebd9e93f1a0727f4c79afe6892a813dda32eb9c036813a7b0b2
+    newTag: cf3a92bc0b02a5781e953efb83093ef3e8f20a27
+    digest: sha256:954c029701e5d76556d1cdb18d0461dd761c05b7193ef9655f575133a542c3b5
 
   - name: ghcr.io/arda-labs/arda-be/loan-service
-    newTag: a24d0ae8e60992b418e76a9b805cd7f1f0b97b39
-    digest: sha256:023844dc9abfa576dd0300f0a93709fcb39903d9174ba3776d4ea33ac70d9756
+    newTag: cf3a92bc0b02a5781e953efb83093ef3e8f20a27
+    digest: sha256:3b0698d03365e737a719367ba4969f5071094bc610054fa97598554656377237

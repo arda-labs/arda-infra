@@ -20,7 +20,7 @@ spec:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
         - alias: platformservice
-          imageName: ghcr.io/arda-labs/arda-be/platform-service:a24d0ae8e60992b418e76a9b805cd7f1f0b97b39
+          imageName: ghcr.io/arda-labs/arda-be/platform-service:cf3a92bc0b02a5781e953efb83093ef3e8f20a27
           commonUpdateSettings:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
@@ -60,7 +60,7 @@ spec:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
         - alias: loanservice
-          imageName: ghcr.io/arda-labs/arda-be/loan-service:a24d0ae8e60992b418e76a9b805cd7f1f0b97b39
+          imageName: ghcr.io/arda-labs/arda-be/loan-service:cf3a92bc0b02a5781e953efb83093ef3e8f20a27
           commonUpdateSettings:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
