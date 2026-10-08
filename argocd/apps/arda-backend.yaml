@@ -7,7 +7,7 @@ spec:
   project: arda
   source:
     repoURL: https://github.com/arda-labs/arda-infra.git
-    targetRevision: codex/thinkcenter-recovery
+    targetRevision: refactor/t6.1-canary-on-t2.3
     path: overlays/thinkcenter-recovery
   destination:
     server: https://kubernetes.default.svc

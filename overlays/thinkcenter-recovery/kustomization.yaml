@@ -9,6 +9,19 @@ resources:
 patches:
   - target:
       kind: Deployment
+      name: workflow-service
+      namespace: arda-app
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: workflow-service
+        namespace: arda-app
+      spec:
+        strategy:
+          type: Recreate
+  - target:
+      kind: Deployment
       name: ((iam|ai|hrm)-service|auth-gateway)
     patch: |-
       - op: replace
@@ -81,6 +94,8 @@ images:
 
   - name: ghcr.io/arda-labs/arda-be/platform-service
     newTag: 559373ce5001b26f3c9a893942704c9f2aa1b444
+  - name: ghcr.io/arda-labs/arda-be/workflow-service
+    newTag: 5aa346c6296da66494a0b7cf2f2a5718b2ea9f6e
     digest: sha256:dce67c8fbf87af7e52f401c96f8d0c8b0dacf58b9b2a5546df3c8b4341c15f88
 
   - name: ghcr.io/arda-labs/arda-be/loan-service
