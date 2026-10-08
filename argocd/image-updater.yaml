@@ -35,7 +35,7 @@ spec:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
         - alias: workflowservice
-          imageName: ghcr.io/arda-labs/arda-be/workflow-service:c87a8d96fc9665883ae3dc73d76bbd0dad88405a
+          imageName: ghcr.io/arda-labs/arda-be/workflow-service:c0e1681eb326d2cb867e114dbe506d00bba8d0d1
           commonUpdateSettings:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
