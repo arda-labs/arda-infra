@@ -1,0 +1,59 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: auth-gateway
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: auth-gateway
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: iam-service
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: iam-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: platform-service
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: platform-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: loan-service
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: loan-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: finance-service
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: finance-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: workflow-service
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: workflow-service

@@ -16,3 +16,4 @@ resources:
   - deposit-service.yaml
   - capital-service.yaml
   - statistical-service.yaml
+  - critical-workloads-pdb.yaml

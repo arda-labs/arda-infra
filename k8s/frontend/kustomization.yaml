@@ -3,3 +3,4 @@ resources:
   - web-ingress.yaml
   - web-public-ingress.yaml
   - web.yaml
+  - web-pdb.yaml

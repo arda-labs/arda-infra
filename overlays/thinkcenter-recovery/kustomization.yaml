@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 # The AiGiare gateway is hosted on its separate VM. This recovery target
-# restores Arda with one backend replica per service on the shared host.
+# restores selected critical services with two replicas for node-level availability.
 resources:
   - ../../k8s
 
@@ -35,6 +35,13 @@ patches:
       - op: replace
         path: /spec/replicas
         value: 1
+  - target:
+      kind: Deployment
+      name: (auth-gateway|iam-service|platform-service|loan-service|finance-service|workflow-service)
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
   - target:
       kind: Deployment
       name: iam-service

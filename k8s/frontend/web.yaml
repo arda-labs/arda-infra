@@ -13,6 +13,13 @@ spec:
       labels:
         app: web
     spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: web
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true

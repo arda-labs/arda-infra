@@ -8,7 +8,7 @@ auth:
 
 primary:
   persistence:
-    enabled: false
+    enabled: true
   resources:
     requests:
       cpu: 100m
@@ -20,7 +20,7 @@ primary:
 replica:
   replicaCount: 3
   persistence:
-    enabled: false
+    enabled: true
   resources:
     requests:
       cpu: 100m

@@ -13,6 +13,13 @@ spec:
       labels:
         app: auth-gateway
     spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: auth-gateway
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
