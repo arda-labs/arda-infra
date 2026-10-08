@@ -20,7 +20,7 @@ spec:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
         - alias: platformservice
-          imageName: ghcr.io/arda-labs/arda-be/platform-service:main
+          imageName: ghcr.io/arda-labs/arda-be/platform-service:a24d0ae8e60992b418e76a9b805cd7f1f0b97b39
           commonUpdateSettings:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
