@@ -37,3 +37,9 @@ spec:
       maintenance_work_mem: "256MB"
       max_wal_size: "4GB"
       checkpoint_timeout: "15min"
+
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: pg-main-backup

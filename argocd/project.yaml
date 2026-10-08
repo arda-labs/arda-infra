@@ -7,7 +7,13 @@ spec:
   description: Arda applications
   sourceRepos:
     - https://github.com/arda-labs/arda-infra.git
+    - https://charts.jetstack.io
+    - https://cloudnative-pg.github.io/charts
   destinations:
+    - namespace: cert-manager
+      server: https://kubernetes.default.svc
+    - namespace: cnpg-system
+      server: https://kubernetes.default.svc
     - namespace: database
       server: https://kubernetes.default.svc
     - namespace: arda-app
@@ -24,6 +30,14 @@ spec:
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace
+    # cert-manager and the CNPG backup plugin own their controller CRDs,
+    # webhook configurations and cluster-scoped RBAC.
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
     # Needed by the monitoring stack: Alloy log shipping, kube-state-metrics
     # and the vmsingle kubelet scrape all use cluster-scoped RBAC.
     - group: rbac.authorization.k8s.io

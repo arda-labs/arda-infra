@@ -4,3 +4,4 @@ resources:
   - aigiare-gw
   - monitoring
   - database
+  - database-restore

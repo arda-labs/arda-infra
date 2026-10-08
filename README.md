@@ -145,3 +145,8 @@ admin API after edits — Argo sync alone does not apply provisioning changes).
 Runbook, access requirements and LogQL examples:
 [`docs/monitoring.md`](docs/monitoring.md). Read-only agent access (kubectl,
 Grafana MCP, Postgres MCP): [`docs/agent-access.md`](docs/agent-access.md).
+
+PostgreSQL backup setup and the isolated restore drill are documented in
+[`docs/postgres-backup-restore.md`](docs/postgres-backup-restore.md). The manifests
+use the Barman Cloud plugin and a dedicated Garage bucket; an operator must
+create the S3 credentials and verify the first completed backup and restore.

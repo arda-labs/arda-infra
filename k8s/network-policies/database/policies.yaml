@@ -133,3 +133,27 @@ spec:
       ports:
         - protocol: TCP
           port: 6443
+---
+# CNPG's Barman sidecar uploads WAL and base backups to the in-cluster Garage
+# S3 service. Restrict the database tier to Garage pods and the S3 API port.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-garage-s3
+  namespace: database
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: platform
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: garage
+              app.kubernetes.io/instance: garage
+      ports:
+        - protocol: TCP
+          port: 3900

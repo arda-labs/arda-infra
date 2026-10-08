@@ -1,5 +1,7 @@
 resources:
   - project.yaml
+  - apps/cert-manager.yaml
+  - apps/cnpg-barman-cloud.yaml
   - apps/arda-database.yaml
   - apps/arda-backend.yaml
   - apps/arda-frontend.yaml

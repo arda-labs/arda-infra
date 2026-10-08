@@ -1,0 +1,4 @@
+namespace: database-restore
+
+resources:
+  - policies.yaml
