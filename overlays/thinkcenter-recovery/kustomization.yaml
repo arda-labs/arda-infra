@@ -37,6 +37,16 @@ patches:
         value: 1
   - target:
       kind: Deployment
+      name: platform-service
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: platform-service
+      spec:
+        replicas: 0
+  - target:
+      kind: Deployment
       name: iam-service
     patch: |-
       apiVersion: apps/v1
