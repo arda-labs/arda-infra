@@ -95,8 +95,8 @@ images:
   - name: ghcr.io/arda-labs/arda-be/platform-service
     newTag: 559373ce5001b26f3c9a893942704c9f2aa1b444
   - name: ghcr.io/arda-labs/arda-be/workflow-service
-    newTag: 5aa346c6296da66494a0b7cf2f2a5718b2ea9f6e
-    digest: sha256:dce67c8fbf87af7e52f401c96f8d0c8b0dacf58b9b2a5546df3c8b4341c15f88
+    newTag: c87a8d96fc9665883ae3dc73d76bbd0dad88405a
+    digest: sha256:97ef6280550ef7080eb1281e7cfe2a2ba48b6d52bc3123f7cd8aeb88cada62d0
 
   - name: ghcr.io/arda-labs/arda-be/loan-service
     newTag: cf3a92bc0b02a5781e953efb83093ef3e8f20a27
