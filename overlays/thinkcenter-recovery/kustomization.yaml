@@ -44,7 +44,7 @@ patches:
       metadata:
         name: platform-service
       spec:
-        replicas: 0
+        replicas: 1
   - target:
       kind: Deployment
       name: iam-service
