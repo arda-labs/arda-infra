@@ -22,3 +22,6 @@ helm upgrade --install "$NATS_RELEASE" nats/nats \
   -f "$ROOT/helm/nats/values.yaml"
 
 kubectl apply -f "$ROOT/manifests/nodeport/nats-nodeport.yaml"
+
+# Create non-overlapping business event subjects before app publishers start.
+bash "$ROOT/bootstrap/init-event-streams.sh"

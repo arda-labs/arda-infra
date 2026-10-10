@@ -84,6 +84,10 @@ spec:
           commonUpdateSettings:
             updateStrategy: digest
             pullSecret: pullsecret:argocd/ghcr-pull
+        - alias: aigiaregateway
+          imageName: calciumion/new-api:v1.0.0-rc.40
+          commonUpdateSettings:
+            updateStrategy: digest
     - namePattern: arda-frontend
       images:
         - alias: web

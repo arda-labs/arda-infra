@@ -226,8 +226,21 @@ spec:
       labels:
         app: gatus
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: gatus
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           image: twinproduction/gatus:v5.36.0
           env:
             - name: GATUS_CONFIG_PATH

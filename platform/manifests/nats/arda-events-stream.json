@@ -1,0 +1,26 @@
+{
+  "subjects": [
+    "arda.capital.>",
+    "arda.crm.>",
+    "arda.deposit.>",
+    "arda.dlq.>",
+    "arda.docs.>",
+    "arda.finance.>",
+    "arda.hrm.>",
+    "arda.iam.>",
+    "arda.interbank.>",
+    "arda.knowledge.>",
+    "arda.loan.>",
+    "arda.mdm.>",
+    "arda.media.>",
+    "arda.notification.>",
+    "arda.platform.>",
+    "arda.report.>",
+    "arda.statistical.>",
+    "arda.workflow.>"
+  ],
+  "storage": "file",
+  "retention": "limits",
+  "name": "ARDA_EVENTS",
+  "num_replicas": 3
+}

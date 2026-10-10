@@ -13,10 +13,23 @@ spec:
       labels:
         app: web
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
       imagePullSecrets:
         - name: ghcr-pull
       containers:
         - name: web
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           image: ghcr.io/arda-labs/arda-mfe/web:87f54b36328096cf9f3ed84afb61315d0d05bfb2
           imagePullPolicy: Always
           ports:

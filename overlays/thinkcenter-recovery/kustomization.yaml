@@ -1,0 +1,67 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# The AiGiare gateway is hosted on its separate VM. This recovery target
+# restores Arda with one backend replica per service on the shared host.
+resources:
+  - ../../k8s
+
+patches:
+  - target:
+      kind: Deployment
+      name: ((iam|ai|hrm)-service|auth-gateway)
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+  - target:
+      kind: Deployment
+      namespace: aigiare-gw
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 0
+  - target:
+      kind: StatefulSet
+      namespace: aigiare-gw
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 0
+  - target:
+      kind: Deployment
+      namespace: arda-app
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+  - target:
+      kind: Deployment
+      name: iam-service
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: iam-service
+      spec:
+        template:
+          spec:
+            containers:
+              - name: iam-service
+                env:
+                  - name: SUPERADMIN_INITIAL_PASSWORD
+                    valueFrom:
+                      secretKeyRef:
+                        name: iam-service-secrets
+                        key: SUPERADMIN_INITIAL_PASSWORD
+
+images:
+  - name: ghcr.io/arda-labs/arda-be/iam-service
+    newTag: 5e2c34d34f9babbe36d7907b47b37331793af852
+  - name: ghcr.io/arda-labs/arda-be/ai-service
+    newTag: 5e2c34d34f9babbe36d7907b47b37331793af852
+  - name: ghcr.io/arda-labs/arda-be/hrm-service
+    newTag: 5e2c34d34f9babbe36d7907b47b37331793af852
+
+  - name: ghcr.io/arda-labs/arda-be/auth-gateway
+    newTag: 5e2c34d34f9babbe36d7907b47b37331793af852

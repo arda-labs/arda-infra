@@ -114,9 +114,26 @@ spec:
       labels:
         app: vmsingle
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
       serviceAccountName: vmsingle
+      # The cAdvisor scrape job authenticates with this ServiceAccount's bearer
+      # token, so the mount is required. Stated explicitly so it does not read
+      # as an oversight against the automountServiceAccountToken: false that
+      # every other workload in this repo now carries.
+      automountServiceAccountToken: true
       containers:
         - name: vmsingle
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           image: victoriametrics/victoria-metrics:v1.152.0
           args:
             - -storageDataPath=/vm-data

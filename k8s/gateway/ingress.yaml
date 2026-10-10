@@ -1,0 +1,39 @@
+# Public edge for the AiGiare gateway.
+#
+# Two independent paths reach this Service, and both are granted in
+# k8s/network-policies/aigiare-gw/policies.yaml:
+#
+#   1. Cloudflare Tunnel. The live path for api.arda.io.vn is a Tunnel
+#      public-hostname rule pointing straight at a Service DNS name, not at
+#      Traefik (see docs/api-edge-routing.md). Do the same here by adding in
+#      the Cloudflare Zero Trust dashboard:
+#
+#        api.aigiare.com -> http://aigiare-gateway.aigiare-gw.svc.cluster.local:3000
+#
+#      plus a proxied CNAME to the tunnel. Tunnel ingress is account state and
+#      is NOT reconciled by Argo CD, so this step is manual and the same change
+#      must be recorded in docs/edge-routing-gateway.md.
+#
+#   2. This Ingress, for in-cluster and Traefik-mediated access. The tunnel
+#      does not have to go through Traefik, but the object keeps the hostname
+#      declared in Git and gives a second way in during a tunnel outage.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aigiare-gateway
+  namespace: aigiare-gw
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: api.aigiare.com
+      http:
+        paths:
+          # new-api serves the console UI and the /v1 relay surface from the
+          # same port, so the whole host is one route.
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: aigiare-gateway
+                port:
+                  number: 3000

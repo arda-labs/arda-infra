@@ -1,0 +1,305 @@
+# Arda application tier.
+#
+# Every service except auth-gateway has no authentication of its own: it trusts
+# X-User-Id / X-Tenant-Id / X-Permissions as delivered by the gateway, and
+# nothing in the service verifies a signature on them. Until Cilium replaced
+# Flannel, the only thing standing between a pod and the full multi-tenant
+# ledger was "do not know the ClusterIP". This namespace is default-deny and
+# every allowed path below is derived from an actual traffic edge, not from what
+# would be convenient.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: arda-app
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# DNS is served by kube-system. Without this every name lookup fails the moment
+# the default-deny lands, and the failure looks like a service outage.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: arda-app
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# The Traefik ingress controller terminates the tunnel and forwards /api/* here.
+# traefik-ingress-controller is the Traefik 3.x service name; the ClusterIP is
+# deliberately not matched, so a replacement controller with a different name
+# fails closed rather than inheriting this grant.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-edge
+  namespace: arda-app
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# auth-gateway proxies browser traffic to the domain services and is the only
+# caller allowed to present a browser session.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-gateway
+  namespace: arda-app
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: auth-gateway
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# The tunnel's API origin is auth-gateway:8080, so it bypasses Traefik.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-tunnel
+  namespace: arda-app
+spec:
+  podSelector:
+    matchLabels:
+      app: auth-gateway
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: platform
+          podSelector:
+            matchLabels:
+              app: cloudflared
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# Auth fetches public Ory endpoints; AI calls tenant-selected model providers;
+# media accesses its public S3 endpoint. Other services retain default-deny.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-external-https
+  namespace: arda-app
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values: [auth-gateway, ai-service, media-service]
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 169.254.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+---
+# Intra-namespace HTTP: the gateway fan-out, the AI tool calls, hrm -> workflow,
+# statistical -> ledger services, and the eval CronJob -> ai-service.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-service-mesh-http
+  namespace: arda-app
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# gRPC is service-to-service only. It is deliberately NOT granted to the edge:
+# the ingress controller never speaks gRPC, so exposing 9090 to Traefik would be
+# an unused grant that widens the blast radius of an edge compromise.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-service-mesh-grpc
+  namespace: arda-app
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 9090
+---
+# VictoriaMetrics scrapes /metrics and Gatus probes /health/*, both on the HTTP
+# port. Kept as one rule so the scrape path and the alerting path cannot drift
+# apart: if this breaks, either metrics or alerting goes dark silently.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-observability
+  namespace: arda-app
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app: vmsingle
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app: gatus
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# Egress back into the namespace, mirroring the ingress mesh rules so a pod that
+# dials a peer is not blocked by its own namespace's egress policy.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-service-mesh
+  namespace: arda-app
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 9090
+---
+# The data tier. Every entry maps to a dependency that appears in a manifest
+# under k8s/apps: DATABASE_DSN, REDIS_URL/valkey, NATS_URL, the Zeebe gateway
+# (gRPC 26500 + REST 8080), Elasticsearch, Garage S3, Gotenberg, and the Ory
+# admin/public endpoints. Port 5432 lands in the database namespace, which has
+# its own default-deny.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-data-tier
+  namespace: arda-app
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: database
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: platform
+      ports:
+        - protocol: TCP
+          port: 4222 # NATS client
+        - protocol: TCP
+          port: 6379 # Valkey
+        - protocol: TCP
+          port: 26379 # Valkey Sentinel primary discovery
+        - protocol: TCP
+          port: 8080 # Zeebe gateway REST
+        - protocol: TCP
+          port: 26500 # Zeebe gateway gRPC
+        - protocol: TCP
+          port: 9200 # Zeebe Elasticsearch
+        - protocol: TCP
+          port: 3900 # Garage S3
+        - protocol: TCP
+          port: 3000 # Gotenberg
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: auth
+      ports:
+        - protocol: TCP
+          port: 4433 # Kratos public
+        - protocol: TCP
+          port: 4434 # Kratos admin
+        - protocol: TCP
+          port: 4444 # Hydra public
+        - protocol: TCP
+          port: 4445 # Hydra admin
+---
+# The apiserver. Only the control-plane address is reachable, and only on 6443.
+# Note that every pod also gets automountServiceAccountToken: false from the
+# workload hardening, so this grant is a path to the API and not a credential.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-kubernetes-api
+  namespace: arda-app
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 192.168.10.201/32
+      ports:
+        - protocol: TCP
+          port: 6443

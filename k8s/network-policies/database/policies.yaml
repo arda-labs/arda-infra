@@ -1,0 +1,135 @@
+# Database tier. CloudNativePG keeps three Postgres instances here; before
+# Cilium this namespace had no policy at all, so any pod in the cluster could
+# open a connection with any credential it happened to hold — or, for a role
+# with a guessable or leaked password, simply try one.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: database
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: database
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# Applications and Ory authentication use their own database roles.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-arda-app
+  namespace: database
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: arda-app
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: auth
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+# The AiGiare gateway runs on its own database and role (see
+# k8s/bootstrap-gateway-database.sh), so it is granted access by namespace
+# rather than by sharing a credential with the banking tier. The grant is
+# namespace-wide rather than label-scoped because the gateway Deployment
+# declares no label this repo's policy checker can resolve against.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-aigiare-gw
+  namespace: database
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: aigiare-gw
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+# Certificate distribution and health probes. The CNPG controller is deployed
+# outside this repository, so the grant is scoped to the operator namespace
+# rather than to a pod label this repo does not own.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-operator
+  namespace: database
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - protocol: TCP
+          port: 5432
+        - protocol: TCP
+          port: 8000
+---
+# Replicas stream WAL from the primary and instance managers watch the API.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-postgres-replication
+  namespace: database
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 5432
+  egress:
+    - to:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - ipBlock:
+            cidr: 192.168.10.201/32
+      ports:
+        - protocol: TCP
+          port: 6443

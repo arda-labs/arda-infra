@@ -1,0 +1,214 @@
+# AiGiare gateway tier.
+#
+# This namespace is internet-facing, holds customer balances and API keys, and
+# runs third-party AGPL code whose trust profile is nothing like the rest of
+# this cluster: there is no caller identity to forward, no mTLS, and the
+# workload is the only thing standing between the public internet and the
+# shared PostgreSQL instance. It is default-deny in both directions and every
+# grant below maps to a dependency that appears in k8s/gateway.
+#
+# The one rule that has no counterpart in arda-app is allow-egress-internet.
+# A relay has to reach upstream hosts that do not exist yet, so egress cannot
+# be enumerated by port into known namespaces. It is still constrained: the
+# RFC 1918, link-local, CGNAT and cluster-network ranges are excluded, so this
+# grants a path to the internet and nothing else. In particular it cannot
+# reach the banking services, the data tier, or the Kubernetes API.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: aigiare-gw
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# DNS. Without this every Service hostname fails the moment the deny lands,
+# and the symptom looks like a full outage rather than a name-resolution bug.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: aigiare-gw
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# The Cloudflare Tunnel connector. api.arda.io.vn is reached by a Tunnel
+# public-hostname rule that points directly at a Service DNS name rather than
+# at Traefik, so the source of every public request is a cloudflared pod in
+# the platform namespace, not the ingress controller.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-tunnel
+  namespace: aigiare-gw
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: platform
+          podSelector:
+            matchLabels:
+              app: cloudflared
+      ports:
+        - protocol: TCP
+          port: 3000
+---
+# Traefik, for the Ingress object in k8s/gateway/ingress.yaml. Selects the
+# controller by label rather than by ClusterIP so a replacement controller with
+# a different name fails closed instead of inheriting this grant.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-edge
+  namespace: aigiare-gw
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - protocol: TCP
+          port: 3000
+---
+# VictoriaMetrics scrapes and Gatus black-box probes. Kept as one rule so the
+# scrape path and the alerting path cannot drift apart: if this breaks, metrics
+# and alerting go dark at the same time instead of one at a time.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-observability
+  namespace: aigiare-gw
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: vmsingle
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: gatus
+      ports:
+        - protocol: TCP
+          port: 3000
+---
+# PostgreSQL. The database namespace has its own default-deny that only
+# admits arda-app, so that side needs a matching grant — see
+# k8s/network-policies/database/policies.yaml.
+#
+# Valkey is not in this rule because it is no longer borrowed from the platform
+# namespace: k8s/gateway/valkey.yaml runs a single-node Valkey inside
+# aigiare-gw, so the gateway reaches it over the loopback-like intra-namespace
+# path that allow-intra-namespace covers. Nothing in this namespace reaches
+# `platform` any more.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-data-tier
+  namespace: aigiare-gw
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: database
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+# The gateway talks to its own Valkey, and the Valkey readiness/liveness probes
+# are exec probes inside the pod rather than network calls, so only the
+# gateway -> valkey direction needs a grant.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-intra-namespace
+  namespace: aigiare-gw
+spec:
+  podSelector:
+    matchLabels:
+      app: aigiare-gw-valkey
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: aigiare-gateway
+      ports:
+        - protocol: TCP
+          port: 6379
+---
+# Upstream AI providers. This is the only namespace in the cluster allowed to
+# originate arbitrary internet traffic, and it is scoped as narrowly as a
+# relay allows: every private, link-local, CGNAT and node range is carved out,
+# so an SSRF in the gateway cannot use this pod to reach pg-main, an Arda
+# service, or the CloudNativePG operator.
+#
+# 192.168.0.0/16 covers the node network, and 10.42.0.0/16 is the default k3s
+# pod CIDR. Confirm both against the live cluster before relying on this rule
+# to contain anything.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-internet
+  namespace: aigiare-gw
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 169.254.0.0/16
+              - 100.64.0.0/10
+              - 127.0.0.0/8
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80

@@ -12,3 +12,11 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: monitoring
+---
+# Internet-facing AI gateway with its own default-deny policy set. Kept out of
+# arda-app so that a public-facing, third-party workload never shares a
+# trust boundary with the banking tier.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aigiare-gw

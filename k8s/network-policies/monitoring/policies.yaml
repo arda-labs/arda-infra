@@ -1,0 +1,279 @@
+# Monitoring tier. This namespace is the one the audit found hardest to
+# justify: VMUI, Gatus, Loki's push endpoint and the scrape API have no
+# authentication of their own, and their only protection was a Cloudflare
+# Access policy configured in a dashboard — outside GitOps, unreviewed in any
+# pull request, and impossible to verify from the manifests. The policies below
+# make the in-cluster reachability explicit so the Cloudflare layer is defence
+# in depth rather than the only control.
+#
+# Selector note: the workloads in this namespace are labelled `app: <name>`,
+# not `app.kubernetes.io/name`. The helm-chart convention was never applied
+# here, so every selector below matches what the manifests actually set. A
+# selector that matches nothing fails closed and takes the scrape path with it,
+# which is why scripts/check-network-policy.mjs asserts these against the
+# manifests rather than trusting them by eye.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: monitoring
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: monitoring
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# The three UIs that have a public hostname behind the tunnel: VMUI on 8428,
+# Grafana on 3000, Gatus on 8080. Nothing else in the cluster may reach them.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-edge
+  namespace: monitoring
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - protocol: TCP
+          port: 8428
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 8080
+---
+# The stack supervises itself: VictoriaMetrics scrapes Grafana, Loki, Gatus and
+# itself; Grafana queries VictoriaMetrics and Loki for its dashboards; Alloy
+# ships the container logs it tails into Loki.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-observability-mesh
+  namespace: monitoring
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: vmsingle
+        - podSelector:
+            matchLabels:
+              app: grafana
+        - podSelector:
+            matchLabels:
+              app: loki
+        - podSelector:
+            matchLabels:
+              app: gatus
+        - podSelector:
+            matchLabels:
+              app: alloy
+      ports:
+        - protocol: TCP
+          port: 8428
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 3100
+        - protocol: TCP
+          port: 8080
+---
+# Cross-namespace egress the scrape config depends on. VictoriaMetrics pulls
+# /metrics from every application service; nothing else in the cluster is
+# allowed to query a service directly.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-scrape-application
+  namespace: monitoring
+spec:
+  podSelector:
+    matchLabels:
+      app: vmsingle
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: arda-app
+      ports:
+        - protocol: TCP
+          port: 8080
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: arda-web
+      ports:
+        - protocol: TCP
+          port: 8080
+    # The AiGiare gateway serves /metrics on 3000, same as its HTTP port. Its
+    # own allow-observability policy is the ingress half of this pair; without
+    # this egress rule the scrape silently fails and the gateway has no
+    # metrics while every other service does.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: aigiare-gw
+      ports:
+        - protocol: TCP
+          port: 3000
+    - to:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8428
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 3100
+        - protocol: TCP
+          port: 8080
+---
+# Node-level scrape targets. These are host endpoints, so they need an ipBlock
+# rather than a pod selector: node-exporter on 9100 and the kubelet cAdvisor
+# endpoint on 10250, both scraped over the node LAN as configured in
+# k8s/monitoring/victoria-metrics.yaml.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-scrape-nodes
+  namespace: monitoring
+spec:
+  podSelector:
+    matchLabels:
+      app: vmsingle
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 192.168.10.0/24
+      ports:
+        - protocol: TCP
+          port: 9100
+        - protocol: TCP
+          port: 10250
+---
+# The apiserver. The scrape config authenticates with the vmsingle
+# ServiceAccount bearer token, so this grant is required for the cAdvisor job.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-kubernetes-api
+  namespace: monitoring
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 192.168.10.201/32
+      ports:
+        - protocol: TCP
+          port: 6443
+---
+# Ingress from the control plane, so the kubelet can reach the DaemonSet
+# metrics endpoint in this namespace. node-exporter publishes on hostPort, so
+# this is a host-to-host path, but the pod is still selected by the default-deny
+# and needs the explicit grant.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-control-plane
+  namespace: monitoring
+spec:
+  podSelector:
+    matchLabels:
+      app: node-exporter
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 192.168.10.0/24
+      ports:
+        - protocol: TCP
+          port: 9100
+
+---
+# Gatus checks application readiness and the existing public HTTPS endpoints.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gatus-checks
+  namespace: monitoring
+spec:
+  podSelector:
+    matchLabels:
+      app: gatus
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: grafana
+      ports:
+        - protocol: TCP
+          port: 3000
+    - to:
+        - podSelector:
+            matchLabels:
+              app: vmsingle
+      ports:
+        - protocol: TCP
+          port: 8428
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: arda-app
+      ports:
+        - protocol: TCP
+          port: 8080
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 169.254.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443

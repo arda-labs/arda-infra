@@ -1,0 +1,4 @@
+namespace: arda-app
+
+resources:
+  - policies.yaml

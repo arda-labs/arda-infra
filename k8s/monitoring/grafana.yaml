@@ -79,10 +79,22 @@ spec:
       labels:
         app: grafana
     spec:
+      automountServiceAccountToken: false
       securityContext:
         fsGroup: 472
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: grafana
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           image: grafana/grafana:13.2.2
           ports:
             - name: http

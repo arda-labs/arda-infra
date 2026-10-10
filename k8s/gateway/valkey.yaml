@@ -1,0 +1,117 @@
+# Valkey for the AiGiare gateway, private to this namespace.
+#
+# Deliberately NOT the shared platform Valkey. That deployment is a three-node
+# StatefulSet behind Sentinel, and its `valkey` Service load-balances across all
+# three pods rather than pinning to the primary. Writing through it returns
+# READONLY on a replica, so a client that cannot speak Sentinel — which is
+# exactly new-api, since it uses redis.ParseURL with a plain redis.Client — would
+# fail most of its writes.
+#
+# A single node with no replication removes that entire problem class: there is
+# one writer, no failover to get wrong, and no Sentinel handshake. The cost is
+# that this cache is not highly available, which is acceptable because Valkey
+# here holds cache, rate-limit counters and session-adjacent state — never the
+# source of truth, which is PostgreSQL.
+#
+# Persistence is off, matching the platform Valkey. A restart empties the cache
+# and new-api rebuilds it. Persistent Valkey would need a StatefulSet volume and
+# a backup story for data that is reconstructible.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: aigiare-gw-valkey
+  namespace: aigiare-gw
+  labels:
+    app: aigiare-gw-valkey
+spec:
+  serviceName: aigiare-gw-valkey
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aigiare-gw-valkey
+  template:
+    metadata:
+      labels:
+        app: aigiare-gw-valkey
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: valkey
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          image: valkey/valkey:9.1.0-alpine
+          imagePullPolicy: IfNotPresent
+          # The password is injected by the shell, not by Kubernetes. An arg of
+          # "$(VALKEY_PASSWORD)" would reach valkey-server as that literal
+          # string — Kubernetes does not expand env references in args — so the
+          # server would come up with a password nobody knows and every probe
+          # would fail. The value is also not visible in the pod spec, the
+          # container args, or `ps`, which a mounted env var also cannot avoid
+          # but at least keeps it out of the manifest and the API.
+          command: ["/bin/sh", "-c"]
+          args:
+            - exec valkey-server --requirepass "$VALKEY_PASSWORD" --save "" --appendonly no --maxmemory 256mb --maxmemory-policy allkeys-lru
+          ports:
+            - name: valkey
+              containerPort: 6379
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 320Mi
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - valkey-cli -a "$VALKEY_PASSWORD" ping | grep -q PONG
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - valkey-cli -a "$VALKEY_PASSWORD" ping | grep -q PONG
+            periodSeconds: 20
+            failureThreshold: 6
+          env:
+            - name: VALKEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aigiare-gw-secrets
+                  key: VALKEY_PASSWORD
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aigiare-gw-valkey
+  namespace: aigiare-gw
+  labels:
+    app: aigiare-gw-valkey
+spec:
+  clusterIP: None
+  selector:
+    app: aigiare-gw-valkey
+  ports:
+    - name: valkey
+      port: 6379
+      targetPort: valkey
