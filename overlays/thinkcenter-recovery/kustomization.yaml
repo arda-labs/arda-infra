@@ -57,11 +57,11 @@ patches:
 
 images:
   - name: ghcr.io/arda-labs/arda-be/iam-service
-    newTag: 5e2c34d34f9babbe36d7907b47b37331793af852
+    newTag: main
   - name: ghcr.io/arda-labs/arda-be/ai-service
-    newTag: 5e2c34d34f9babbe36d7907b47b37331793af852
+    newTag: main
   - name: ghcr.io/arda-labs/arda-be/hrm-service
-    newTag: 5e2c34d34f9babbe36d7907b47b37331793af852
+    newTag: main
 
   - name: ghcr.io/arda-labs/arda-be/auth-gateway
-    newTag: 5e2c34d34f9babbe36d7907b47b37331793af852
+    newTag: main
