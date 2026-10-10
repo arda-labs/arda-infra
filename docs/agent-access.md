@@ -13,6 +13,13 @@ The workspace `opencode.jsonc` wires these stdio MCP servers:
 | `postgres` | Read-only SQL on every service database (tools take a `database` argument) | `dev/mcp-postgres.ps1` | `dev/mcp-postgres.env` (role `arda_agent_ro`) |
 | `postgres-admin` | Adds `execute_write` for cleaning up junk dev data | `dev/mcp-postgres.ps1 -Write` | `dev/mcp-postgres.env` (role `arda_agent_rw`) |
 
+Claude Code đọc cùng ba server từ `.mcp.json` ở workspace root (nội dung tương
+đương `opencode.jsonc`; sửa một nơi phải sửa nơi kia). Lần đầu Claude Code hỏi
+duyệt từng server, và cần khởi động lại session để tool xuất hiện. Quyền mặc
+định: `grafana`/`postgres` được phép, `postgres-admin__execute_write` luôn hỏi.
+Subagent `arda-debug` (chỉ đọc) và `arda-data-cleanup` (dry_run, chờ xác nhận)
+nằm ở `.claude/agents/`.
+
 ## Kubernetes
 
 `kubectl` works with the default kubeconfig (`~/.kube/config`, context
