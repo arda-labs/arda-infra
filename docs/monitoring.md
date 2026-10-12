@@ -59,10 +59,13 @@ reads the directory at startup, so a vmsingle restart is needed after edits.
 
 ## Alert rules
 
-`k8s/monitoring/grafana-alerting.yaml` provisions 7 rules into Grafana
-Alerting (folder *Arda*, groups `arda-ai`, `arda-endpoints`, `arda-platform`):
-publish failures, model unavailable, embedding p95, prompt budget, endpoint
-down (Gatus metric), pod crash-looping, node disk > 85%.
+`k8s/monitoring/grafana-alerting.yaml` provisions rules into Grafana
+Alerting (folder *Arda*, groups `arda-ai`, `arda-endpoints`, `arda-platform`,
+`arda-workflow`): publish failures, model unavailable, embedding p95, prompt
+budget, endpoint down (Gatus metric), pod crash-looping, node disk > 85%,
+platform scheduler stalled (`ArdaPlatformSchedulerStalled`: no
+`arda_platform_scheduler_last_tick_timestamp_seconds` tick for 5 minutes, and
+a missing metric alerts too), unrouted workflow decisions.
 
 **File provisioning is read at startup.** After editing the ConfigMap, either
 restart Grafana or hot-reload:
