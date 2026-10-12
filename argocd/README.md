@@ -63,7 +63,6 @@ This creates:
 
 - `AppProject/arda`
 - `Application/arda-backend`
-- `Application/arda-frontend`
 - `Application/arda-database`
 - `ImageUpdater/arda`
 
@@ -74,12 +73,6 @@ Create them before syncing apps:
 
 ```bash
 kubectl -n arda-app create secret docker-registry ghcr-pull \
-  --docker-server=ghcr.io \
-  --docker-username=<github-user> \
-  --docker-password=<pat-with-read-packages> \
-  --docker-email=<email>
-
-kubectl -n arda-web create secret docker-registry ghcr-pull \
   --docker-server=ghcr.io \
   --docker-username=<github-user> \
   --docker-password=<pat-with-read-packages> \
@@ -144,8 +137,7 @@ kubectl create secret generic arda-app-secrets -n arda-app \
 
 Argo CD Image Updater (`argocd/image-updater.yaml`, `writeBackConfig.method:
 argocd`) tracks the `:main` tag of all 15 backend images for
-`arda-backend` and of `arda-mfe/web` for `arda-frontend`, with
-`updateStrategy: digest`. On each GHCR push it writes the new digest as an
+`arda-backend`, with `updateStrategy: digest`. On each GHCR push it writes the new digest as an
 image override on the Application, not into git. The running image is
 therefore the latest `:main` digest whatever tag the manifest names.
 

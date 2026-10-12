@@ -88,10 +88,3 @@ spec:
           imageName: calciumion/new-api:v1.0.0-rc.40
           commonUpdateSettings:
             updateStrategy: digest
-    - namePattern: arda-frontend
-      images:
-        - alias: web
-          imageName: ghcr.io/arda-labs/arda-mfe/web:main
-          commonUpdateSettings:
-            updateStrategy: digest
-            pullSecret: pullsecret:argocd/ghcr-pull

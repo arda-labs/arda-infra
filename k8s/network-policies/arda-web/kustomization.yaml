@@ -1,4 +1,0 @@
-namespace: arda-web
-
-resources:
-  - policies.yaml

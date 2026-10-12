@@ -6,11 +6,6 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: arda-web
----
-apiVersion: v1
-kind: Namespace
-metadata:
   name: monitoring
 ---
 # Internet-facing AI gateway with its own default-deny policy set. Kept out of

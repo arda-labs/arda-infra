@@ -1,6 +1,5 @@
 resources:
   - arda-app
-  - arda-web
   - aigiare-gw
   - monitoring
   - database

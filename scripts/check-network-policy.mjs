@@ -220,7 +220,7 @@ function templateLabels(manifest) {
   return found
 }
 
-for (const dir of ["k8s/apps", "k8s/gateway", "k8s/monitoring", "k8s/frontend"]) {
+for (const dir of ["k8s/apps", "k8s/gateway", "k8s/monitoring"]) {
   for (const name of await readdir(join(root, dir))) {
     if (!name.endsWith(".yaml")) continue
     const manifest = await readFile(join(root, dir, name), "utf8")
@@ -264,14 +264,12 @@ for (const { namespace, policies } of managed) {
 // --- E. every declared service dependency is permitted ---------------------
 const EGRESS_PORTS = {
   "arda-app": new Set(["8080", "9090"]),
-  arda_web: new Set(["8080"]),
   database: new Set(["5432"]),
   platform: new Set(["4222", "6379", "8080", "26500", "9200", "3900", "3000"]),
   auth: new Set(["4433", "4434", "4444", "4445"]),
 }
 
 function egressPortsFor(namespace) {
-  if (namespace === "arda-web") return EGRESS_PORTS.arda_web
   return EGRESS_PORTS[namespace] ?? new Set()
 }
 

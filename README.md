@@ -10,7 +10,7 @@ auth/            Ory Hydra/Kratos values and bootstrap scripts
 database/        CloudNativePG PostgreSQL cluster manifests
 dev/             Local dev endpoint examples + read-only MCP wrappers (Grafana, Postgres)
 platform/        Shared platform runtime bootstrap: NATS, Valkey, Garage, Cloudflared, Zeebe
-k8s/             Arda backend/frontend application manifests
+k8s/             Arda backend application manifests
 k8s/monitoring/  Observability stack: VictoriaMetrics, Grafana, Loki/Alloy, Gatus
 scripts/         CI invariant checks (check-secret-hygiene.mjs, check-canary-policy.mjs, check-operational-gates.mjs)
 docs/            Edge routing and operational architecture notes
@@ -36,18 +36,18 @@ kubectl apply -k argocd
 ```
 
 Argo CD applications in `argocd/apps` sync manifests from this repo. Backend
-images are published from `arda-be`; frontend images are published from
-`arda-mfe`.
+images are published from `arda-be`. The frontend is not deployed from this
+repository: `arda-mfe` builds and deploys it to Cloudflare Workers.
 
 Production API edge routing is documented in
 [`docs/api-edge-routing.md`](docs/api-edge-routing.md). The frontend is served
 from `arda.io.vn`; browser APIs use `api.arda.io.vn` through Cloudflare Tunnel.
 
-`k8s/frontend` (Application `arda-frontend`, namespace `arda-web`) still runs the
-web image as an in-cluster Deployment, and Argo CD keeps it synced with
-`selfHeal: true`. `arda-mfe` also deploys to Cloudflare Workers, so confirm which
-path serves `arda.io.vn` before changing either — `kubectl apply -k k8s` does not
-include `k8s/frontend`.
+Cloudflare Workers serve `arda.io.vn`: worker `arda-shell` owns
+`arda.io.vn/*` and each remote owns `arda.io.vn/mfes/<app>/*`. The former
+in-cluster frontend (`k8s/frontend`, Application `arda-frontend`, namespace
+`arda-web`) was removed on 2026-10-12; it had not been applied since the
+ThinkCentre recovery.
 
 For a non-Argo local setup, apply the database and platform runtime first:
 

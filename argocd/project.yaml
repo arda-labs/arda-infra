@@ -12,8 +12,6 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: arda-app
       server: https://kubernetes.default.svc
-    - namespace: arda-web
-      server: https://kubernetes.default.svc
     - namespace: monitoring
       server: https://kubernetes.default.svc
     # Public-facing AiGiare gateway. Listed explicitly because the AppProject
