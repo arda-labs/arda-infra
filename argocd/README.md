@@ -142,12 +142,20 @@ kubectl create secret generic arda-app-secrets -n arda-app \
 
 ## Image Tags
 
-Argo CD Image Updater is configured (`argocd/image-updater.yaml`,
-`writeBackConfig.method: argocd`), so it updates image digests in-cluster on
-each GHCR push. Backend manifests with SHA-digest image tags (`auth-gateway`,
-`crm-service`, `finance-service`, `iam-service`, `media-service`,
-`notification-service`, `platform-service`) are pinned to exact builds. The
-remaining eight still use the `:main` tag (`ai-service`, `hrm-service`,
-`workflow-service`, `loan-service`, `mdm-service`, `deposit-service`,
-`capital-service`, `statistical-service`) — they are
-updated on the next successful Image Updater run.
+Argo CD Image Updater (`argocd/image-updater.yaml`, `writeBackConfig.method:
+argocd`) tracks the `:main` tag of all 15 backend images for
+`arda-backend` and of `arda-mfe/web` for `arda-frontend`, with
+`updateStrategy: digest`. On each GHCR push it writes the new digest as an
+image override on the Application, not into git. The running image is
+therefore the latest `:main` digest whatever tag the manifest names.
+
+The tags in `k8s/apps/*.yaml` only matter on a first sync or while Image
+Updater is down. Some are SHA tags from earlier pins and some are `:main`;
+`overlays/thinkcenter-recovery` rewrites `auth-gateway`, `iam-service`,
+`ai-service` and `hrm-service` to `:main`. To see what actually runs,
+read the Application's image overrides or the Deployment's `sha256:` digest:
+
+```bash
+kubectl -n argocd get application arda-backend -o jsonpath='{.spec.source.kustomize.images}'
+kubectl -n arda-app get deploy -o custom-columns=NAME:.metadata.name,IMAGE:.spec.template.spec.containers[0].image
+```
