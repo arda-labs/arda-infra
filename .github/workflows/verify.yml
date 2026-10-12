@@ -20,6 +20,20 @@ jobs:
         run: kubectl kustomize k8s/apps > /tmp/arda-apps-rendered.yaml
       - name: Render network policies
         run: kubectl kustomize k8s/network-policies > /tmp/arda-netpol-rendered.yaml
+      - name: Render every path Argo CD syncs
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Applications under argocd/apps are applied by hand, but the paths
+          # they name are synced on every merge to main. Render each one so a
+          # broken overlay fails here instead of in Argo CD.
+          kubectl kustomize argocd > /dev/null
+          paths=$(grep -h '^ *path:' argocd/apps/*.yaml | awk '{print $2}' | sort -u)
+          test -n "$paths"
+          for path in $paths; do
+            echo "Rendering $path"
+            kubectl kustomize "$path" > /dev/null
+          done
       - name: Ensure workload identity mounts are present
         shell: bash
         run: |
@@ -40,4 +54,6 @@ jobs:
           bash -n platform/bootstrap/backup.sh platform/bootstrap/restore.sh platform/bootstrap/preflight.sh platform/bootstrap/verify-runtime-secrets.sh platform/bootstrap/install-cilium.sh
           node scripts/check-operational-gates.mjs
           node scripts/check-canary-policy.mjs
+      - name: Validate workload hardening
+        run: node scripts/check-workload-hardening.mjs
       - run: git diff --check

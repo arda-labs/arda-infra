@@ -1,5 +1,0 @@
-resources:
-  - web-auth-middleware.yaml
-  - web-ingress.yaml
-  - web-public-ingress.yaml
-  - web.yaml

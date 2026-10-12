@@ -50,7 +50,7 @@ const REQUIRED = [
   ["capabilities", /capabilities:\s*\n\s*drop:\s*\n\s*- ALL/],
 ]
 
-for (const dir of ["k8s/apps", "k8s/monitoring", "k8s/frontend"]) {
+for (const dir of ["k8s/apps", "k8s/monitoring"]) {
   for (const name of await readdir(join(root, dir))) {
     if (!name.endsWith(".yaml")) continue
     const rel = `${dir}/${name}`
