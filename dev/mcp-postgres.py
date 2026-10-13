@@ -51,7 +51,9 @@ def _csv(name: str, default: list[str]) -> list[str]:
 
 
 MODE = os.environ.get("MCP_POSTGRES_MODE", "ro").lower()
-HOST = os.environ.get("POSTGRES_HOST", "192.168.10.201")
+# The NodePort uses externalTrafficPolicy: Local, so only the node running the
+# primary answers; libpq tries each listed host in turn.
+HOST = os.environ.get("POSTGRES_HOST", "192.168.10.201,192.168.10.202,192.168.10.203")
 PORT = int(os.environ.get("POSTGRES_PORT", "30432"))
 DATABASES = _csv("POSTGRES_DATABASES", DEFAULT_DATABASES)
 WRITE_DATABASES = _csv("POSTGRES_WRITE_DATABASES", DEFAULT_WRITE_DATABASES)
@@ -82,7 +84,8 @@ def _connect(database: str, write: bool = False) -> psycopg.Connection:
         dbname=database,
         user=user,
         password=password,
-        connect_timeout=5,
+        connect_timeout=3,
+        target_session_attrs="read-write",
         application_name="arda-agent-write" if write else "arda-agent-read",
     )
     conn.read_only = not write

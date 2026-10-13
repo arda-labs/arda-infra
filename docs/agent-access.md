@@ -68,8 +68,10 @@ The script carries PEP 723 metadata, so `uv` resolves `mcp<2` and
 `psycopg[binary]` itself. `mcp<2` matters because the server imports
 `mcp.server.fastmcp`, renamed in mcp 2.x; Python 3.12 keeps parity with the
 tested setup (the upstream `postgres-mcp` fallback additionally needs it —
-`pglast` has no 3.14 wheel). The NodePort `192.168.10.201:30432` routes to the
-primary; read-only is enforced in three layers: the role grants/settings above,
+`pglast` has no 3.14 wheel). The NodePort `30432` routes to the primary; it uses
+`externalTrafficPolicy: Local`, so only the primary's node answers and
+`POSTGRES_HOST` lists all three nodes, and NetworkPolicy
+`allow-ingress-from-dev-workstation` admits only the workstation `/32`; read-only is enforced in three layers: the role grants/settings above,
 psycopg `read_only` mode, and the server only exposing SELECT/SHOW/EXPLAIN
 tools.
 
