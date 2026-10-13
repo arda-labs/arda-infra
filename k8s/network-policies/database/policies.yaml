@@ -134,8 +134,8 @@ spec:
         - protocol: TCP
           port: 6443
 ---
-# Developer workstation reaching the primary through the dev NodePort
-# (database/nodeport, port 30432). The grant is one /32, not the LAN: every
+# Developer workstation reaching the primary through the LAN VIP
+# (database/loadbalancer, 192.168.10.210:5432). The grant is one /32, not the LAN: every
 # other device on 192.168.10.0/24 stays denied. It only matches because that
 # Service uses externalTrafficPolicy: Local; with Cluster, kube-proxy
 # masquerades the client to a node address and this ipBlock never sees it.

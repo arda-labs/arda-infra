@@ -1,0 +1,25 @@
+# LAN VIP for the Postgres primary: 192.168.10.210:5432.
+#
+# externalTrafficPolicy: Local does two jobs. MetalLB announces the VIP only
+# from the node holding the primary, so it follows a CNPG failover; and the
+# client address is kept, which the ipBlock in k8s/network-policies/database
+# (allow-ingress-from-dev-workstation) needs. Requires MetalLB from
+# platform/bootstrap/install-metallb.sh.
+apiVersion: v1
+kind: Service
+metadata:
+  name: pg-main-lb
+  namespace: database
+  annotations:
+    metallb.io/loadBalancerIPs: 192.168.10.210
+spec:
+  type: LoadBalancer
+  loadBalancerClass: metallb.io/l2
+  externalTrafficPolicy: Local
+  allocateLoadBalancerNodePorts: false
+  selector:
+    cnpg.io/cluster: pg-main
+    role: primary
+  ports:
+    - port: 5432
+      targetPort: 5432

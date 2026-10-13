@@ -1,0 +1,23 @@
+# Addresses MetalLB may announce. Each one is outside the router's DHCP pool
+# and claimed explicitly by a Service (autoAssign: false), so a new
+# LoadBalancer Service never takes a LAN address by accident.
+#
+#   192.168.10.210  Postgres primary (database/loadbalancer/pg-main-lb.yaml)
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: lan-vip
+  namespace: metallb-system
+spec:
+  addresses:
+    - 192.168.10.210/32
+  autoAssign: false
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: lan-vip
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - lan-vip
