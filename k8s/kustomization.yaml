@@ -4,3 +4,4 @@ resources:
   - apps
   - gateway
   - network-policies
+  - rbac
