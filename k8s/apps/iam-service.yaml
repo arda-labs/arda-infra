@@ -75,6 +75,8 @@ spec:
               value: "6"
             - name: KRATOS_ADMIN_URL
               value: http://kratos-admin.auth.svc.cluster.local
+            - name: HYDRA_ADMIN_URL
+              value: http://hydra-admin.auth.svc.cluster.local:4445
           volumeMounts:
             - name: grpc-tls
               mountPath: /var/run/arda-grpc-tls
