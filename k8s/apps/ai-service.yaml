@@ -57,6 +57,8 @@ spec:
               value: "true"
             - name: AI_ENABLE_HITL_PROPOSALS
               value: "true"
+            - name: AI_ENABLE_SANDBOXED_UI
+              value: "false"
             - name: CRM_SERVICE_URL
               value: http://crm-service:8080
             - name: FINANCE_SERVICE_URL
