@@ -58,6 +58,12 @@ spec:
               value: https://auth.arda.io.vn/.well-known/jwks.json
             - name: IAM_SERVICE_URL
               value: http://iam-service:8080
+            # arda-be#47: the gateway can reach IAM over gRPC (GatewayService,
+            # mTLS). Stay on http until a workload certificate
+            # for the gateway (see arda-infra#18) is issued and mounted; then set
+            # IAM_TRANSPORT=grpc with IAM_GRPC_ADDR=iam-service:9090.
+            - name: IAM_TRANSPORT
+              value: http
             - name: PLATFORM_SERVICE_URL
               value: http://platform-service:8080
             - name: FINANCE_SERVICE_URL
