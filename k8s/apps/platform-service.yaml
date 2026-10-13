@@ -80,7 +80,7 @@ spec:
                   key: NATS_URL
                   optional: true
             - name: JOB_TARGET_URLS
-              value: ai-service=http://ai-service:8080,platform-service=http://platform-service:8080
+              value: ai-service=http://ai-service:8080,platform-service=http://platform-service:8080,loan-service=http://loan-service:8080,deposit-service=http://deposit-service:8080,finance-service=http://finance-service:8080,statistical-service=http://statistical-service:8080
             - name: JOB_NOTIFY_DEFAULT_TENANT
               value: "00000000-0000-0000-0000-000000000010"
           volumeMounts:
