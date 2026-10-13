@@ -37,7 +37,8 @@ pg-main-rw.database.svc.cluster.local:5432
   a CNPG failover, and the client address survives to the pod, where
   NetworkPolicy `allow-ingress-from-dev-workstation`
   (`k8s/network-policies/database`) admits only the developer workstation
-  `/32`:
+  `/32` (and `allow-ingress-from-tailscale-router` the Tailscale subnet router
+  `192.168.10.220/32` used by remote agents):
 
   ```text
   postgres://<user>:<password>@192.168.10.210:5432/<db>?sslmode=disable

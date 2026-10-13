@@ -82,7 +82,7 @@ The script carries PEP 723 metadata, so `uv` resolves `mcp<2` and
 tested setup (the upstream `postgres-mcp` fallback additionally needs it —
 `pglast` has no 3.14 wheel). The MetalLB VIP `192.168.10.210:5432` (`database/loadbalancer`) routes to
 the primary and follows failover; NetworkPolicy
-`allow-ingress-from-dev-workstation` admits only the workstation `/32`; read-only is enforced in three layers: the role grants/settings above,
+`allow-ingress-from-dev-workstation` admits only the workstation `/32` (remote agents come in through the Tailscale subnet router `192.168.10.220`, see `allow-ingress-from-tailscale-router`); read-only is enforced in three layers: the role grants/settings above,
 psycopg `read_only` mode, and the server only exposing SELECT/SHOW/EXPLAIN
 tools.
 
