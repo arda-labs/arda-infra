@@ -9,6 +9,7 @@ load_env
 ensure_ns
 "$ROOT/bootstrap/create-secrets.sh"
 
+"$ROOT/bootstrap/install-metallb.sh"
 "$ROOT/bootstrap/install-nats.sh"
 "$ROOT/bootstrap/install-valkey.sh"
 "$ROOT/bootstrap/install-garage.sh"

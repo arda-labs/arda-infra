@@ -85,10 +85,11 @@ The former internal Node.js `ai-runtime` deployment was removed from
 `k8s/apps/kustomization.yaml` and pruned by ArgoCD; do not re-add it. Details:
 `arda-be/docs/ai/go-native-copilotkit.md`.
 
-Optional local-only Postgres NodePort:
+Optional LAN VIP for the Postgres primary (`192.168.10.210:5432`, MetalLB from
+`platform/bootstrap/install-metallb.sh`, workstation `/32` only):
 
 ```bash
-kubectl apply -k database/nodeport
+kubectl apply -k database/loadbalancer
 ```
 
 ## Workflow runtime

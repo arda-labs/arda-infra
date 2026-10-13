@@ -1,0 +1,2 @@
+resources:
+  - pg-main-lb.yaml
