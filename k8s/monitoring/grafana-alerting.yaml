@@ -464,6 +464,67 @@ data:
             labels:
               severity: warning
               service: platform
+          - uid: arda-platform-scheduler-stalled
+            title: ArdaPlatformSchedulerStalled
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange: { from: 900, to: 0 }
+                datasourceUid: vm
+                model:
+                  datasource: { type: prometheus, uid: vm }
+                  editorMode: code
+                  expr: 'time() - max(arda_platform_scheduler_last_tick_timestamp_seconds)'
+                  instant: true
+                  intervalMs: 1000
+                  legendFormat: __auto
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: B
+                relativeTimeRange: { from: 900, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [], type: gt }
+                      operator: { type: and }
+                      query: { params: [B] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  reducer: last
+                  refId: B
+                  type: reduce
+                  settings: { mode: dropNN }
+              - refId: C
+                relativeTimeRange: { from: 900, to: 0 }
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator: { params: [300], type: gt }
+                      operator: { type: and }
+                      query: { params: [C] }
+                      reducer: { params: [], type: last }
+                      type: query
+                  datasource: { type: __expr__, uid: __expr__ }
+                  expression: B
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: threshold
+                  settings: {}
+            noDataState: Alerting
+            execErrState: Error
+            for: 5m
+            annotations:
+              summary: Platform job scheduler is not ticking
+              description: 'No scheduler tick for {{ $values.B }}s; scheduled jobs (ai-eval, eod, cleanup) are not running. Missing metric also means the scheduler is dead.'
+            labels:
+              severity: warning
+              service: platform-service
       - orgId: 1
         name: arda-workflow
         folder: Arda
