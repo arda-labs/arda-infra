@@ -24,8 +24,20 @@ nằm ở `.claude/agents/`.
 
 `kubectl` works with the default kubeconfig (`~/.kube/config`, context
 `default` -> `https://192.168.10.201:6443`): no `KUBECONFIG` override and no
-Freelens kubeconfig path. Node-level SSH is not configured on the dev
-workstation; use `kubectl exec` inside pods instead.
+Freelens kubeconfig path. Prefer `kubectl exec` inside pods; SSH only for
+node-level work (sysctl, containerd, disk).
+
+Node SSH uses the dev workstation's key (`hoanv@HoanPc`), which cloud-init
+injects into each VM; no password is set or needed:
+
+| Host | SSH | Notes |
+|---|---|---|
+| Proxmox `thinkcenter` | `root@192.168.10.200` | VMs 101-103 = `k3s-node1..3`, 104 = `aigiare-gw` |
+| `k3s-node1..3` | `hoan@192.168.10.201..203` | passwordless `sudo` |
+
+The node VMs run qemu-guest-agent, so `qm guest exec <vmid> -- <cmd>` works
+from Proxmox. A console password (noVNC) can be set without reboot with
+`qm guest passwd <vmid> hoan`.
 
 Recipes (pods, logs, events, port-forward) and safety rules live in the
 workspace skill `.agents/skills/k3s-ops/SKILL.md`. The cluster is production

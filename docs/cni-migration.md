@@ -30,8 +30,9 @@ etcd. The failure mode is a cluster that cannot reach its own API server.
   auto-syncs `k8s/` with `prune: true`; if the policies land first they are inert
   (harmless), but if they land while Cilium is half-installed they will deny
   traffic against a datapath that does not exist yet.
-- Keep a shell open on each node. Node SSH is configured for the operator, not
-  from the dev workstation.
+- Keep a shell open on each node (`ssh hoan@192.168.10.201..203`, see
+  `docs/agent-access.md`). If the network breaks, fall back to
+  `qm guest exec <vmid>` or the console on the Proxmox host `192.168.10.200`.
 
 ## Rollout
 
