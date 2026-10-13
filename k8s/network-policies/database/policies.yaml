@@ -133,3 +133,26 @@ spec:
       ports:
         - protocol: TCP
           port: 6443
+---
+# Developer workstation reaching the primary through the dev NodePort
+# (database/nodeport, port 30432). The grant is one /32, not the LAN: every
+# other device on 192.168.10.0/24 stays denied. It only matches because that
+# Service uses externalTrafficPolicy: Local; with Cluster, kube-proxy
+# masquerades the client to a node address and this ipBlock never sees it.
+# Keep the address pinned with a DHCP reservation, or update it here.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-dev-workstation
+  namespace: database
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 192.168.10.41/32
+      ports:
+        - protocol: TCP
+          port: 5432

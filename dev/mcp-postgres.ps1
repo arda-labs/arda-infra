@@ -32,7 +32,7 @@ if (Test-Path -LiteralPath $envFile) {
   }
 }
 
-if (-not $env:POSTGRES_HOST) { $env:POSTGRES_HOST = '192.168.10.201' }
+if (-not $env:POSTGRES_HOST) { $env:POSTGRES_HOST = '192.168.10.201,192.168.10.202,192.168.10.203' }
 if (-not $env:POSTGRES_PORT) { $env:POSTGRES_PORT = '30432' }
 if (-not $env:ARDA_AGENT_RO_USER) { $env:ARDA_AGENT_RO_USER = 'arda_agent_ro' }
 if (-not $env:ARDA_AGENT_RW_USER) { $env:ARDA_AGENT_RW_USER = 'arda_agent_rw' }
@@ -69,7 +69,8 @@ if (-not (Test-Path -LiteralPath $uv)) {
   exit 1
 }
 
-# NodePort 30432 routes to the primary; write access is limited by the role
+# NodePort 30432 routes to the primary (externalTrafficPolicy: Local, so only
+# that node answers and only the workstation /32 is allowed in); write access is limited by the role
 # grants (DML only, not an owner) and by the server's execute_write guardrails.
 & $uv run --python 3.12 --no-project --quiet $server
 exit $LASTEXITCODE

@@ -5,6 +5,11 @@ metadata:
   namespace: database
 spec:
   type: NodePort
+  # Local keeps the client address, which the ipBlock in
+  # k8s/network-policies/database (allow-ingress-from-dev-workstation) needs.
+  # Only the node running the primary answers, so clients list all three
+  # nodes (host=192.168.10.201,192.168.10.202,192.168.10.203).
+  externalTrafficPolicy: Local
   selector:
     cnpg.io/cluster: pg-main
     role: primary
