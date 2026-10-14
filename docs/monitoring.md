@@ -13,12 +13,12 @@ Git — `kubectl edit` gets reverted by `selfHeal`.
 | Grafana | `grafana/grafana:13.2.2` | The single UI: dashboards, Grafana Alerting, Explore for logs | `grafana.yaml` |
 | Loki | `grafana/loki:3.7.7` | Central log store, 14 days retention, 10Gi PVC (single binary) | `loki.yaml` |
 | Alloy | `grafana/alloy:v1.19.2` | DaemonSet, tails container logs through the Kubernetes API, parses JSON, pushes to Loki | `alloy.yaml` |
-| Gatus | `twinproduction/gatus:v5.36.0` | Black-box endpoint watchdog (20 checks) + status page + Telegram alerts | `gatus.yaml` |
+| Gatus | `twinproduction/gatus:v5.36.0` | Black-box endpoint watchdog (21 checks) + status page + Telegram alerts | `gatus.yaml` |
 | node-exporter | `prom/node-exporter:v1.12.1` | Node CPU / memory / disk / network | `cluster-metrics.yaml` |
 | kube-state-metrics | `registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0` | Pod phases, restarts, OOM reasons, deployment status | `cluster-metrics.yaml` |
 | kubelet cAdvisor | — (scrape only) | Per-pod CPU / memory / network from `kubelet:10250/metrics/cadvisor` | `victoria-metrics.yaml` + `scrape-rbac.yaml` |
 
-Scrape jobs (`vmsingle-scrape` ConfigMap): `arda-services` (15 services),
+Scrape jobs (`vmsingle-scrape` ConfigMap): `arda-services` (16 services),
 `monitoring` (vmsingle, Grafana, Loki, Gatus), `node-exporter` (3 nodes on
 hostPort 9100), `kube-state-metrics`, `kubelet-cadvisor` (3 nodes, filtered to
 the series the dashboards need). `vmalert` was retired — alert evaluation lives

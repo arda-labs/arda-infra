@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: document-service
+  namespace: arda-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: document-service
+  template:
+    metadata:
+      labels:
+        app: document-service
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      imagePullSecrets:
+        - name: ghcr-pull
+      containers:
+        - name: document-service
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          image: ghcr.io/arda-labs/arda-be/document-service:main
+          resources:
+            requests:
+              cpu: 50m
+              memory: 96Mi
+            limits:
+              cpu: 500m
+              memory: 384Mi
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: HTTP_ADDR
+              value: 0.0.0.0:8080
+            - name: LOG_LEVEL
+              value: info
+            # Dev cluster: cloud model, fictional/sample data only (spec D2).
+            # Production: point at the in-cluster model and set DOCUMENT_REQUIRE_LOCAL=true.
+            - name: DOCUMENT_MODEL_PRESET
+              value: opencode-go
+            - name: DOCUMENT_MODEL_BASE_URL
+              value: https://opencode.ai/zen/go/v1
+            - name: DOCUMENT_MODEL_NAME
+              value: qwen3.8-flash
+            - name: DOCUMENT_MODEL_TIMEOUT
+              value: 25s   # total budget per extract; auth-gateway upstream timeout is 30s
+            - name: DOCUMENT_REQUIRE_LOCAL
+              value: "false"
+            - name: DOCUMENT_MODEL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: arda-app-secrets
+                  key: DOCUMENT_MODEL_API_KEY
+                  optional: true
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: document-service
+  namespace: arda-app
+spec:
+  selector:
+    app: document-service
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
