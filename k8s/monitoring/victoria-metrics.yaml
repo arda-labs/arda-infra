@@ -1,5 +1,5 @@
 # VictoriaMetrics single-node (audit-2026-09 A3): scrapes every Arda service
-# /metrics endpoint (all 15 services expose arda_http_* there) plus the
+# /metrics endpoint (all 16 services expose arda_http_* there) plus the
 # monitoring stack itself, and keeps 30 days of history. Alert evaluation lives
 # in Grafana now (k8s/monitoring/grafana-alerting.yaml) — vmalert was retired so
 # there is a single UI for dashboards, alert state and notifications.
@@ -23,6 +23,7 @@ data:
               - capital-service.arda-app.svc.cluster.local:8080
               - crm-service.arda-app.svc.cluster.local:8080
               - deposit-service.arda-app.svc.cluster.local:8080
+              - document-service.arda-app.svc.cluster.local:8080
               - finance-service.arda-app.svc.cluster.local:8080
               - hrm-service.arda-app.svc.cluster.local:8080
               - iam-service.arda-app.svc.cluster.local:8080

@@ -128,6 +128,15 @@ data:
           - "[RESPONSE_TIME] < 3000"
         alerts:
           - type: telegram
+      - name: document-service
+        group: arda-services
+        url: "http://document-service.arda-app.svc.cluster.local:8080/health/ready"
+        interval: 30s
+        conditions:
+          - "[STATUS] == 200"
+          - "[RESPONSE_TIME] < 3000"
+        alerts:
+          - type: telegram
       - name: notification-service
         group: arda-services
         url: "http://notification-service.arda-app.svc.cluster.local:8080/health/ready"

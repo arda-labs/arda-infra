@@ -70,6 +70,8 @@ spec:
               value: http://finance-service:8080
             - name: MEDIA_SERVICE_URL
               value: http://media-service:8080
+            - name: DOCUMENT_SERVICE_URL
+              value: http://document-service:8080
             - name: WORKFLOW_SERVICE_URL
               value: http://workflow-service:8080
             - name: CRM_SERVICE_URL

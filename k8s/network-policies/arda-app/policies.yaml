@@ -113,7 +113,9 @@ spec:
           port: 8080
 ---
 # Auth fetches public Ory endpoints; AI calls tenant-selected model providers;
-# media accesses its public S3 endpoint. Other services retain default-deny.
+# media accesses its public S3 endpoint; document calls the OCR model provider
+# (dev only — production points document-service at an in-cluster model).
+# Other services retain default-deny.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -124,7 +126,7 @@ spec:
     matchExpressions:
       - key: app
         operator: In
-        values: [auth-gateway, ai-service, media-service]
+        values: [auth-gateway, ai-service, media-service, document-service]
   policyTypes:
     - Egress
   egress:

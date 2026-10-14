@@ -130,13 +130,14 @@ kubectl create secret generic arda-app-secrets -n arda-app \
   --from-literal=ARDA_SERVICE_AUTH_SECRET='<random-value-at-least-32-chars>' \
   --from-literal=REDIS_URL='redis-sentinel://:<valkey-password>@valkey.platform.svc.cluster.local:26379/myprimary' \
   --from-literal=NATS_URL='nats://<nats-endpoint>' \
+  --from-literal=DOCUMENT_MODEL_API_KEY='<opencode-go-key; omit to disable OCR>' \
   --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 ## Image Tags
 
 Argo CD Image Updater (`argocd/image-updater.yaml`, `writeBackConfig.method:
-argocd`) tracks the `:main` tag of all 15 backend images for
+argocd`) tracks the `:main` tag of all 16 backend images for
 `arda-backend`, with `updateStrategy: digest`. On each GHCR push it writes the new digest as an
 image override on the Application, not into git. The running image is
 therefore the latest `:main` digest whatever tag the manifest names.
