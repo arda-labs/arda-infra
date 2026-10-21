@@ -32,7 +32,7 @@ injects into each VM; no password is set or needed:
 
 | Host | SSH | Notes |
 |---|---|---|
-| Proxmox `thinkcenter` | `root@192.168.10.200` | VMs 101-103 = `k3s-node1..3`, 104 = `aigiare-gw` |
+| Proxmox `thinkcenter` | `root@192.168.10.200` | VMs 101-103 = `k3s-node1..3`, 104 = `aigiare-gw` (being decommissioned; its k8s namespace was removed) |
 | `k3s-node1..3` | `hoan@192.168.10.201..203` | passwordless `sudo` |
 
 The node VMs run qemu-guest-agent, so `qm guest exec <vmid> -- <cmd>` works

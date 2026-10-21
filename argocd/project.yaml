@@ -14,11 +14,6 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: monitoring
       server: https://kubernetes.default.svc
-    # Public-facing AiGiare gateway. Listed explicitly because the AppProject
-    # destination list is an allowlist: without this, Argo CD refuses to place
-    # the k8s/gateway resources even though the repository is permitted.
-    - namespace: aigiare-gw
-      server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace
