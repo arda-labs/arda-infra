@@ -220,7 +220,7 @@ function templateLabels(manifest) {
   return found
 }
 
-for (const dir of ["k8s/apps", "k8s/gateway", "k8s/monitoring"]) {
+for (const dir of ["k8s/apps", "k8s/monitoring"]) {
   for (const name of await readdir(join(root, dir))) {
     if (!name.endsWith(".yaml")) continue
     const manifest = await readFile(join(root, dir, name), "utf8")

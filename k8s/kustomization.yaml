@@ -2,6 +2,5 @@ resources:
   - namespaces.yaml
   - monitoring
   - apps
-  - gateway
   - network-policies
   - rbac
