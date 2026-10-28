@@ -5,6 +5,11 @@ metadata:
   namespace: platform
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: cloudflared
@@ -23,11 +28,21 @@ spec:
 
       containers:
         - name: cloudflared
-          image: cloudflare/cloudflared:latest
+          # Pinned: >= 2026.10.3 drops the compromised eMudhra intermediates (Cloudflare notice, 2026-10-20).
+          image: cloudflare/cloudflared:2026.10.5
           args:
             - tunnel
             - --no-autoupdate
+            - --metrics
+            - 0.0.0.0:2000
             - run
+          # /ready is 200 only once connected to Cloudflare, so a rolling update keeps the old pod until the new one serves.
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 2000
+            periodSeconds: 5
+            failureThreshold: 3
           env:
             - name: TUNNEL_TOKEN
               valueFrom:
