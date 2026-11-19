@@ -1,0 +1,21 @@
+# Nightly base backup of pg-main to the pg-main-r2 ObjectStore.
+#
+# CNPG cron has six fields (seconds first) and runs in UTC: 19:00 UTC is
+# 02:00 Asia/Ho_Chi_Minh, after the EOD jobs. `immediate` takes the first
+# base backup as soon as the schedule is created, so point-in-time recovery
+# is available from day one instead of the next night. WAL is archived
+# continuously in between (pg-main.yaml, isWALArchiver).
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: pg-main-daily
+  namespace: database
+spec:
+  schedule: "0 0 19 * * *"
+  immediate: true
+  backupOwnerReference: self
+  cluster:
+    name: pg-main
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io

@@ -13,6 +13,16 @@ spec:
     storageClass: local-path
     size: 10Gi
 
+  # Continuous WAL archiving + base backups to Cloudflare R2 through the
+  # Barman Cloud plugin (backup-objectstore.yaml, backup-schedule.yaml).
+  # The r2-pg-backup Secret and the bucket must exist first:
+  # docs/postgres-backup-restore.md §1.
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: pg-main-r2
+
   resources:
     requests:
       cpu: "1"

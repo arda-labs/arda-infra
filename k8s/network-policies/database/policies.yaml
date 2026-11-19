@@ -81,6 +81,36 @@ spec:
         - protocol: TCP
           port: 8000
 ---
+# Off-site backups: the Barman Cloud sidecar in each instance pod ships base
+# backups and WAL to Cloudflare R2 over HTTPS (database/backup-objectstore.yaml).
+# Public addresses only, port 443 only; private ranges stay denied.
+# podSelector {} like the rest of this namespace: CNPG creates the pods, so no
+# manifest here carries their labels, and the namespace holds only CNPG
+# instances (pg-main, and a restore-drill cluster while one runs).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-backup-egress-r2
+  namespace: database
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 100.64.0.0/10
+              - 169.254.0.0/16
+              - 127.0.0.0/8
+      ports:
+        - protocol: TCP
+          port: 443
+---
 # Replicas stream WAL from the primary and instance managers watch the API.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

@@ -6,6 +6,15 @@ PostgreSQL cluster manifests for Arda.
 
 - `pg-main.yaml`: CloudNativePG `Cluster` named `pg-main` in namespace `database`.
 - `loadbalancer/pg-main-lb.yaml`: LAN VIP `192.168.10.210:5432` for the primary (dev tools, agent MCP).
+- `backup-objectstore.yaml`, `backup-schedule.yaml`: continuous WAL archiving and
+  nightly base backups of `pg-main` to Cloudflare R2 (off-site) through the
+  Barman Cloud plugin, 30-day retention. The `r2-pg-backup` Secret and the
+  bucket must exist before these sync.
+- `restore-drill/pg-restore-test.yaml`: throw-away restore target for the
+  monthly restore drill; applied by hand, not part of the kustomization.
+
+Backup, verification and restore procedures:
+[`docs/postgres-backup-restore.md`](../docs/postgres-backup-restore.md).
 
 ## Setup
 
