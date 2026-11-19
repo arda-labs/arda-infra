@@ -13,6 +13,15 @@ const forbidden = [
   new RegExp(["test", "test"].join(":"), "i"),
 ]
 const credentialedUrl = /(?:postgres(?:ql)?|redis):\/\/[^\s"'`<>$]+:[^\s"'`<>$@]+@/i
+// A plain `kind: Secret` carrying data may only be a placeholder example.
+// Real secrets are committed as SealedSecrets (docs/secret-management.md).
+const isExample = (file) =>
+  file.startsWith("platform/secrets/examples/") || /\.example\.ya?ml$/.test(file)
+const isYaml = (file) => /\.ya?ml$/.test(file)
+const plainSecretWithData = (doc) =>
+  /^kind:\s*Secret\s*$/m.test(doc) && /^(data|stringData):/m.test(doc)
+const sealedSecretAge = (doc) =>
+  /^kind:\s*SealedSecret\s*$/m.test(doc) && !/^\s+encryptedData:/m.test(doc)
 
 for (const file of files) {
   if (file.endsWith(".lock") || file.includes("node_modules/")) continue
@@ -27,6 +36,16 @@ for (const file of files) {
     if (pattern.test(content)) findings.push(`${file}: forbidden credential pattern ${pattern}`)
   }
   if (credentialedUrl.test(content)) findings.push(`${file}: credentialed database/cache URL must come from a secret reference`)
+  if (isYaml(file) && !isExample(file)) {
+    for (const doc of content.split(/^---\s*$/m)) {
+      if (plainSecretWithData(doc)) {
+        findings.push(`${file}: plain Secret with data; commit a SealedSecret instead (platform/bootstrap/seal-secret.sh)`)
+      }
+      if (sealedSecretAge(doc)) {
+        findings.push(`${file}: SealedSecret without encryptedData`)
+      }
+    }
+  }
 }
 
 if (findings.length) {
