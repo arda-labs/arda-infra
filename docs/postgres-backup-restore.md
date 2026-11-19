@@ -109,7 +109,7 @@ manifest diễn tập.
 
 | Ngày | Người làm | Backup dùng | RTO | RPO | Ghi chú |
 |---|---|---|---|---|---|
-| _chưa diễn tập_ | | | | | |
+| 2026-11-19 | Claude (HOA-5) | `pg-main-manual-20261119` (02:36:43 UTC) + WAL tới 02:39 | 123 giây (apply → healthy) | 0 dòng mất: tổng số dòng chính xác của cả 20 database khớp `pg-main` | Lần đầu; dữ liệu ~213 MB. Cụm tạm đã xoá (cluster, pod, PVC). RPO lý thuyết ≤ `archive_timeout` 5 phút |
 
 ## 4. Khôi phục thật (mất pg-main)
 
