@@ -1,3 +1,5 @@
 resources:
   - namespace.yaml
   - pg-main.yaml
+  - backup-objectstore.yaml
+  - backup-schedule.yaml

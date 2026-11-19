@@ -1,0 +1,51 @@
+# Off-site backup target for pg-main: Cloudflare R2, outside the Proxmox host.
+#
+# Garage runs inside this same cluster, so a backup kept there dies with the
+# VMs, which is exactly what happened on 2026-10-07
+# (docs/thinkcenter-recovery-2026-10-07.md). R2 survives losing the whole
+# cluster. The Barman Cloud plugin (cnpg-system/barman-cloud) ships base
+# backups and archives every WAL segment here, so any point inside the
+# retention window can be restored, not only the nightly snapshot.
+#
+# Prerequisites, in this order, BEFORE this reaches main (Argo CD syncs
+# database/ automatically): see docs/postgres-backup-restore.md §1. If the
+# bucket or the r2-pg-backup Secret is missing, WAL archiving fails and WAL
+# files accumulate on the 10Gi volumes until Postgres stops.
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: pg-main-r2
+  namespace: database
+spec:
+  # A financial ledger lives here: keep a full month of point-in-time
+  # recovery. Older base backups and WAL are pruned by the plugin.
+  retentionPolicy: 30d
+  configuration:
+    destinationPath: s3://arda-pg-backups/pg-main
+    endpointURL: https://8daf04d9f3a2a26d996661b3a67d8710.r2.cloudflarestorage.com
+    s3Credentials:
+      accessKeyId:
+        name: r2-pg-backup
+        key: R2_ACCESS_KEY_ID
+      secretAccessKey:
+        name: r2-pg-backup
+        key: R2_SECRET_ACCESS_KEY
+    data:
+      compression: gzip
+    wal:
+      compression: gzip
+  instanceSidecarConfiguration:
+    # R2 rejects the default boto3 request checksums; same setting as the
+    # working puchi staging backup on this cluster.
+    env:
+      - name: AWS_REQUEST_CHECKSUM_CALCULATION
+        value: when_required
+      - name: AWS_RESPONSE_CHECKSUM_VALIDATION
+        value: when_required
+    retentionPolicyIntervalSeconds: 1800
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 256Mi

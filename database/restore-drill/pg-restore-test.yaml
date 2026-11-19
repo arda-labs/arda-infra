@@ -1,0 +1,43 @@
+# Restore drill: rebuild pg-main from the R2 backups into a throw-away cluster.
+#
+# NOT part of database/kustomization.yaml and never synced by Argo CD: apply it
+# by hand, check it, then delete it (docs/postgres-backup-restore.md §3).
+#
+# It has no `plugins:` section on purpose: a restored cluster must never
+# archive WAL into pg-main's backup path.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: pg-restore-test
+  namespace: database
+spec:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.0
+
+  storage:
+    storageClass: local-path
+    size: 10Gi
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      memory: 2Gi
+
+  bootstrap:
+    recovery:
+      source: pg-main-backup
+      # Point-in-time recovery: uncomment and set a UTC timestamp inside the
+      # recovery window (ObjectStore status.serverRecoveryWindow). Without it
+      # the restore replays every archived WAL segment (latest state).
+      # recoveryTarget:
+      #   targetTime: "2026-11-19T01:30:00Z"
+
+  externalClusters:
+    - name: pg-main-backup
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: pg-main-r2
+          serverName: pg-main
