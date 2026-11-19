@@ -51,7 +51,7 @@ jobs:
       - name: Validate operational gate scripts
         shell: bash
         run: |
-          bash -n platform/bootstrap/backup.sh platform/bootstrap/restore.sh platform/bootstrap/preflight.sh platform/bootstrap/verify-runtime-secrets.sh platform/bootstrap/install-cilium.sh
+          bash -n platform/bootstrap/backup.sh platform/bootstrap/restore.sh platform/bootstrap/preflight.sh platform/bootstrap/verify-runtime-secrets.sh platform/bootstrap/install-cilium.sh platform/bootstrap/seal-secret.sh platform/bootstrap/backup-sealing-key.sh
           node scripts/check-operational-gates.mjs
           node scripts/check-canary-policy.mjs
       - name: Validate workload hardening

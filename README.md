@@ -15,7 +15,14 @@ k8s/monitoring/  Observability stack: VictoriaMetrics, Grafana, Loki/Alloy, Gatu
 scripts/         CI invariant checks (check-secret-hygiene.mjs, check-canary-policy.mjs, check-operational-gates.mjs)
 docs/            Edge routing and operational architecture notes
 traefik/         Traefik dynamic/static examples
+secrets/         SealedSecret manifests, secrets/<namespace>/<name>.sealed.yaml
 ```
+
+Secrets are committed only as SealedSecrets, decrypted in-cluster by the
+Sealed Secrets controller (`argocd/apps/sealed-secrets.yaml`). Procedures,
+key backup and the migration inventory:
+[`docs/secret-management.md`](docs/secret-management.md). CI rejects any plain
+`kind: Secret` with data outside `platform/secrets/examples/`.
 
 Secrets should not be committed as raw values. Use Kubernetes Secret references,
 SealedSecrets, SOPS, or ExternalSecrets before moving production credentials here.

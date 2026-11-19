@@ -1,5 +1,7 @@
 resources:
   - project.yaml
+  - project-platform.yaml
   - apps/arda-database.yaml
   - apps/arda-backend.yaml
+  - apps/sealed-secrets.yaml
   - image-updater.yaml

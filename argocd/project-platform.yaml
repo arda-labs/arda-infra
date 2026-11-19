@@ -1,0 +1,25 @@
+# Cluster add-ons that are not Arda workloads (today: the Sealed Secrets
+# controller). Kept apart from the `arda` project so that project never has to
+# allow CustomResourceDefinitions, kube-system, or third-party chart repos.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: platform
+  namespace: argocd
+spec:
+  description: Cluster add-ons (Sealed Secrets)
+  sourceRepos:
+    - https://bitnami.github.io/sealed-secrets
+  destinations:
+    - namespace: kube-system
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
